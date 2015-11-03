@@ -1,8 +1,6 @@
 package firefighters.agent;
 
-import java.util.Iterator;
 import java.util.List;
-
 import firefighters.utils.Directions;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.query.space.grid.GridCell;
@@ -10,9 +8,10 @@ import repast.simphony.query.space.grid.GridCellNgh;
 import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
-import repast.simphony.space.grid.MultiOccupancyCellAccessor;
 import repast.simphony.util.ContextUtils;
 
+
+// TODO: define dummy class that extends this abstract class and do some basic testing, e.g. for death conditions and moving
 public abstract class Agent {
 	
 	Grid<Object> grid;
@@ -23,7 +22,7 @@ public abstract class Agent {
 	
 	@ScheduledMethod(start = 1, interval = 1)
 	public void step() {
-		if (checkDeath()) die();
+		if (checkDeath()) kill();
 	}
 	
 	/**
@@ -36,7 +35,7 @@ public abstract class Agent {
 		List<GridCell<Fire>> gridCells = ngh.getNeighborhood(false);
 
 		// Need at least four fires in neighborhood in order to be surrounded
-		if (gridCells.size() < 4) return;
+		if (gridCells.size() < 4) return false;
 
 		// If at least four fires in neighborhood, check that they are immediately
 		// surrounding the agent, i.e. two fires on same y-axis, two fires on same x-axis
@@ -53,9 +52,9 @@ public abstract class Agent {
 	}
 	
 	/**
-	 * Remove agent from the simulation
+	 * Remove this agent from the simulation
 	 */
-	private void die() {
+	public void kill() {
 		ContextUtils.getContext(this).remove(this);
 	}
 	
@@ -88,15 +87,22 @@ public abstract class Agent {
 		targetFire.extinguish();
 	}
 	
-	public abstract void checkWeather();
+	public void checkWeather() {
+		// TODO: Need to check rain and wind. First need to know how these are modeled.
+		
+	}
 	
 	public void setTargetFire(Fire targetFire) {
 		this.targetFire = targetFire;
 	}
 	
+	/**
+	 * Temporary class to model fire until actual Fire class has been implemented.
+	 * @author Wim
+	 *
+	 */
 	class Fire {
 		public Fire() {
-			// TODO Auto-generated constructor stub
 		}
 		
 		/**
