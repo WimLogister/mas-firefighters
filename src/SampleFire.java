@@ -13,6 +13,8 @@ import repast.simphony.util.ContextUtils;
 
 public class SampleFire {
 	
+	//Changed by Nadine
+	
 	private static final double BURN_PROB = 0.9;
 	private static final double SPREAD_PROB = 0.1;
 	private static final Uniform urng = RandomHelper.getUniform();
