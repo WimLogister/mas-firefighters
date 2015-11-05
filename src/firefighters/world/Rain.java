@@ -9,7 +9,6 @@ public class Rain {
 	public Rain(Grid<Object> grid){
 		this.grid = grid;
 	}
-		
 	
 	/*
 	 * Rain can appear in any part of the forest at any time 
