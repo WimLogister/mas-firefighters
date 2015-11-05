@@ -1,24 +1,24 @@
 <repast.simphony.visualization.engine.CartesianDisplayDescriptor>
-  <name>FireDisplay</name>
+  <name>ForestDisplay</name>
   <type>2D</type>
   <styles>
     <entry>
-      <string>SampleTree</string>
+      <string>firefighters.world.Tree</string>
       <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
     </entry>
     <entry>
-      <string>SampleFire</string>
+      <string>firefighters.world.Fire</string>
       <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
     </entry>
   </styles>
   <editedStyles>
     <entry>
-      <string>SampleTree</string>
-      <string>SampleTree.style_0.xml</string>
+      <string>firefighters.world.Tree</string>
+      <string>firefighters.world.Tree.style_0.xml</string>
     </entry>
     <entry>
-      <string>SampleFire</string>
-      <string>SampleFire.style_0.xml</string>
+      <string>firefighters.world.Fire</string>
+      <string>firefighters.world.Fire.style_0.xml</string>
     </entry>
   </editedStyles>
   <netStyles/>
@@ -31,18 +31,18 @@
     <pType>LAST</pType>
     <duration>-1.0</duration>
     <frequency>REPEAT</frequency>
-    <hashCode>-943716327</hashCode>
+    <hashCode>1620886722</hashCode>
   </schedParams>
   <layoutClassName>foo.bar.baz</layoutClassName>
   <layoutProjection>grid</layoutProjection>
   <layoutInterval>0</layoutInterval>
   <layerOrder>
     <entry>
-      <string>SampleTree</string>
+      <string>firefighters.world.Tree</string>
       <int>0</int>
     </entry>
     <entry>
-      <string>SampleFire</string>
+      <string>firefighters.world.Fire</string>
       <int>1</int>
     </entry>
   </layerOrder>

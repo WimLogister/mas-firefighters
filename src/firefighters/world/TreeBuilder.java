@@ -1,6 +1,7 @@
 package firefighters.world;
 
 
+import firefighters.utils.Directions;
 import repast.simphony.context.Context;
 import repast.simphony.context.space.continuous.ContinuousSpaceFactory;
 import repast.simphony.context.space.continuous.ContinuousSpaceFactoryFinder;
@@ -26,31 +27,35 @@ public class TreeBuilder implements ContextBuilder<Object> {
 
 	@Override
 	public Context build(Context<Object> context) {
-		// TODO: Grid variable size 
-		
 		context.setId("sample-simulation");
 		
 		Parameters params = RunEnvironment.getInstance().getParameters();
-		int Width = (Integer) params.getValue("width");
-		int Height = (Integer) params.getValue("heigth");
+		int size = (Integer) params.getValue("grid_size");
 		int lifePoints = (Integer) params.getValue("life_points"); // How many steps it takes before the tree-grid has burned down completely
-		int fireCount = (Integer) params.getValue("fire_count");
+		int fireCount = (Integer) params.getValue("fire_count"); // How many fires we initialize with
 		
 		GridFactory gridFactory = GridFactoryFinder.createGridFactory(null);
 		Grid<Object> grid = gridFactory.createGrid("grid", context,
 				new GridBuilderParameters<Object>(new WrapAroundBorders(),
-						new SimpleGridAdder<Object>(), true, 100, 100));
+						new SimpleGridAdder<Object>(), true, size, size)); // Square grid, variable size
 		
 		GridDimensions dims = grid.getDimensions();
 		
-		
-		
-		//Add fires to the grid
+		/* 
+		 * Randomly place fires in grid
+		 * Each of the wildfires can have a different initial speed and direction
+		 * Is there a way to use SimpleGridAdder and RandomCartesianAdder in the same grid?
+		 * Maybe better to start "groups" of fire or one bigger fire instead of randomly scattered single fires?
+		 * TODO: check if there already is a fire initialized in the new random place.
+		 */
 		for (int i = 0; i < fireCount; i++) {
-			context.add(new Fire(grid));
+			int[] nextLoc = {RandomHelper.nextIntFromTo(0,dims.getDimension(0)),RandomHelper.nextIntFromTo(0,dims.getDimension(1))};
+			Fire fire = new Fire(grid,Directions.EAST,1);
+			context.add(fire);
+			grid.moveTo(fire, nextLoc);
 		}
 		
-		// Add trees to the grid
+		// Fill the grid with trees
 		for (int d0=0; d0<dims.getDimension(0); d0++){
 			for (int d1=0; d1<dims.getDimension(1); d1++){
 				int[] nextLoc = {d0,d1};

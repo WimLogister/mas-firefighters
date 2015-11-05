@@ -1,12 +1,24 @@
 package firefighters.world;
 
+import repast.simphony.space.grid.Grid;
+import firefighters.utils.Directions;
+
 public class Wind {
-	/*Is global across the forest 
+	
+	private Grid<Object> grid;
+	private Directions direction; // Is global across forest
+	
+	public Wind(Grid<Object> grid, Directions direction){
+		this.grid = grid;
+		this.direction = direction;
+	}
+	
+	/*
+	 * Can change direction at any time
 	 */
-	
-	private enum Direction {NORTH,EAST,SOUTH,WEST}; 
-	
-	private Direction direction;
+	public void changeDirection(Directions dir){
+		this.direction = dir;
+	}
 
 }
 
