@@ -1,7 +1,9 @@
 package firefighters.world;
 
 
+import cern.jet.random.Uniform;
 import firefighters.utils.Directions;
+import firefighters.utils.SimpleGridAdderExtended;
 import repast.simphony.context.Context;
 import repast.simphony.context.space.continuous.ContinuousSpaceFactory;
 import repast.simphony.context.space.continuous.ContinuousSpaceFactoryFinder;
@@ -10,6 +12,7 @@ import repast.simphony.context.space.grid.GridFactory;
 import repast.simphony.context.space.grid.GridFactoryFinder;
 import repast.simphony.dataLoader.ContextBuilder;
 import repast.simphony.engine.environment.RunEnvironment;
+import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.parameter.Parameters;
 import repast.simphony.random.RandomHelper;
 import repast.simphony.space.continuous.ContinuousSpace;
@@ -33,11 +36,13 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		int size = (Integer) params.getValue("grid_size");
 		int lifePoints = (Integer) params.getValue("life_points"); // How many steps it takes before the tree-grid has burned down completely
 		int fireCount = (Integer) params.getValue("fire_count"); // How many fires we initialize with
+		double rainProb = (Double) params.getValue("rain_prob"); // The chance with which rain can appear 
+		double fireProb = (Double) params.getValue("fire_prob"); // The chance with which fire can appear
 		
 		GridFactory gridFactory = GridFactoryFinder.createGridFactory(null);
 		Grid<Object> grid = gridFactory.createGrid("grid", context,
 				new GridBuilderParameters<Object>(new WrapAroundBorders(),
-						new SimpleGridAdder<Object>(), true, size, size)); // Square grid, variable size
+						new SimpleGridAdderExtended<Object>(), true, size, size)); // Square grid, variable size
 		
 		GridDimensions dims = grid.getDimensions();
 		
@@ -52,7 +57,7 @@ public class TreeBuilder implements ContextBuilder<Object> {
 			int[] nextLoc = {RandomHelper.nextIntFromTo(0,dims.getDimension(0)),RandomHelper.nextIntFromTo(0,dims.getDimension(1))};
 			Fire fire = new Fire(grid,Directions.EAST,1);
 			context.add(fire);
-			grid.moveTo(fire, nextLoc);
+			grid.moveTo(fire, nextLoc);	
 		}
 		
 		// Fill the grid with trees
@@ -64,8 +69,6 @@ public class TreeBuilder implements ContextBuilder<Object> {
 				grid.moveTo(tree, nextLoc);
 			}
 		}
-		
 		return context;
 	}
-
 }

@@ -3,6 +3,9 @@ package firefighters.world;
 import repast.simphony.space.grid.Grid;
 import firefighters.utils.Directions;
 
+/*
+ * Can change direction at any time: how to model this?
+ */
 public class Wind {
 	
 	private Grid<Object> grid;
@@ -13,12 +16,12 @@ public class Wind {
 		this.direction = direction;
 	}
 	
-	/*
-	 * Can change direction at any time
-	 */
-	public void changeDirection(Directions dir){
+	public Directions getDirection(){
+		return this.direction;
+	}
+	
+	public void setDirection(Directions dir){
 		this.direction = dir;
 	}
-
 }
 

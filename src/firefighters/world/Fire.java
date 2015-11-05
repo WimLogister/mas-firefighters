@@ -21,6 +21,8 @@ public class Fire {
 	private Grid<Object> grid;
 	private Directions direction; // Influenced by wind
 	private double speed; // Influenced by rain and hosing, probability with which it spreads, maximum speed = 1
+	private static final Uniform urng = RandomHelper.getUniform();
+	//private double 
 	
 	public Fire(Grid<Object> grid, Directions direction, int speed) {
 		this.grid = grid;
@@ -31,7 +33,8 @@ public class Fire {
 	}
 	
 	/*
-	 * With each step the fire:
+	 * With each step 
+	 * Wildfires can appear suddenly in any part of the forest
 	 * May change its speed according to rain and hosing
 	 * May change its direction according to the direction of the wind
 	 * May decrease in lifepoints due to hosing
@@ -48,6 +51,11 @@ public class Fire {
 		ContextUtils.getContext(this).remove(this);
 	}
 	
+	
+	/*
+	 * If there is no rain in the direction of the movement of the wildfire, it speeds up. 
+	 * If there is rain in its heading, then it slows down
+	 */
 	public void updateSpeed(){
 		
 	}
@@ -70,6 +78,13 @@ public class Fire {
 		
 		// Can only spread to new area if this area is a forest (with no forester on it) which is not already burned (if so, it cannot spread to here)
 		// (So to begin with easy assumption: cannot spread to a grid which is occupied by a forester)
+		
+	}
+	
+	/*
+	 * Fires can appear suddenly in any part of the forest
+	 */
+	public void appear(){
 		
 	}
 	
