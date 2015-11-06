@@ -103,3 +103,240 @@ repast.simphony.parameter.IllegalParameterException: Parameter 'width' not found
 	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
 	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:93)
 	at java.awt.EventDispatchThread.run(EventDispatchThread.java:82)
+ERROR [AWT-EventQueue-0] 2015-11-06 10:45:35,303 repast.simphony.ui.RSApplication - Projection error
+repast.simphony.space.SpatialException: Object 'firefighters.world.Fire@32362a77' must be added to the grid's context before it can be moved
+	at repast.simphony.space.grid.AbstractGrid.moveTo(AbstractGrid.java:128)
+	at repast.simphony.space.grid.RandomGridAdder.add(RandomGridAdder.java:31)
+	at firefighters.world.TreeBuilder.build(TreeBuilder.java:80)
+	at repast.simphony.dataLoader.engine.ClassNameContextBuilder.build(ClassNameContextBuilder.java:41)
+	at repast.simphony.dataLoader.engine.DataLoaderControllerAction.runInitialize(DataLoaderControllerAction.java:48)
+	at repast.simphony.engine.controller.DefaultController$2.visit(DefaultController.java:214)
+	at repast.simphony.engine.controller.DefaultController$2.visit(DefaultController.java:1)
+	at repast.simphony.util.collections.NaryTree.preOrderTraverals(NaryTree.java:292)
+	at repast.simphony.util.collections.NaryTree.preOrderTraverals(NaryTree.java:295)
+	at repast.simphony.util.collections.NaryTree.preOrderTraverals(NaryTree.java:295)
+	at repast.simphony.util.collections.NaryTree.preOrderTraversal(NaryTree.java:288)
+	at repast.simphony.engine.controller.DefaultController.runInitialize(DefaultController.java:212)
+	at repast.simphony.engine.controller.DefaultController.runInitialize(DefaultController.java:383)
+	at repast.simphony.ui.RSApplication.initSim(RSApplication.java:157)
+	at repast.simphony.ui.action.InitRun.actionPerformed(InitRun.java:17)
+	at javax.swing.AbstractButton.fireActionPerformed(AbstractButton.java:2022)
+	at javax.swing.AbstractButton$Handler.actionPerformed(AbstractButton.java:2346)
+	at javax.swing.DefaultButtonModel.fireActionPerformed(DefaultButtonModel.java:402)
+	at javax.swing.DefaultButtonModel.setPressed(DefaultButtonModel.java:259)
+	at javax.swing.plaf.basic.BasicButtonListener.mouseReleased(BasicButtonListener.java:252)
+	at java.awt.AWTEventMulticaster.mouseReleased(AWTEventMulticaster.java:289)
+	at java.awt.Component.processMouseEvent(Component.java:6525)
+	at javax.swing.JComponent.processMouseEvent(JComponent.java:3324)
+	at java.awt.Component.processEvent(Component.java:6290)
+	at java.awt.Container.processEvent(Container.java:2234)
+	at java.awt.Component.dispatchEventImpl(Component.java:4881)
+	at java.awt.Container.dispatchEventImpl(Container.java:2292)
+	at java.awt.Component.dispatchEvent(Component.java:4703)
+	at java.awt.LightweightDispatcher.retargetMouseEvent(Container.java:4898)
+	at java.awt.LightweightDispatcher.processMouseEvent(Container.java:4533)
+	at java.awt.LightweightDispatcher.dispatchEvent(Container.java:4462)
+	at java.awt.Container.dispatchEventImpl(Container.java:2278)
+	at java.awt.Window.dispatchEventImpl(Window.java:2750)
+	at java.awt.Component.dispatchEvent(Component.java:4703)
+	at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:758)
+	at java.awt.EventQueue.access$500(EventQueue.java:97)
+	at java.awt.EventQueue$3.run(EventQueue.java:709)
+	at java.awt.EventQueue$3.run(EventQueue.java:703)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.ProtectionDomain$1.doIntersectionPrivilege(ProtectionDomain.java:75)
+	at java.security.ProtectionDomain$1.doIntersectionPrivilege(ProtectionDomain.java:86)
+	at java.awt.EventQueue$4.run(EventQueue.java:731)
+	at java.awt.EventQueue$4.run(EventQueue.java:729)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.ProtectionDomain$1.doIntersectionPrivilege(ProtectionDomain.java:75)
+	at java.awt.EventQueue.dispatchEvent(EventQueue.java:728)
+	at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:201)
+	at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:116)
+	at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:105)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:93)
+	at java.awt.EventDispatchThread.run(EventDispatchThread.java:82)
+FATAL [Thread-7] 2015-11-06 12:07:02,971 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (1.0)
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at repast.simphony.engine.schedule.DynamicTargetAction.execute(DynamicTargetAction.java:72)
+	at repast.simphony.engine.controller.ScheduledMethodControllerAction$ScheduleMethodAllAction.execute(ScheduledMethodControllerAction.java:333)
+	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
+	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
+	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
+	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
+	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
+	at java.lang.Thread.run(Thread.java:745)
+Caused by: java.lang.reflect.InvocationTargetException
+	at firefighters.world.Fire$$FastClassByCGLIB$$bd969ad4.invoke(<generated>)
+	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
+	at repast.simphony.engine.schedule.DynamicTargetAction.execute(DynamicTargetAction.java:69)
+	... 7 more
+Caused by: java.util.NoSuchElementException: Iterator contains no elements
+	at org.apache.commons.collections15.iterators.AbstractEmptyIterator.next(AbstractEmptyIterator.java:42)
+	at org.apache.commons.collections15.iterators.IteratorChain.next(IteratorChain.java:271)
+	at firefighters.world.Fire.updateDirection(Fire.java:109)
+	at firefighters.world.Fire.step(Fire.java:52)
+	... 10 more
+FATAL [Thread-7] 2015-11-06 12:46:12,008 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (3.0)
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at repast.simphony.engine.schedule.DynamicTargetAction.execute(DynamicTargetAction.java:72)
+	at repast.simphony.engine.controller.ScheduledMethodControllerAction$ScheduleMethodAllAction.execute(ScheduledMethodControllerAction.java:333)
+	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
+	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
+	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
+	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
+	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
+	at java.lang.Thread.run(Thread.java:745)
+Caused by: java.lang.reflect.InvocationTargetException
+	at firefighters.world.Fire$$FastClassByCGLIB$$bd969ad4.invoke(<generated>)
+	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
+	at repast.simphony.engine.schedule.DynamicTargetAction.execute(DynamicTargetAction.java:69)
+	... 7 more
+Caused by: java.util.ConcurrentModificationException
+	at java.util.ArrayList$Itr.checkForComodification(ArrayList.java:901)
+	at java.util.ArrayList$Itr.next(ArrayList.java:851)
+	at repast.simphony.util.collections.UnremoveableIterator.next(UnremoveableIterator.java:41)
+	at firefighters.world.Fire.burn(Fire.java:135)
+	at firefighters.world.Fire.step(Fire.java:55)
+	... 10 more
+FATAL [Thread-7] 2015-11-06 12:54:43,530 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (3.0)
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at repast.simphony.engine.schedule.DynamicTargetAction.execute(DynamicTargetAction.java:72)
+	at repast.simphony.engine.controller.ScheduledMethodControllerAction$ScheduleMethodAllAction.execute(ScheduledMethodControllerAction.java:333)
+	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
+	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
+	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
+	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
+	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
+	at java.lang.Thread.run(Thread.java:745)
+Caused by: java.lang.reflect.InvocationTargetException
+	at firefighters.world.Fire$$FastClassByCGLIB$$bd969ad4.invoke(<generated>)
+	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
+	at repast.simphony.engine.schedule.DynamicTargetAction.execute(DynamicTargetAction.java:69)
+	... 7 more
+Caused by: java.util.ConcurrentModificationException
+	at java.util.ArrayList$Itr.checkForComodification(ArrayList.java:901)
+	at java.util.ArrayList$Itr.next(ArrayList.java:851)
+	at repast.simphony.util.collections.UnremoveableIterator.next(UnremoveableIterator.java:41)
+	at firefighters.world.Fire.burn(Fire.java:141)
+	at firefighters.world.Fire.step(Fire.java:57)
+	... 10 more
+FATAL [Thread-8] 2015-11-06 12:56:54,369 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (3.0)
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at repast.simphony.engine.schedule.DynamicTargetAction.execute(DynamicTargetAction.java:72)
+	at repast.simphony.engine.controller.ScheduledMethodControllerAction$ScheduleMethodAllAction.execute(ScheduledMethodControllerAction.java:333)
+	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
+	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
+	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
+	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
+	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
+	at java.lang.Thread.run(Thread.java:745)
+Caused by: java.lang.reflect.InvocationTargetException
+	at firefighters.world.Fire$$FastClassByCGLIB$$bd969ad4.invoke(<generated>)
+	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
+	at repast.simphony.engine.schedule.DynamicTargetAction.execute(DynamicTargetAction.java:69)
+	... 7 more
+Caused by: java.util.ConcurrentModificationException
+	at java.util.ArrayList$Itr.checkForComodification(ArrayList.java:901)
+	at java.util.ArrayList$Itr.next(ArrayList.java:851)
+	at repast.simphony.util.collections.UnremoveableIterator.next(UnremoveableIterator.java:41)
+	at firefighters.world.Fire.burn(Fire.java:141)
+	at firefighters.world.Fire.step(Fire.java:57)
+	... 10 more
+FATAL [Thread-9] 2015-11-06 12:57:23,849 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (3.0)
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at repast.simphony.engine.schedule.DynamicTargetAction.execute(DynamicTargetAction.java:72)
+	at repast.simphony.engine.controller.ScheduledMethodControllerAction$ScheduleMethodAllAction.execute(ScheduledMethodControllerAction.java:333)
+	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
+	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
+	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
+	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
+	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
+	at java.lang.Thread.run(Thread.java:745)
+Caused by: java.lang.reflect.InvocationTargetException
+	at firefighters.world.Fire$$FastClassByCGLIB$$bd969ad4.invoke(<generated>)
+	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
+	at repast.simphony.engine.schedule.DynamicTargetAction.execute(DynamicTargetAction.java:69)
+	... 7 more
+Caused by: java.util.ConcurrentModificationException
+	at java.util.ArrayList$Itr.checkForComodification(ArrayList.java:901)
+	at java.util.ArrayList$Itr.next(ArrayList.java:851)
+	at repast.simphony.util.collections.UnremoveableIterator.next(UnremoveableIterator.java:41)
+	at firefighters.world.Fire.burn(Fire.java:141)
+	at firefighters.world.Fire.step(Fire.java:57)
+	... 10 more
+FATAL [Thread-10] 2015-11-06 12:59:06,592 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (3.0)
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at repast.simphony.engine.schedule.DynamicTargetAction.execute(DynamicTargetAction.java:72)
+	at repast.simphony.engine.controller.ScheduledMethodControllerAction$ScheduleMethodAllAction.execute(ScheduledMethodControllerAction.java:333)
+	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
+	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
+	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
+	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
+	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
+	at java.lang.Thread.run(Thread.java:745)
+Caused by: java.lang.reflect.InvocationTargetException
+	at firefighters.world.Fire$$FastClassByCGLIB$$bd969ad4.invoke(<generated>)
+	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
+	at repast.simphony.engine.schedule.DynamicTargetAction.execute(DynamicTargetAction.java:69)
+	... 7 more
+Caused by: java.util.ConcurrentModificationException
+	at java.util.ArrayList$Itr.checkForComodification(ArrayList.java:901)
+	at java.util.ArrayList$Itr.next(ArrayList.java:851)
+	at repast.simphony.util.collections.UnremoveableIterator.next(UnremoveableIterator.java:41)
+	at firefighters.world.Fire.burn(Fire.java:141)
+	at firefighters.world.Fire.step(Fire.java:57)
+	... 10 more
+FATAL [Thread-7] 2015-11-06 13:03:34,243 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (3.0)
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at repast.simphony.engine.schedule.DynamicTargetAction.execute(DynamicTargetAction.java:72)
+	at repast.simphony.engine.controller.ScheduledMethodControllerAction$ScheduleMethodAllAction.execute(ScheduledMethodControllerAction.java:333)
+	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
+	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
+	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
+	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
+	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
+	at java.lang.Thread.run(Thread.java:745)
+Caused by: java.lang.reflect.InvocationTargetException
+	at firefighters.world.Fire$$FastClassByCGLIB$$bd969ad4.invoke(<generated>)
+	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
+	at repast.simphony.engine.schedule.DynamicTargetAction.execute(DynamicTargetAction.java:69)
+	... 7 more
+Caused by: java.util.ConcurrentModificationException
+	at java.util.ArrayList$Itr.checkForComodification(ArrayList.java:901)
+	at java.util.ArrayList$Itr.next(ArrayList.java:851)
+	at repast.simphony.util.collections.UnremoveableIterator.next(UnremoveableIterator.java:41)
+	at firefighters.world.Fire.burn(Fire.java:138)
+	at firefighters.world.Fire.step(Fire.java:58)
+	... 10 more
+FATAL [Thread-7] 2015-11-06 13:05:27,757 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (3.0)
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at repast.simphony.engine.schedule.DynamicTargetAction.execute(DynamicTargetAction.java:72)
+	at repast.simphony.engine.controller.ScheduledMethodControllerAction$ScheduleMethodAllAction.execute(ScheduledMethodControllerAction.java:333)
+	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
+	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
+	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
+	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
+	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
+	at java.lang.Thread.run(Thread.java:745)
+Caused by: java.lang.reflect.InvocationTargetException
+	at firefighters.world.Fire$$FastClassByCGLIB$$bd969ad4.invoke(<generated>)
+	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
+	at repast.simphony.engine.schedule.DynamicTargetAction.execute(DynamicTargetAction.java:69)
+	... 7 more
+Caused by: java.util.ConcurrentModificationException
+	at java.util.ArrayList$Itr.checkForComodification(ArrayList.java:901)
+	at java.util.ArrayList$Itr.next(ArrayList.java:851)
+	at repast.simphony.util.collections.UnremoveableIterator.next(UnremoveableIterator.java:41)
+	at firefighters.world.Fire.burn(Fire.java:143)
+	at firefighters.world.Fire.step(Fire.java:58)
+	... 10 more

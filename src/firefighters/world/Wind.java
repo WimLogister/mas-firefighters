@@ -4,7 +4,8 @@ import repast.simphony.space.grid.Grid;
 import firefighters.utils.Directions;
 
 /*
- * Can change direction at any time: how to model this?
+ * Improvements/TODO
+ * Can change direction at any time
  */
 public class Wind {
 	

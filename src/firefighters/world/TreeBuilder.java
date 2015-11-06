@@ -3,7 +3,6 @@ package firefighters.world;
 
 import cern.jet.random.Uniform;
 import firefighters.utils.Directions;
-import firefighters.utils.SimpleGridAdderExtended;
 import repast.simphony.context.Context;
 import repast.simphony.context.space.continuous.ContinuousSpaceFactory;
 import repast.simphony.context.space.continuous.ContinuousSpaceFactoryFinder;
@@ -26,6 +25,13 @@ import repast.simphony.space.grid.GridBuilderParameters;
 import repast.simphony.space.grid.SimpleGridAdder;
 
 
+/*
+ * Possible improvements:
+ * Maybe better to start "groups" of fire or one bigger fire instead of randomly scattered single fires?
+ * Same with rain
+ * TODO: Add initial wind direction as parameter in the model?
+ * TODO: Visualize wind in grid
+ */
 public class TreeBuilder implements ContextBuilder<Object> {
 
 	@Override
@@ -36,17 +42,18 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		int size = (Integer) params.getValue("grid_size");
 		int lifePoints = (Integer) params.getValue("life_points"); // How many steps it takes before the tree-grid has burned down completely
 		int fireCount = (Integer) params.getValue("fire_count"); // How many fires we initialize with
-		int rainCount = (Integer) params.getValue("rain_count");
+		int rainCount = (Integer) params.getValue("rain_count"); // How much rain we initialize with
 		final Uniform urng = RandomHelper.getUniform();
 		
 		GridFactory gridFactory = GridFactoryFinder.createGridFactory(null);
 		Grid<Object> grid = gridFactory.createGrid("grid", context,
 				new GridBuilderParameters<Object>(new WrapAroundBorders(),
-						new SimpleGridAdderExtended<Object>(), true, size, size)); // Square grid, variable size
+						new SimpleGridAdder<Object>(), true, size, size)); // Square grid, variable size
 		
 		GridDimensions dims = grid.getDimensions();
+		RandomGridAdder<Object> ra = new RandomGridAdder<Object>(); // To random add objects in the space
 		
-		// Fill the grid with trees
+		// Fill the grid completely with trees
 		for (int d0=0; d0<dims.getDimension(0); d0++){
 			for (int d1=0; d1<dims.getDimension(1); d1++){
 				int[] nextLoc = {d0,d1};
@@ -56,37 +63,24 @@ public class TreeBuilder implements ContextBuilder<Object> {
 			}
 		}
 		
-		// Add wind to the forest
-		// TODO: How to visualize wind in grid?
-		// TODO: Add initial wind direction as parameter in the model?
-		Wind wind = new Wind(grid, Directions.getRandomDirection());
+		Wind wind = new Wind(grid, Directions.getRandomDirection()); // Add wind to the forest
+		context.add(wind);
 		
 		/* 
 		 * Randomly place fires in grid
 		 * Each of the wildfires can have a different initial speed and direction
-		 * Is there a way to use SimpleGridAdder and RandomCartesianAdder in the same grid?
-		 * Maybe better to start "groups" of fire or one bigger fire instead of randomly scattered single fires?
-		 * TODO: check if there already is a fire initialized in the new random place.
 		 */
 		for (int i = 0; i < fireCount; i++) {
-			// TODO: AddRandom
-			int[] nextLoc = {RandomHelper.nextIntFromTo(0,dims.getDimension(0)),RandomHelper.nextIntFromTo(0,dims.getDimension(1))};
-			// Initialize with random direction and speed
 			Fire fire = new Fire(grid,Directions.getRandomDirection(),urng.nextDouble());
 			context.add(fire);
-			grid.moveTo(fire, nextLoc);	
+			ra.add(grid, fire);
 		}
 		
-		/*
-		 * Randomly place rain in grid
-		 */
+		// Randomly place rain in grid
 		for (int i = 0; i < rainCount; i++) {
-			// TODO: AddRandom
-			int[] nextLoc = {RandomHelper.nextIntFromTo(0,dims.getDimension(0)),RandomHelper.nextIntFromTo(0,dims.getDimension(1))};
-			// Initialize with random direction and speed
 			Rain rain = new Rain(grid);
 			context.add(rain);
-			grid.moveTo(rain, nextLoc);	
+			ra.add(grid, rain);
 		}
 		return context;
 	}

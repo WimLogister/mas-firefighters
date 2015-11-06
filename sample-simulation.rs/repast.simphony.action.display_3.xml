@@ -10,6 +10,10 @@
       <string>firefighters.world.Fire</string>
       <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
     </entry>
+    <entry>
+      <string>firefighters.world.Rain</string>
+      <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
+    </entry>
   </styles>
   <editedStyles>
     <entry>
@@ -19,6 +23,10 @@
     <entry>
       <string>firefighters.world.Fire</string>
       <string>firefighters.world.Fire.style_0.xml</string>
+    </entry>
+    <entry>
+      <string>firefighters.world.Rain</string>
+      <string>firefighters.world.Rain.style_2.xml</string>
     </entry>
   </editedStyles>
   <netStyles/>
@@ -31,7 +39,7 @@
     <pType>LAST</pType>
     <duration>-1.0</duration>
     <frequency>REPEAT</frequency>
-    <hashCode>1620886722</hashCode>
+    <hashCode>-1288507128</hashCode>
   </schedParams>
   <layoutClassName>foo.bar.baz</layoutClassName>
   <layoutProjection>grid</layoutProjection>
@@ -44,6 +52,10 @@
     <entry>
       <string>firefighters.world.Fire</string>
       <int>1</int>
+    </entry>
+    <entry>
+      <string>firefighters.world.Rain</string>
+      <int>2</int>
     </entry>
   </layerOrder>
   <projections>
