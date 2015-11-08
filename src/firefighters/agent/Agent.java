@@ -1,7 +1,7 @@
 package firefighters.agent;
 
 import java.util.List;
-import firefighters.utils.Directions;
+
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.query.space.grid.GridCell;
 import repast.simphony.query.space.grid.GridCellNgh;
@@ -9,6 +9,8 @@ import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.ContextUtils;
+import firefighters.utils.Directions;
+import firefighters.world.Fire;
 
 
 // TODO: define dummy class that extends this abstract class and do some basic testing, e.g. for death conditions and moving
@@ -96,21 +98,5 @@ public abstract class Agent {
 		this.targetFire = targetFire;
 	}
 	
-	/**
-	 * Temporary class to model fire until actual Fire class has been implemented.
-	 * @author Wim
-	 *
-	 */
-	class Fire {
-		public Fire() {
-		}
-		
-		/**
-		 * Placeholder method to model decreasing this fire's life points.
-		 */
-		public void extinguish() {
-			
-		}
-	}
 
 }
