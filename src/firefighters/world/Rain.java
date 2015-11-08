@@ -9,16 +9,15 @@ import repast.simphony.space.grid.GridDimensions;
 import repast.simphony.space.grid.RandomGridAdder;
 import repast.simphony.util.ContextUtils;
 
-/*
+/**
  * Very simple implementation of rain
  * Improvements:
- * Chance with which rain can appear can change over time
+ * Chance with which rain can appear can change over time (because weather can change over time)
  * Rain usually appears in a few areas and is not just randomly scattered around the forest.
  */
-
 public class Rain {
 	
-	private double RAIN_PROB = 0.1; // Chance with which rain can appear
+	private double RAIN_PROB = 0.0; // Chance with which rain can appear
 	private static final Uniform urng = RandomHelper.getUniform();
 	private Grid<Object> grid;
 	
@@ -26,8 +25,8 @@ public class Rain {
 		this.grid = grid;
 	}
 	
-	/*
-	 * Rain can appear in any part of the forest at any time 
+	/**
+	 * Rain can appear and disappear in any part of the forest at any time 
 	 */
 	@ScheduledMethod(start = 1, interval = 1)
 	public void raining(){

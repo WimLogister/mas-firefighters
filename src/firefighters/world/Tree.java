@@ -20,6 +20,7 @@ public class Tree {
 			Context<Object> context = ContextUtils.getContext(this);
 			context.remove(this);
 		}
+		System.out.println(lifePoints);
 	}
 	
 	public int getLifePoints() {

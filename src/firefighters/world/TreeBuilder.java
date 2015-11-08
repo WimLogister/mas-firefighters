@@ -26,12 +26,11 @@ import repast.simphony.space.grid.SimpleGridAdder;
 
 
 /*
- * Possible improvements:
+ * TODO:
  * Maybe better to start "groups" of fire or one bigger fire instead of randomly scattered single fires?
  * Same with rain
  * Add initial wind direction as parameter in the model?
  * Visualize wind in grid
- * Different grid color for burned trees
  */
 public class TreeBuilder implements ContextBuilder<Object> {
 

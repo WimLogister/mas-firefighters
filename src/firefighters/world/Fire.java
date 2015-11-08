@@ -20,15 +20,14 @@ import repast.simphony.util.ContextUtils;
 import repast.simphony.util.collections.IndexedIterable;
 
 /*
- * Improvements:
- * Spreading the fire: can the spread to a grid which is occupied by a forester? Currently not.
+ * TODO:
+ * Spreading the fire: can the fire spread to a grid which is occupied by a forester? Currently not.
  * Direction: currently fire takes direction of the wind in one timestep, other solutions might make more sense.
  * Appear(): now fires might randomly appear at already burned grids? Need to check this.
  */
-
 public class Fire {
 	
-	private static final double FIRE_PROB = 0.05; // Chance with which fire can appear out of nowhere
+	private static final double FIRE_PROB = 0.0; // Chance with which fire can appear out of nowhere
 	private Grid<Object> grid;
 	private Directions direction; // Influenced by wind
 	private double speed; // Influenced by rain and hosing, probability with which it spreads, maximum speed = 1
@@ -47,25 +46,25 @@ public class Fire {
 		this.maxLifePoints = lifePoints;
 	}
 	
-	/*
-	 * With each step 
+	/**
+	 * With each step: 
 	 * Fires can be extinguished, method called by agent
-	 * Wildfires can appear suddenly in any part of the forest
-	 * May change its speed according to rain and hosing
-	 * Burns down the trees (decreasing lifepoints of trees)
+	 * Fire burns down the trees (decreasing the lifepoints of the trees)
+	 * Fire may change its speed according to rain and hosing
 	 * May change its direction according to the direction of the wind
 	 * Spreads to new area (according to direction) with certain chance
+	 * Wildfires can appear suddenly in any part of the forest
 	 */
 	@ScheduledMethod(start = 1, interval = 1)
 	public void step(){
 		burn();
-		appear();
 		updateSpeed();
 		updateDirection();
 		spread();
+		appear();
 	}
 	
-	/*
+	/**
 	 *  If there is a firefighter hosing the fire, the fire decreases in its lifepoints and speed
 	 */
 	public void extinguish(){
@@ -79,10 +78,10 @@ public class Fire {
 		}
 	}
 	
-	/*
+	/**
 	 * If there is no rain in the direction of the movement of the wildfire, it speeds up. 
 	 * If there is rain in its heading, then it slows down
-	 * If there is rain at the location itself speed slows down even more
+	 * If there is rain at the location of the fire itself, speed slows down even more
 	 * Can be adjusted according to what seems feasible with respect to reducing speed
 	 */
 	public void updateSpeed(){
@@ -92,7 +91,7 @@ public class Fire {
 		else setSpeed(speed + 0.1);
 	}
 
-	/*
+	/**
 	 * Method to check if it is raining, either in the direction in which the fire is going to
 	 * (passing true to the method) or at the current location of the fire itself (passing false to the method).
 	 */
@@ -115,10 +114,9 @@ public class Fire {
 		return isRaining;
 	}
 	
-	/*
+	/**
 	 * Check if it's raining in the current location of the fire
-	 */
-	
+	 */	
 	public boolean checkRainInLocation(){
 		boolean isRaining = false;
 		GridPoint pt = grid.getLocation(this);
@@ -128,7 +126,7 @@ public class Fire {
 		return isRaining;
 	}
 	
-	/*
+	/**
 	 * Update the fires direction: fire takes direction of the wind
 	 */
 	public void updateDirection(){
@@ -139,21 +137,21 @@ public class Fire {
 		direction.yDiff = windDirection.yDiff;
 	}
 	
-	/*
-	 * Fire is burning the trees in the current grid thus decreasing their lifepoints
+	/**
+	 * Fire is burning the tree in the current grid (= decreasing its lifepoints)
 	 */
 	public void burn(){
 		GridPoint pt = grid.getLocation(this);
 		Tree treeToBurn = null;
 		for (Object obj : grid.getObjectsAt(pt.getX(), pt.getY())){
 			if (obj instanceof Tree){
-				Tree treetoBurn = (Tree) obj;
+				treeToBurn = (Tree) obj;
 			}
 		}
 		if(!(treeToBurn == null)) treeToBurn.decrementLifePoints();
 	}
 	
-	/*
+	/**
 	 * Fire spreads to the next grid in its direction with the highest chance (= speed), but can also spread to other directions with a lower chance
 	 */
 	public void spread(){
@@ -183,7 +181,9 @@ public class Fire {
 		}
 	}
 	
-	// Can only spread to new area if this area is a forest (with no forester on it) which is not already burned (if so, it cannot spread to here)
+	/**
+	 *  Can only spread to new area if this area is a forest (with no forester on it) which is not already burned (if so, it cannot spread to here)
+	 */
 	public boolean canSpread(int[] location){
 		boolean spreadPossible = true;
 		for (Object object : grid.getObjectsAt(location)){
@@ -193,7 +193,7 @@ public class Fire {
 		return spreadPossible;
 	}
 	
-	/*
+	/**
 	 * Fires can appear suddenly in any part of the forest with a certain chance
 	 */
 	public void appear(){
@@ -210,7 +210,7 @@ public class Fire {
 		return this.speed;
 	}
 	
-	/*
+	/**
 	 * Not possible to set speed lower than 0 or higher than 1
 	 */
 	public void setSpeed(double speed){
@@ -231,8 +231,8 @@ public class Fire {
 		return lifePoints;
 	}
 	
-	/*
-	 * Cannot set lifepoints of fire higher than the maximum lifepoints
+	/**
+	 * Not possible to set lifepoints of fire higher than the maximum number of lifepoints
 	 */	
 	public void setLifePoints(int lifePoints){
 		if(lifePoints > maxLifePoints) this.lifePoints = maxLifePoints;
