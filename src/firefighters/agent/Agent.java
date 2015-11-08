@@ -22,7 +22,14 @@ public abstract class Agent {
 	Directions direction;
 	Fire targetFire;
 	
-	@ScheduledMethod(start = 1, interval = 1)
+  public Agent(Grid<Object> grid, double movementSpeed, double money) {
+    this.grid = grid;
+    this.movementSpeed = movementSpeed;
+    this.money = money;
+    this.direction = Directions.getRandomDirection();
+  }
+
+  @ScheduledMethod(start = 1, interval = 1)
 	public void step() {
 		if (checkDeath()) kill();
 	}

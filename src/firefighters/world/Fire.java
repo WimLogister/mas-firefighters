@@ -1,23 +1,20 @@
 package firefighters.world;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import cern.jet.random.Uniform;
-import firefighters.agent.Agent;
-import firefighters.utils.Directions;
 import repast.simphony.context.Context;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.query.space.grid.GridCell;
 import repast.simphony.query.space.grid.GridCellNgh;
 import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
-import repast.simphony.space.grid.GridDimensions;
 import repast.simphony.space.grid.GridPoint;
 import repast.simphony.space.grid.RandomGridAdder;
 import repast.simphony.util.ContextUtils;
 import repast.simphony.util.collections.IndexedIterable;
+import cern.jet.random.Uniform;
+import firefighters.agent.Agent;
+import firefighters.utils.Directions;
 
 /*
  * TODO:
@@ -133,8 +130,7 @@ public class Fire {
 		IndexedIterable<Wind> winds = ContextUtils.getContext(this).getObjects(Wind.class);
 		Wind currentWind = winds.iterator().next();
 		Directions windDirection = currentWind.getDirection();
-		direction.xDiff = windDirection.xDiff;
-		direction.yDiff = windDirection.yDiff;
+    direction = windDirection;
 	}
 	
 	/**
