@@ -1,5 +1,6 @@
 package firefighters.world;
 
+import constants.SimulationConstants;
 import cern.jet.random.Uniform;
 import repast.simphony.context.Context;
 import repast.simphony.engine.schedule.ScheduledMethod;
@@ -17,7 +18,6 @@ import repast.simphony.util.ContextUtils;
  */
 public class Rain {
 	
-	private double RAIN_PROB = 0.2; // Chance with which rain can appear
 	private static final Uniform urng = RandomHelper.getUniform();
 	private Grid<Object> grid;
 	
@@ -35,7 +35,7 @@ public class Rain {
 	}
 	
 	public void appearRain(){
-		if (urng.nextDouble() < RAIN_PROB) {
+		if (urng.nextDouble() < SimulationConstants.RAIN_PROB) {
 			RandomGridAdder<Object> ra = new RandomGridAdder<Object>();
 			Rain rain = new Rain(grid);
 			ContextUtils.getContext(this).add(rain);
@@ -44,7 +44,7 @@ public class Rain {
 	}
 	
 	public void disappearRain(){
-		if (urng.nextDouble() < RAIN_PROB) {
+		if (urng.nextDouble() < SimulationConstants.RAIN_PROB) {
 			ContextUtils.getContext(this).remove(this);
 		}
 	}

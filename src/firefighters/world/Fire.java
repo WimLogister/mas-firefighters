@@ -2,6 +2,7 @@ package firefighters.world;
 
 import java.util.List;
 
+import constants.SimulationConstants;
 import repast.simphony.context.Context;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.query.space.grid.GridCell;
@@ -24,7 +25,6 @@ import firefighters.utils.Directions;
  */
 public class Fire {
 	
-	private static final double FIRE_PROB = 0.1; // Chance with which fire can appear out of nowhere
 	private Grid<Object> grid;
 	private Directions direction; // Influenced by wind
 	private double speed; // Influenced by rain and hosing, probability with which it spreads, maximum speed = 1
@@ -185,6 +185,7 @@ public class Fire {
 		for (Object object : grid.getObjectsAt(location)){
 			if(object instanceof Agent) spreadPossible = false;
 			if(object instanceof Tree) if (((Tree) object).getLifePoints()<=0) spreadPossible = false;
+			if(object instanceof Fire) spreadPossible = false;
 		}
 		return spreadPossible;
 	}
@@ -193,7 +194,7 @@ public class Fire {
 	 * Fires can appear suddenly in any part of the forest with a certain chance
 	 */
 	public void appear(){
-		if (urng.nextDouble() < FIRE_PROB) {
+		if (urng.nextDouble() < SimulationConstants.FIRE_PROB) {
 			RandomGridAdder<Object> ra = new RandomGridAdder<Object>();
 			// New fire has maximum number of lifepoints
 			Fire fire = new Fire(grid,Directions.getRandomDirection(),urng.nextDouble(),maxLifePoints,maxLifePoints);
@@ -211,7 +212,7 @@ public class Fire {
 	 */
 	public void setSpeed(double speed){
 		if(speed < 0) speed = 0;
-		if(speed > 1) speed = 1;
+		if(speed > SimulationConstants.MAX_FIRE_SPEED) speed = SimulationConstants.MAX_FIRE_SPEED;
 		this.speed = speed;
 	}
 	
