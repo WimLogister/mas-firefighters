@@ -28,8 +28,6 @@ import repast.simphony.space.grid.SimpleGridAdder;
 /*
  * TODO:
  * Maybe better to start "groups" of fire or one bigger fire instead of randomly scattered single fires?
- * Same with rain
- * Add initial wind direction as parameter in the model?
  * Visualize wind in grid
  */
 public class TreeBuilder implements ContextBuilder<Object> {
@@ -44,6 +42,9 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		int lifePointsFire = (Integer) params.getValue("life_points_fire");
 		int fireCount = (Integer) params.getValue("fire_count"); // How many fires we initialize with
 		int rainCount = (Integer) params.getValue("rain_count"); // How much rain we initialize with
+		int agentCount = (Integer) params.getValue("agent_count"); // How many agents we start with
+		Directions windDirection = returnWindDirection((String) params.getValue("wind_direction")); // Initial direction of wind
+		
 		final Uniform urng = RandomHelper.getUniform();
 		
 		GridFactory gridFactory = GridFactoryFinder.createGridFactory(null);
@@ -64,8 +65,14 @@ public class TreeBuilder implements ContextBuilder<Object> {
 			}
 		}
 		
-		Wind wind = new Wind(grid, Directions.getRandomDirection()); // Add wind to the forest
+		Wind wind = new Wind(grid, windDirection); // Add wind to the forest
 		context.add(wind);
+		
+		/*
+		 * Randomly place agents in grid: constructor agent?
+		 */
+		
+		
 		
 		/* 
 		 * Randomly place fires in grid
@@ -84,5 +91,13 @@ public class TreeBuilder implements ContextBuilder<Object> {
 			ra.add(grid, rain);
 		}
 		return context;
+	}
+	
+	public Directions returnWindDirection(String string){
+		if(string.equals("north")) return Directions.NORTH;
+		else if(string.equals("south")) return Directions.SOUTH;
+		else if(string.equals("east")) return Directions.EAST;
+		else if(string.equals("west")) return Directions.WEST;
+		else throw new IllegalArgumentException("Wind direction must be one of the following strings: \"north\", \"south\", \"east\" or \"west\"");
 	}
 }

@@ -30,8 +30,20 @@
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
+				<parameter name="wind_direction" displayName="Wind Direction" type="java.lang.String" 
+						defaultValue="north" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$StringStringConverter"
+									
+		/>
 				<parameter name="rain_count" displayName="Rain Count" type="int" 
 						defaultValue="20" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+									
+		/>
+				<parameter name="agent_count" displayName="Agent Count" type="int" 
+						defaultValue="25" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									

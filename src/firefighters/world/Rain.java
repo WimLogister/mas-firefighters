@@ -17,7 +17,7 @@ import repast.simphony.util.ContextUtils;
  */
 public class Rain {
 	
-	private double RAIN_PROB = 0.0; // Chance with which rain can appear
+	private double RAIN_PROB = 0.2; // Chance with which rain can appear
 	private static final Uniform urng = RandomHelper.getUniform();
 	private Grid<Object> grid;
 	

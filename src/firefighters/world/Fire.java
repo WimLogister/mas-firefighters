@@ -27,7 +27,7 @@ import repast.simphony.util.collections.IndexedIterable;
  */
 public class Fire {
 	
-	private static final double FIRE_PROB = 0.0; // Chance with which fire can appear out of nowhere
+	private static final double FIRE_PROB = 0.1; // Chance with which fire can appear out of nowhere
 	private Grid<Object> grid;
 	private Directions direction; // Influenced by wind
 	private double speed; // Influenced by rain and hosing, probability with which it spreads, maximum speed = 1
