@@ -36,5 +36,5 @@
     <float>1.0</float>
     <float>1.0</float>
   </colorScale>
-  <iconFile2D>C:/Users/Nadine/Documents/University/Uni 2015/Multi-Agent Systems/Assignment/Rain-drop-symbol.png</iconFile2D>
+  <iconFile2D>img/Rain-drop-symbol.png</iconFile2D>
 </repast.simphony.visualization.editedStyle.DefaultEditedStyleData2D>
