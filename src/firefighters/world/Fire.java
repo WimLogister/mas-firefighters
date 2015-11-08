@@ -2,7 +2,6 @@ package firefighters.world;
 
 import java.util.List;
 
-import constants.SimulationConstants;
 import repast.simphony.context.Context;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.query.space.grid.GridCell;
@@ -14,6 +13,7 @@ import repast.simphony.space.grid.RandomGridAdder;
 import repast.simphony.util.ContextUtils;
 import repast.simphony.util.collections.IndexedIterable;
 import cern.jet.random.Uniform;
+import constants.SimulationConstants;
 import firefighters.agent.Agent;
 import firefighters.utils.Directions;
 
@@ -66,7 +66,7 @@ public class Fire {
 	 */
 	public void extinguish(){
 		this.lifePoints--;
-		if (this.lifePoints-- <= 0) {
+    if (this.lifePoints <= 0) {
 			Context<Object> context = ContextUtils.getContext(this);
 			context.remove(this);
 		}
