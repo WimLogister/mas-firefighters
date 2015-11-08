@@ -1,20 +1,32 @@
 package firefighters.world;
 
+import cern.jet.random.Uniform;
+import repast.simphony.engine.schedule.ScheduledMethod;
+import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
+import repast.simphony.util.ContextUtils;
 import firefighters.utils.Directions;
 
-/*
- * Improvements/TODO
- * Can change direction at any time
- */
 public class Wind {
 	
 	private Grid<Object> grid;
 	private Directions direction; // Is global across forest
+	private static final double WIND_CHANGE_PROB = 0.1;
+	private static final Uniform urng = RandomHelper.getUniform();	
 	
 	public Wind(Grid<Object> grid, Directions direction){
 		this.grid = grid;
 		this.direction = direction;
+	}
+	
+	/*
+	 * Wind can change its direction at any time
+	 */
+	@ScheduledMethod(start = 1, interval = 1)
+	public void blow(){
+		if (urng.nextDouble() < WIND_CHANGE_PROB) {
+			direction = Directions.getRandomDirection();
+		}	
 	}
 	
 	public Directions getDirection(){

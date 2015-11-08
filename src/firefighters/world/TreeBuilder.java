@@ -29,8 +29,9 @@ import repast.simphony.space.grid.SimpleGridAdder;
  * Possible improvements:
  * Maybe better to start "groups" of fire or one bigger fire instead of randomly scattered single fires?
  * Same with rain
- * TODO: Add initial wind direction as parameter in the model?
- * TODO: Visualize wind in grid
+ * Add initial wind direction as parameter in the model?
+ * Visualize wind in grid
+ * Different grid color for burned trees
  */
 public class TreeBuilder implements ContextBuilder<Object> {
 
@@ -40,7 +41,8 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		
 		Parameters params = RunEnvironment.getInstance().getParameters();
 		int size = (Integer) params.getValue("grid_size");
-		int lifePoints = (Integer) params.getValue("life_points"); // How many steps it takes before the tree-grid has burned down completely
+		int lifePointsTree = (Integer) params.getValue("life_points_tree"); // How many steps it takes before the tree-grid has burned down completely
+		int lifePointsFire = (Integer) params.getValue("life_points_fire");
 		int fireCount = (Integer) params.getValue("fire_count"); // How many fires we initialize with
 		int rainCount = (Integer) params.getValue("rain_count"); // How much rain we initialize with
 		final Uniform urng = RandomHelper.getUniform();
@@ -57,7 +59,7 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		for (int d0=0; d0<dims.getDimension(0); d0++){
 			for (int d1=0; d1<dims.getDimension(1); d1++){
 				int[] nextLoc = {d0,d1};
-				Tree tree = new Tree(grid,lifePoints);
+				Tree tree = new Tree(grid,lifePointsTree);
 				context.add(tree);
 				grid.moveTo(tree, nextLoc);
 			}
@@ -71,7 +73,7 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		 * Each of the wildfires can have a different initial speed and direction
 		 */
 		for (int i = 0; i < fireCount; i++) {
-			Fire fire = new Fire(grid,Directions.getRandomDirection(),urng.nextDouble());
+			Fire fire = new Fire(grid,Directions.getRandomDirection(),urng.nextDouble(),lifePointsFire,lifePointsFire);
 			context.add(fire);
 			ra.add(grid, fire);
 		}

@@ -6,18 +6,6 @@
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
-				<parameter name="fire_prob" displayName="Fire Probability" type="double" 
-						defaultValue="0.1" 
-						isReadOnly="false" 
-						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
-									
-		/>
-				<parameter name="life_points" displayName="Life Points" type="int" 
-						defaultValue="5" 
-						isReadOnly="false" 
-						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
-									
-		/>
 				<parameter name="fire_count" displayName="Fire Count" type="int" 
 						defaultValue="5" 
 						isReadOnly="false" 
@@ -30,16 +18,16 @@
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
-				<parameter name="rain_count" displayName="Rain Count" type="int" 
-						defaultValue="20" 
+				<parameter name="life_points_tree" displayName="Life Points Tree" type="int" 
+						defaultValue="5" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
-				<parameter name="rain_prob" displayName="Rain Probability" type="double" 
-						defaultValue="0.25" 
+				<parameter name="rain_count" displayName="Rain Count" type="int" 
+						defaultValue="20" 
 						isReadOnly="false" 
-						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
 		</parameters>

@@ -20,30 +20,36 @@ import repast.simphony.util.ContextUtils;
 import repast.simphony.util.collections.IndexedIterable;
 
 /*
- * Improvements
- * Adding "lifepoints" to the fire
- * Spreading the fire: now fire cannot spread to a grid which is occupied by a forester. Could be implemented?
- * Spreading direction: fire spreads with the direction of the wind with the highest chance, but can also spread to other directions with a lower chance
+ * Improvements:
+ * Spreading the fire: can the spread to a grid which is occupied by a forester? Currently not.
+ * Direction: currently fire takes direction of the wind in one timestep, other solutions might make more sense.
+ * Appear(): now fires might randomly appear at already burned grids? Need to check this.
  */
 
 public class Fire {
 	
-	private static final double FIRE_PROB = 0; // Chance with which fire can appear out of nowhere
+	private static final double FIRE_PROB = 0.05; // Chance with which fire can appear out of nowhere
 	private Grid<Object> grid;
 	private Directions direction; // Influenced by wind
 	private double speed; // Influenced by rain and hosing, probability with which it spreads, maximum speed = 1
 	private static final Uniform urng = RandomHelper.getUniform();
+	// Fire has certain number of lifePoints which decreases it is being hosed by an agent
+	private int lifePoints;
+	private int maxLifePoints;
 	
-	public Fire(Grid<Object> grid, Directions direction, double speed) {
+	public Fire(Grid<Object> grid, Directions direction, double speed, int lifePoints, int maxLifePoints) {
 		this.grid = grid;
 		this.direction = direction;
 		if(speed > 1 || speed < 0){
 			throw new IllegalArgumentException("Speed value of fire is out of range!");
 		} else this.speed = speed;
+		this.lifePoints = lifePoints;
+		this.maxLifePoints = lifePoints;
 	}
 	
 	/*
 	 * With each step 
+	 * Fires can be extinguished, method called by agent
 	 * Wildfires can appear suddenly in any part of the forest
 	 * May change its speed according to rain and hosing
 	 * Burns down the trees (decreasing lifepoints of trees)
@@ -52,20 +58,25 @@ public class Fire {
 	 */
 	@ScheduledMethod(start = 1, interval = 1)
 	public void step(){
+		burn();
 		appear();
 		updateSpeed();
 		updateDirection();
-		burn();
 		spread();
 	}
 	
 	/*
-	 *  If there is a firefighter hosing the fire speed reduces
-	 *  How "strong" the firefighter is can be modelled by increasing/decreasing the increasment of the fire
+	 *  If there is a firefighter hosing the fire, the fire decreases in its lifepoints and speed
 	 */
 	public void extinguish(){
-		ContextUtils.getContext(this).remove(this);
-		setSpeed(speed - 0.2);
+		this.lifePoints--;
+		if (this.lifePoints-- <= 0) {
+			Context<Object> context = ContextUtils.getContext(this);
+			context.remove(this);
+		}
+		else{
+			setSpeed(speed - 0.2);
+		}
 	}
 	
 	/*
@@ -79,7 +90,6 @@ public class Fire {
 		else setSpeed(speed * 1.1);
 		if(checkRainInLocation()) setSpeed(speed - 0.1);
 		else setSpeed(speed + 0.1);
-		System.out.println("Speed " + speed);
 	}
 
 	/*
@@ -134,43 +144,53 @@ public class Fire {
 	 */
 	public void burn(){
 		GridPoint pt = grid.getLocation(this);
-		Iterable<Object> trees = grid.getObjectsAt(pt.getX(), pt.getY());
-		//for (final Object obj : trees){
-		//Iterable<Object> trees = grid.getObjectsAt(pt.getX(),pt.getY());
-		Iterator<Object> objects = trees.iterator(); 
-		Object obj;
-		while(objects.hasNext()){
-			obj = objects.next();
+		Tree treeToBurn = null;
+		for (Object obj : grid.getObjectsAt(pt.getX(), pt.getY())){
 			if (obj instanceof Tree){
-				((Tree) obj).decrementLifePoints();
+				Tree treetoBurn = (Tree) obj;
 			}
-		}	
+		}
+		if(!(treeToBurn == null)) treeToBurn.decrementLifePoints();
 	}
 	
 	/*
-	 * Fire is spreading
+	 * Fire spreads to the next grid in its direction with the highest chance (= speed), but can also spread to other directions with a lower chance
 	 */
 	public void spread(){
-		// Get the location to which the fire wants to spread according to its direction
 		GridPoint pt = grid.getLocation(this);
-		int cX = pt.getX() + direction.xDiff;
-		int cY = pt.getY() + direction.yDiff;
-		int[] cLoc = {cX, cY};
-		// Can only spread to new area if this area is a forest (with no forester on it) which is not already burned (if so, it cannot spread to here)
+		double spreadChance = speed * 0.2; // Chance with which to spread to another direction than the fires own direction
+		for(Directions dir : Directions.values()){
+			int cX = pt.getX() + dir.xDiff;
+			int cY = pt.getY() + dir.yDiff;
+			int[] cLoc = {cX, cY}; // Get location of grid to which the fire possibly spreads
+	
+			if(canSpread(cLoc)){
+				if(dir == direction){
+					if (urng.nextDouble() < speed) { // Spreads with certain "speed" (modeled in stochastic way)
+						Fire fire = new Fire(grid, direction, speed, lifePoints, maxLifePoints); // Fire spreads with same direction, speed and number of lifepoints
+						ContextUtils.getContext(this).add(fire);
+						grid.moveTo(fire, cX, cY);
+					}
+				}
+				else{
+					if(urng.nextDouble() < spreadChance){
+						Fire fire = new Fire(grid, direction, speed, lifePoints, maxLifePoints);
+						ContextUtils.getContext(this).add(fire);
+						grid.moveTo(fire, cX, cY);
+					}
+				}
+			}			
+		}
+	}
+	
+	// Can only spread to new area if this area is a forest (with no forester on it) which is not already burned (if so, it cannot spread to here)
+	public boolean canSpread(int[] location){
 		boolean spreadPossible = true;
-		for (Object object : grid.getObjectsAt(cLoc)){
+		for (Object object : grid.getObjectsAt(location)){
 			if(object instanceof Agent) spreadPossible = false;
 			if(object instanceof Tree) if (((Tree) object).getLifePoints()<=0) spreadPossible = false;
 		}
-		if(spreadPossible){
-			// Spreads with certain "speed" (modeled in stochastic way)
-			if (urng.nextDouble() < speed) {
-				// Fire spreads with same direction and speed
-				Fire fire = new Fire(grid, direction, speed);
-				ContextUtils.getContext(this).add(fire);
-				grid.moveTo(fire, cX, cY);
-			}
-		}
+		return spreadPossible;
 	}
 	
 	/*
@@ -179,7 +199,8 @@ public class Fire {
 	public void appear(){
 		if (urng.nextDouble() < FIRE_PROB) {
 			RandomGridAdder<Object> ra = new RandomGridAdder<Object>();
-			Fire fire = new Fire(grid,Directions.getRandomDirection(),urng.nextDouble());
+			// New fire has maximum number of lifepoints
+			Fire fire = new Fire(grid,Directions.getRandomDirection(),urng.nextDouble(),maxLifePoints,maxLifePoints);
 			ContextUtils.getContext(this).add(fire);
 			ra.add(grid, fire);
 		}
@@ -204,5 +225,17 @@ public class Fire {
 	
 	public void setDirection(Directions direction){
 		this.direction = direction;
+	}
+	
+	public int getLifePoints(){
+		return lifePoints;
+	}
+	
+	/*
+	 * Cannot set lifepoints of fire higher than the maximum lifepoints
+	 */	
+	public void setLifePoints(int lifePoints){
+		if(lifePoints > maxLifePoints) this.lifePoints = maxLifePoints;
+		else this.lifePoints = lifePoints;
 	}
 }
