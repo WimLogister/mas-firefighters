@@ -1,5 +1,6 @@
 package firefighters.world;
 
+import constants.SimulationConstants;
 import cern.jet.random.Uniform;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.random.RandomHelper;
@@ -11,7 +12,6 @@ public class Wind {
 	
 	private Grid<Object> grid;
 	private Directions direction; // Is global across forest
-	private static final double WIND_CHANGE_PROB = 0.1; // Change with which wind is changing direction
 	private static final Uniform urng = RandomHelper.getUniform();	
 	
 	public Wind(Grid<Object> grid, Directions direction){
@@ -24,7 +24,7 @@ public class Wind {
 	 */
 	@ScheduledMethod(start = 1, interval = 1)
 	public void blow(){
-		if (urng.nextDouble() < WIND_CHANGE_PROB) {
+		if (urng.nextDouble() < SimulationConstants.WIND_CHANGE_PROB) {
 			direction = Directions.getRandomDirection();
 		}	
 	}

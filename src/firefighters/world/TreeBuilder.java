@@ -1,28 +1,22 @@
 package firefighters.world;
 
 
-import cern.jet.random.Uniform;
-import firefighters.utils.Directions;
 import repast.simphony.context.Context;
-import repast.simphony.context.space.continuous.ContinuousSpaceFactory;
-import repast.simphony.context.space.continuous.ContinuousSpaceFactoryFinder;
-import repast.simphony.context.space.graph.NetworkBuilder;
 import repast.simphony.context.space.grid.GridFactory;
 import repast.simphony.context.space.grid.GridFactoryFinder;
 import repast.simphony.dataLoader.ContextBuilder;
 import repast.simphony.engine.environment.RunEnvironment;
-import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.parameter.Parameters;
 import repast.simphony.random.RandomHelper;
-import repast.simphony.space.continuous.ContinuousSpace;
-import repast.simphony.space.continuous.NdPoint;
-import repast.simphony.space.continuous.RandomCartesianAdder;
-import repast.simphony.space.grid.GridDimensions;
-import repast.simphony.space.grid.RandomGridAdder;
-import repast.simphony.space.grid.WrapAroundBorders;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridBuilderParameters;
+import repast.simphony.space.grid.GridDimensions;
+import repast.simphony.space.grid.RandomGridAdder;
 import repast.simphony.space.grid.SimpleGridAdder;
+import repast.simphony.space.grid.WrapAroundBorders;
+import cern.jet.random.Uniform;
+import firefighters.agent.SimpleAgent;
+import firefighters.utils.Directions;
 
 
 /*
@@ -35,7 +29,7 @@ public class TreeBuilder implements ContextBuilder<Object> {
 	@Override
 	public Context build(Context<Object> context) {
 		context.setId("sample-simulation");
-		
+
 		Parameters params = RunEnvironment.getInstance().getParameters();
 		int size = (Integer) params.getValue("grid_size");
 		int lifePointsTree = (Integer) params.getValue("life_points_tree"); // How many steps it takes before the tree-grid has burned down completely
@@ -90,6 +84,15 @@ public class TreeBuilder implements ContextBuilder<Object> {
 			context.add(rain);
 			ra.add(grid, rain);
 		}
+
+    // Randomly place the agents
+    for (int i = 0; i < agentCount; i++) {
+      double movementSpeed = 1.0;
+      double money = 0;
+      SimpleAgent agent = new SimpleAgent(grid, movementSpeed, money);
+      context.add(agent);
+      ra.add(grid, agent);
+    }
 		return context;
 	}
 	
