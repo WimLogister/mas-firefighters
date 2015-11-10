@@ -1,5 +1,5 @@
 <repast.simphony.visualization.engine.CartesianDisplayDescriptor>
-  <name>ForestDisplay</name>
+  <name>InclAgents</name>
   <type>2D</type>
   <styles>
     <entry>
@@ -14,19 +14,27 @@
       <string>firefighters.world.Rain</string>
       <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
     </entry>
+    <entry>
+      <string>firefighters.agent.SimpleAgent</string>
+      <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
+    </entry>
   </styles>
   <editedStyles>
     <entry>
       <string>firefighters.world.Tree</string>
-      <string>firefighters.world.Tree.style_0.xml</string>
+      <string>firefighters.world.Tree.style_1.xml</string>
     </entry>
     <entry>
       <string>firefighters.world.Fire</string>
-      <string>firefighters.world.Fire.style_0.xml</string>
+      <string>firefighters.world.Fire.style_2.xml</string>
     </entry>
     <entry>
       <string>firefighters.world.Rain</string>
-      <string>firefighters.world.Rain.style_2.xml</string>
+      <string>firefighters.world.Rain.style_3.xml</string>
+    </entry>
+    <entry>
+      <string>firefighters.agent.SimpleAgent</string>
+      <string>firefighters.agent.SimpleAgent.style_0.xml</string>
     </entry>
   </editedStyles>
   <netStyles/>
@@ -39,7 +47,7 @@
     <pType>LAST</pType>
     <duration>-1.0</duration>
     <frequency>REPEAT</frequency>
-    <hashCode>-1288507128</hashCode>
+    <hashCode>707945177</hashCode>
   </schedParams>
   <layoutClassName>foo.bar.baz</layoutClassName>
   <layoutProjection>grid</layoutProjection>
@@ -51,11 +59,15 @@
     </entry>
     <entry>
       <string>firefighters.world.Fire</string>
-      <int>1</int>
+      <int>2</int>
     </entry>
     <entry>
       <string>firefighters.world.Rain</string>
-      <int>2</int>
+      <int>1</int>
+    </entry>
+    <entry>
+      <string>firefighters.agent.SimpleAgent</string>
+      <int>3</int>
     </entry>
   </layerOrder>
   <projections>

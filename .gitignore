@@ -1,2 +1,6 @@
 /bin/
 *.log
+/velocity.log
+/debug.log
+/Repast.settings
+*.log.*
