@@ -2,6 +2,8 @@ package firefighters.agent;
 
 import java.util.List;
 
+import com.badlogic.gdx.math.Vector2;
+
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.query.space.grid.GridCell;
 import repast.simphony.query.space.grid.GridCellNgh;
@@ -9,7 +11,6 @@ import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.ContextUtils;
-import firefighters.utils.Directions;
 import firefighters.world.Fire;
 
 
@@ -17,16 +18,14 @@ import firefighters.world.Fire;
 public abstract class Agent {
 	
 	Grid<Object> grid;
-	double movementSpeed;
 	double money;
-	Directions direction;
+	Vector2 velocity;
 	Fire targetFire;
 	
-  public Agent(Grid<Object> grid, double movementSpeed, double money) {
+  public Agent(Grid<Object> grid, double money, Vector2 velocity) {
     this.grid = grid;
-    this.movementSpeed = movementSpeed;
     this.money = money;
-    this.direction = Directions.getRandomDirection();
+    this.velocity = velocity;
   }
 
   @ScheduledMethod(start = 1, interval = 1)
@@ -72,21 +71,21 @@ public abstract class Agent {
 	 * Movement is a stochastic process: each agent's movement speed is modeled as 
 	 * the probability of moving to the square it is currently facing.
 	 */
-	public void move() {
-		if (RandomHelper.nextDouble() < movementSpeed) {
-			GridPoint pt = grid.getLocation(this);
+	//public void move() {
+	//	if (RandomHelper.nextDouble() < movementSpeed) {
+	//		GridPoint pt = grid.getLocation(this);
 			/*
 			 * Move the agent according to its current direction. How the direction
 			 * influences its movement in the grid is modeled by the Directions Enum,
 			 * which is used here.
 			 */
-			grid.moveTo(this, pt.getX()+direction.xDiff, pt.getY()+direction.yDiff);
+	/*		grid.moveTo(this, pt.getX()+direction.xDiff, pt.getY()+direction.yDiff);
 		}
 	}
 	
 	public void turn(Directions direction) {
 		this.direction = direction;
-	}
+	}*/
 	
 	/**
 	 * Fight this agent's target fire.

@@ -1,6 +1,9 @@
 package firefighters.world;
 
 import java.util.List;
+import java.util.Random;
+
+import com.badlogic.gdx.math.Vector2;
 
 import repast.simphony.context.Context;
 import repast.simphony.engine.schedule.ScheduledMethod;
@@ -15,7 +18,8 @@ import repast.simphony.util.collections.IndexedIterable;
 import cern.jet.random.Uniform;
 import constants.SimulationConstants;
 import firefighters.agent.Agent;
-import firefighters.utils.Directions;
+import firefighters.utils.Direction;
+import firefighters.utils.Helper;
 
 /*
  * TODO:
@@ -25,40 +29,47 @@ import firefighters.utils.Directions;
  */
 public class Fire {
 	
+	Random rand = new Random();
 	private Grid<Object> grid;
-	private Directions direction; // Influenced by wind
-	private double speed; // Influenced by rain and hosing, probability with which it spreads, maximum speed = 1
+	private Vector2 velocity; // Direction: Influenced by wind. Speed: Influenced by rain and hosing, probability with which it spreads, maximum speed = 1
 	private static final Uniform urng = RandomHelper.getUniform();
 	// Fire has certain number of lifePoints which decreases it is being hosed by an agent
 	private int lifePoints;
 	private int maxLifePoints;
+	private float baseSpeed;
 	
-	public Fire(Grid<Object> grid, Directions direction, double speed, int lifePoints, int maxLifePoints) {
+	public Fire(Grid<Object> grid, Vector2 velocity, int lifePoints, int maxLifePoints) {
 		this.grid = grid;
-		this.direction = direction;
-		if(speed > 1 || speed < 0){
+		if(velocity.len() > SimulationConstants.MAX_FIRE_SPEED){
 			throw new IllegalArgumentException("Speed value of fire is out of range!");
-		} else this.speed = speed;
+		} else this.velocity = velocity;
 		this.lifePoints = lifePoints;
-		this.maxLifePoints = lifePoints;
+		this.maxLifePoints = lifePoints; 
 	}
 	
 	/**
-	 * With each step: 
-	 * Fires can be extinguished, method called by agent
+	 * With each step (and in this order): 
+	 * Fires can be extinguished, this method is called by the agent who is performing this action.
 	 * Fire burns down the trees (decreasing the lifepoints of the trees)
-	 * Fire may change its speed according to rain and hosing
-	 * May change its direction according to the direction of the wind
-	 * Spreads to new area (according to direction) with certain chance
-	 * Wildfires can appear suddenly in any part of the forest
+	 * Fire may change its speed and direction according to the rain, wind and hosing of a firefighter
+	 * Fire may spread to new area (according to direction) with certain chance
+	 * Wildfires can appear suddenly in any part of the forest with a small chance
 	 */
 	@ScheduledMethod(start = 1, interval = 1)
 	public void step(){
-		burn();
-		updateSpeed();
-		updateDirection();
+		// If the fire is not removed from the grid, update its velocity and let it spread
+		//boolean fireRemoved = burn();
+		//System.out.println(fireRemoved);
+		//if(!fireRemoved){
+		
+		//updateVelocity();
 		spread();
-		appear();
+		//}
+		burn();
+		//if (this.equals(null)) System.out.println("null");
+
+		//appear();
+		removeFire();
 	}
 	
 	/**
@@ -66,49 +77,87 @@ public class Fire {
 	 */
 	public void extinguish(){
 		this.lifePoints--;
-    if (this.lifePoints <= 0) {
+		if (this.lifePoints <= 0) {
 			Context<Object> context = ContextUtils.getContext(this);
 			context.remove(this);
 		}
 		else{
-			setSpeed(speed - 0.2);
+			float newSpeed = this.getSpeed() - SimulationConstants.MAX_FIRE_SPEED * 0.5f;
+			this.setSpeed(newSpeed);
+		}
+	}		
+	
+	/**
+	 * Fire grows in strenght by burning trees
+	 * Fire is burning the tree in the current grid (= decreasing its lifepoints)
+	 * Fire is being removed if it burned down the grid completely
+	 */
+	public void burn(){
+		incrementLifePoints();
+		GridPoint pt = grid.getLocation(this);
+		Tree treeToBurn = null;
+		// Check if there is a Tree object in this grid cell
+		for (Object obj : grid.getObjectsAt(pt.getX(), pt.getY())){
+			if (obj instanceof Tree){
+				treeToBurn = (Tree) obj;
+			}
+		}
+		if(!(treeToBurn == null)) treeToBurn.decrementLifePoints();
+	}	
+	
+	public void removeFire(){
+		if(lifePoints == 0) ContextUtils.getContext(this).remove(this);
+		else {
+			// if there is no tree
+			GridPoint pt = grid.getLocation(this);
+			if(!containsTree(pt)) ContextUtils.getContext(this).remove(this);
 		}
 	}
 	
-	/**
-	 * If there is no rain in the direction of the movement of the wildfire, it speeds up. 
-	 * If there is rain in its heading, then it slows down
-	 * If there is rain at the location of the fire itself, speed slows down even more
-	 * Can be adjusted according to what seems feasible with respect to reducing speed
-	 */
-	public void updateSpeed(){
-		if(checkRainInHeading()) setSpeed(speed * 0.9);
-		else setSpeed(speed * 1.1);
-		if(checkRainInLocation()) setSpeed(speed - 0.1);
-		else setSpeed(speed + 0.1);
+	public boolean containsTree(GridPoint pt){
+		boolean containsTree = false;
+		for (Object obj : grid.getObjectsAt(pt.getX(), pt.getY())){
+			if (obj instanceof Tree) containsTree = true;
+		}
+		return containsTree;
 	}
-
+	
 	/**
-	 * Method to check if it is raining, either in the direction in which the fire is going to
-	 * (passing true to the method) or at the current location of the fire itself (passing false to the method).
+	 * Method to check if it is raining in the direction in which the fire is heading to
+	 * That means we look at if there is rain in the 3 adjacent cells in the direction of the fire
+	 * EG: Fire has direction of 90 degrees (= North), we look at the cells North, North-West and North-East
+	 * If fire has direction of 135 degrees (= North-West), we look at the cells North-West, North and West
+	 * We return the number of these cells containing rain.
+	 * 
 	 */
-	public boolean checkRainInHeading(){
+	public int checkRainInHeading(){
+		int noRain = 0;
 		GridPoint pt = grid.getLocation(this);
 		GridCellNgh<Rain> ngh = new GridCellNgh<>(grid, pt, Rain.class, 1, 1);
 		List<GridCell<Rain>> gridCells = ngh.getNeighborhood(false);
 		
 		// If there is no rain at all, return false
-		if(gridCells.size()==0) return false;
+		if(gridCells.size()==0) return 0;
+		
+		Direction direction = new Direction(); // Direction of the fire in grid cell coordinates		
+		float angle = velocity.angle(); // Angle of the fire
 		
 		// If there is rain in the grid the fire is heading to, return true
 		boolean isRaining = false;
 		for (GridCell<Rain> cell : gridCells) {
 			for (Rain rain : cell.items()) {
 				GridPoint rainpt = grid.getLocation(rain);  
-				if (rainpt.getX() == pt.getX()+direction.xDiff && rainpt.getY() == pt.getY()+direction.yDiff) isRaining = true;
+				// Get xDiff and yDiff from 3 grids 'in front of' the fire
+				float right = Math.abs(angle - 45f ) % 360;
+				float left = Math.abs(angle + 45f) % 360;
+				float[] toCheck = {left,angle,right};
+				for(float i : toCheck){
+					direction.fromAngleToDir(i);
+					if (rainpt.getX() == pt.getX()+direction.xDiff && rainpt.getY() == pt.getY()+direction.yDiff) noRain++;
+				}
 			}
 		}
-		return isRaining;
+		return noRain;
 	}
 	
 	/**
@@ -124,108 +173,175 @@ public class Fire {
 	}
 	
 	/**
-	 * Update the fires direction: fire takes direction of the wind
+	 * SPEED
+	 * If there is no rain in the direction of the movement of the wildfire, it speeds up. 
+	 * If there is rain in its heading, then it slows down (if there are 3 grid cells containing rain, 
+	 * rain slows down more than with 2 cells, same for 2 and 1 cell)
+	 * If there is rain at the location of the fire itself, speed slows down even more
+	 * 
+	 * DIRECTION
+	 * Fire is influenced by the direction of the wind by adding the wind's velocity vector to that of the fire
+	 * 
+	 * LIFEPOINTS
+	 * Rain in the current grid reduces the lifepoints of the fire by 1
 	 */
-	public void updateDirection(){
-		IndexedIterable<Wind> winds = ContextUtils.getContext(this).getObjects(Wind.class);
-		Wind currentWind = winds.iterator().next();
-		Directions windDirection = currentWind.getDirection();
-    direction = windDirection;
-	}
-	
-	/**
-	 * Fire is burning the tree in the current grid (= decreasing its lifepoints)
-	 */
-	public void burn(){
-		GridPoint pt = grid.getLocation(this);
-		Tree treeToBurn = null;
-		for (Object obj : grid.getObjectsAt(pt.getX(), pt.getY())){
-			if (obj instanceof Tree){
-				treeToBurn = (Tree) obj;
-			}
+	public void updateVelocity(){
+		// Adjust velocity vector of fire according to that of the wind
+		velocity.add(getCurrentWindDirection()).clamp(0, SimulationConstants.MAX_FIRE_SPEED);	
+		
+		int noRainHeading = checkRainInHeading();
+		// If it is raining the current grid
+		if(checkRainInLocation()){
+			decrementLifePoints();
+			float newSpeed = this.getSpeed() - SimulationConstants.MAX_FIRE_SPEED * 0.4f;
+			this.setSpeed(newSpeed);
 		}
-		if(!(treeToBurn == null)) treeToBurn.decrementLifePoints();
+		else if(noRainHeading==3){
+			float newSpeed = this.getSpeed() - SimulationConstants.MAX_FIRE_SPEED * 0.3f;
+			this.setSpeed(newSpeed);
+		}
+		else if(noRainHeading==2){
+			float newSpeed = this.getSpeed() - SimulationConstants.MAX_FIRE_SPEED * 0.2f;
+			this.setSpeed(newSpeed);
+		}
+		else if(noRainHeading==1){
+			float newSpeed = this.getSpeed() - SimulationConstants.MAX_FIRE_SPEED * 0.1f;
+			this.setSpeed(newSpeed);
+		}
+		else{
+			float newSpeed = this.getSpeed() + SimulationConstants.MAX_FIRE_SPEED * 0.1f;
+			this.setSpeed(newSpeed);
+		}
+		
 	}
 	
 	/**
 	 * Fire spreads to the next grid in its direction with the highest chance (= speed), but can also spread to other directions with a lower chance
 	 */
 	public void spread(){
-		GridPoint pt = grid.getLocation(this);
-		double spreadChance = speed * 0.2; // Chance with which to spread to another direction than the fires own direction
-		for(Directions dir : Directions.values()){
-			int cX = pt.getX() + dir.xDiff;
-			int cY = pt.getY() + dir.yDiff;
-			int[] cLoc = {cX, cY}; // Get location of grid to which the fire possibly spreads
-	
-			if(canSpread(cLoc)){
-				if(dir == direction){
-					if (urng.nextDouble() < speed) { // Spreads with certain "speed" (modeled in stochastic way)
-						Fire fire = new Fire(grid, direction, speed, lifePoints, maxLifePoints); // Fire spreads with same direction, speed and number of lifepoints
-						ContextUtils.getContext(this).add(fire);
-						grid.moveTo(fire, cX, cY);
-					}
-				}
-				else{
-					if(urng.nextDouble() < spreadChance){
-						Fire fire = new Fire(grid, direction, speed, lifePoints, maxLifePoints);
-						ContextUtils.getContext(this).add(fire);
-						grid.moveTo(fire, cX, cY);
-					}
-				}
-			}			
+		double spreadToDirInFront = getSpeed(); // value between 0 and 1, for example direction is North
+		double spreadTo2ClosestDirs = spreadToDirInFront * 0.8; // directions are North-East and North-West
+		double spreadToOther = spreadToDirInFront * 0.1; // Chance with which to spread to another direction than the fire's own direction and the 2 closest directions
+		
+		// Spreading to the direction the fire is directly heading 
+		Direction dir = new Direction();
+		dir.discretizeVector(velocity);
+		//System.out.println(dir);
+		spreadStepFire(dir,spreadToDirInFront);
+				
+		// 2 other "front"-locations
+		float right = Math.abs(velocity.angle() - 45f ) % 360;
+		float left = Math.abs(velocity.angle() + 45f) % 360;
+		float[] toCheck = {left,right};
+		for(float i: toCheck){
+			dir.fromAngleToDir(i);
+			spreadStepFire(dir,spreadToDirInFront);			
+		}
+		// All other locations
+		float j = left;
+		for(int i=0; i<5;i++){
+			j = (j+45f)%360;
+			dir.fromAngleToDir(j);
+			spreadStepFire(dir,spreadToOther);
 		}
 	}
 	
 	/**
-	 *  Can only spread to new area if this area is a forest (with no forester on it) which is not already burned (if so, it cannot spread to here)
+	 * Given a direction, moves this fire to the direction with a certain chance
+	 * @param dir: direction to move to 
+	 * @param chance: chance to move with
+	 */	
+	public void spreadStepFire(Direction dir, double chance){
+		GridPoint pt = grid.getLocation(this);
+		//System.out.println(pt.getX());
+		//System.out.println(dir.xDiff);
+		//System.out.println(pt.getY());
+		//System.out.println(dir.yDiff);
+		//System.out.println(pt);
+		int cX = pt.getX() + dir.xDiff;
+		int cY = pt.getY() + dir.yDiff;
+		int[] cLoc = {cX, cY}; // Get location of grid to which the fire possibly spreads
+		if(canSpread(cLoc)){
+			if (urng.nextDouble() < chance) { // Spreads with certain "speed" (modeled in stochastic way)
+				Fire fire = new Fire(grid, velocity, lifePoints, maxLifePoints); // Fire spreads with same direction, speed and number of lifepoints
+				ContextUtils.getContext(this).add(fire);
+				grid.moveTo(fire, cX, cY);
+				// If there is a firefighter at the new location, the firefighter is being killed
+				for (Object object : grid.getObjectsAt(cLoc)){
+					if(object instanceof Agent) ContextUtils.getContext(this).remove(object);
+				}
+			}
+		}
+	}
+	
+	/**
+	 *  Can only spread to new area if this area is a forest which is not already burned and does not contain a fire already
 	 */
 	public boolean canSpread(int[] location){
 		boolean spreadPossible = true;
+		boolean containsTree = false;
 		for (Object object : grid.getObjectsAt(location)){
-			if(object instanceof Agent) spreadPossible = false;
-			if(object instanceof Tree) if (((Tree) object).getLifePoints()<=0) spreadPossible = false;
-			if(object instanceof Fire) spreadPossible = false;
+			if(object instanceof Tree) containsTree = true;
+			else if(object instanceof Fire) spreadPossible = false;
 		}
+		if(!containsTree) spreadPossible = false;
 		return spreadPossible;
 	}
 	
 	/**
 	 * Fires can appear suddenly in any part of the forest with a certain chance
+	 * They appear with the direction of the wind
 	 */
 	public void appear(){
 		if (urng.nextDouble() < SimulationConstants.FIRE_PROB) {
 			RandomGridAdder<Object> ra = new RandomGridAdder<Object>();
-			// New fire has maximum number of lifepoints
-			Fire fire = new Fire(grid,Directions.getRandomDirection(),urng.nextDouble(),maxLifePoints,maxLifePoints);
+			Vector2 fire_vel = new Vector2();
+			fire_vel.x = rand.nextFloat() * (SimulationConstants.MAX_FIRE_SPEED - 0) + 0;
+			fire_vel.setAngle(rand.nextFloat() * (360 - 0) + 0);
+			Fire fire = new Fire(grid,fire_vel,1,maxLifePoints);
 			ContextUtils.getContext(this).add(fire);
 			ra.add(grid, fire);
 		}
 	}
 	
-	public double getSpeed(){
-		return this.speed;
+	public float getSpeed(){
+		return this.velocity.len();
 	}
 	
 	/**
-	 * Not possible to set speed lower than 0 or higher than 1
+	 * Setting the speed is setting the length of the velocity vector to this value
 	 */
-	public void setSpeed(double speed){
-		if(speed < 0) speed = 0;
-		if(speed > SimulationConstants.MAX_FIRE_SPEED) speed = SimulationConstants.MAX_FIRE_SPEED;
-		this.speed = speed;
+	public void setSpeed(float speed){
+		velocity.setLength(speed);
+		velocity.clamp(0, SimulationConstants.MAX_FIRE_SPEED);
 	}
 	
-	public Directions getDirection(){
-		return this.direction;
+	public float getDirection(){
+		return this.velocity.angle();
 	}
 	
-	public void setDirection(Directions direction){
-		this.direction = direction;
+	public void setDirection(float angle){
+		this.velocity.setAngle(angle);
 	}
 	
 	public int getLifePoints(){
 		return lifePoints;
+	}
+	
+	public void setVelocity(Vector2 velocity){
+		this.velocity = velocity;
+	}
+	
+	public Vector2 getVelocity(){
+		return velocity;
+	}
+	
+	public void decrementLifePoints(){
+		this.lifePoints--;
+		if (this.lifePoints-- <= 0) {
+			Context<Object> context = ContextUtils.getContext(this);
+			context.remove(this);
+		}
 	}
 	
 	/**
@@ -234,5 +350,15 @@ public class Fire {
 	public void setLifePoints(int lifePoints){
 		if(lifePoints > maxLifePoints) this.lifePoints = maxLifePoints;
 		else this.lifePoints = lifePoints;
+	}
+	
+	public void incrementLifePoints(){
+		if(lifePoints < maxLifePoints) lifePoints ++;
+	}
+	
+	public Vector2 getCurrentWindDirection(){
+		IndexedIterable<Wind> winds = ContextUtils.getContext(this).getObjects(Wind.class);
+		Wind currentWind = winds.iterator().next();
+		return currentWind.getDirection();
 	}
 }

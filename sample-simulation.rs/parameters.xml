@@ -24,16 +24,22 @@
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
+				<parameter name="weather" displayName="Weather" type="java.lang.String" 
+						defaultValue="sunny" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$StringStringConverter"
+									
+		/>
 				<parameter name="life_points_tree" displayName="Life Points Tree" type="int" 
 						defaultValue="5" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
-				<parameter name="wind_direction" displayName="Wind Direction" type="java.lang.String" 
-						defaultValue="north" 
+				<parameter name="wind_direction" displayName="Wind Direction" type="float" 
+						defaultValue="90.0" 
 						isReadOnly="false" 
-						converter="repast.simphony.parameter.StringConverterFactory$StringStringConverter"
+						converter="repast.simphony.parameter.StringConverterFactory$FloatConverter"
 									
 		/>
 				<parameter name="rain_count" displayName="Rain Count" type="int" 

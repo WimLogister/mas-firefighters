@@ -1,40 +1,50 @@
 package firefighters.world;
 
+import com.badlogic.gdx.math.Vector2;
+
 import constants.SimulationConstants;
 import cern.jet.random.Uniform;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.util.ContextUtils;
-import firefighters.utils.Directions;
 
+/**
+ * The wind is global across the forest
+ * The wind its direction changes gradually over time
+ * TODO: visualisation of the wind in the grid
+ */
 public class Wind {
 	
 	private Grid<Object> grid;
-	private Directions direction; // Is global across forest
-	private static final Uniform urng = RandomHelper.getUniform();	
+	// Velocity vector with speed and direction 
+	// These values are global across the forest
+	private Vector2 velocity; 
 	
-	public Wind(Grid<Object> grid, Directions direction){
+	public Wind(Grid<Object> grid, Vector2 velocity){
 		this.grid = grid;
-		this.direction = direction;
+		this.velocity = velocity;
 	}
 	
 	/**
-	 * Wind can change its direction (randomly) at any time
+	 * With each step some random noise is added so that the direction of the wind changes gradually over time
 	 */
 	@ScheduledMethod(start = 1, interval = 1)
 	public void blow(){
-		if (urng.nextDouble() < SimulationConstants.WIND_CHANGE_PROB) {
-			direction = Directions.getRandomDirection();
-		}	
+		/*
+		double variance = direction.len();
+		double mean = direction.
+		java.util.Random r = new java.util.Random();
+		double noise = r.nextGaussian() * Math.sqrt(variance) + mean;
+		*/
 	}
 	
-	public Directions getDirection(){
-		return this.direction;
+	public Vector2 getDirection(){
+		return this.velocity;
 	}
 	
-	public void setDirection(Directions dir){
-		this.direction = dir;
+	public void setDirection(Vector2 dir){
+		this.velocity = dir;
 	}
 }
 
