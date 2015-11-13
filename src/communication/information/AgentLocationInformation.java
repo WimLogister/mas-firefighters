@@ -2,7 +2,7 @@ package communication.information;
 
 import lombok.Getter;
 import repast.simphony.space.grid.GridPoint;
-import agent.FirefighterAgent;
+import firefighters.agent.Agent;
 
 @Getter
 public class AgentLocationInformation
@@ -12,9 +12,9 @@ public class AgentLocationInformation
   private GridPoint position;
   
   /** The agent whose position is  described*/
-  private FirefighterAgent agent;
+  private Agent agent;
 
-  public AgentLocationInformation(FirefighterAgent agent, int x, int y) {
+  public AgentLocationInformation(Agent agent, int x, int y) {
     super(InformationType.AgentPosition);
     this.agent = agent;
     this.position = new GridPoint(x, y);

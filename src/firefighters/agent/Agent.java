@@ -9,6 +9,9 @@ import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.ContextUtils;
+
+import communication.Message;
+
 import firefighters.utils.Directions;
 import firefighters.world.Fire;
 
@@ -105,5 +108,9 @@ public abstract class Agent {
 		this.targetFire = targetFire;
 	}
 	
+  /** Called when another agent sends a message to this agent */
+  public void messageReceived(Message message) {
+    // TODO Implement
+  }
 
 }

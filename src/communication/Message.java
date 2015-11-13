@@ -2,7 +2,7 @@ package communication;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import agent.FirefighterAgent;
+import firefighters.agent.Agent;
 
 /** Any message sent by an agent. */
 @Getter
@@ -10,7 +10,7 @@ import agent.FirefighterAgent;
 public class Message {
 
   /** The agent sending the message */
-  private FirefighterAgent sender;
+  private Agent sender;
 
   /** The scope of the message, global or local */
   private MessageScope scope;

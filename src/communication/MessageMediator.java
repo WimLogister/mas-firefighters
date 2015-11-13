@@ -2,7 +2,7 @@ package communication;
 
 import java.util.List;
 
-import agent.FirefighterAgent;
+import firefighters.agent.Agent;
 
 // Note: All messages should probably be sent at the beginning of each iteration to ensure each agent can act on the messages received
 /**
@@ -12,11 +12,11 @@ import agent.FirefighterAgent;
 public class MessageMediator {
 
   /** List of all the agents in the world */
-  private List<FirefighterAgent> activeAgents;
+  private List<Agent> activeAgents;
 
   /** Sends a message to all other agents */
   public void broadcastToAll(Message message) {
-    for (FirefighterAgent agent : activeAgents) {
+    for (Agent agent : activeAgents) {
       if (agent != message.getSender()) {
         agent.messageReceived(message);
       }
