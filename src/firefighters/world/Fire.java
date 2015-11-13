@@ -19,13 +19,10 @@ import cern.jet.random.Uniform;
 import constants.SimulationConstants;
 import firefighters.agent.Agent;
 import firefighters.utils.Direction;
-import firefighters.utils.Helper;
 
 /*
  * TODO:
- * Spreading the fire: can the fire spread to a grid which is occupied by a forester? Currently not.
- * Direction: currently fire takes direction of the wind in one timestep, other solutions might make more sense.
- * Appear(): now fires might randomly appear at already burned grids? Need to check this.
+ * Appear(): FIX: now fires might randomly appear at already burned grids
  */
 public class Fire {
 	
@@ -37,14 +34,16 @@ public class Fire {
 	private int lifePoints;
 	private int maxLifePoints;
 	private float baseSpeed;
+	private double fireProb;
 	
-	public Fire(Grid<Object> grid, Vector2 velocity, int lifePoints, int maxLifePoints) {
+	public Fire(Grid<Object> grid, Vector2 velocity, int lifePoints, int maxLifePoints, double fireProb) {
 		this.grid = grid;
 		if(velocity.len() > SimulationConstants.MAX_FIRE_SPEED){
 			throw new IllegalArgumentException("Speed value of fire is out of range!");
 		} else this.velocity = velocity;
 		this.lifePoints = lifePoints;
 		this.maxLifePoints = lifePoints; 
+		this.fireProb = fireProb;
 	}
 	
 	/**
@@ -57,18 +56,10 @@ public class Fire {
 	 */
 	@ScheduledMethod(start = 1, interval = 1)
 	public void step(){
-		// If the fire is not removed from the grid, update its velocity and let it spread
-		//boolean fireRemoved = burn();
-		//System.out.println(fireRemoved);
-		//if(!fireRemoved){
-		
-		//updateVelocity();
-		spread();
-		//}
 		burn();
-		//if (this.equals(null)) System.out.println("null");
-
-		//appear();
+		updateVelocity();
+		spread();
+		appear();
 		removeFire();
 	}
 	
@@ -77,11 +68,8 @@ public class Fire {
 	 */
 	public void extinguish(){
 		this.lifePoints--;
-		if (this.lifePoints <= 0) {
-			Context<Object> context = ContextUtils.getContext(this);
-			context.remove(this);
-		}
-		else{
+		if(lifePoints<=0) setSpeed(0);
+		else {
 			float newSpeed = this.getSpeed() - SimulationConstants.MAX_FIRE_SPEED * 0.5f;
 			this.setSpeed(newSpeed);
 		}
@@ -96,17 +84,15 @@ public class Fire {
 		incrementLifePoints();
 		GridPoint pt = grid.getLocation(this);
 		Tree treeToBurn = null;
-		// Check if there is a Tree object in this grid cell
+		// Check if there is a Tree object in this grid cell it will be decremented in its life-points.
 		for (Object obj : grid.getObjectsAt(pt.getX(), pt.getY())){
-			if (obj instanceof Tree){
-				treeToBurn = (Tree) obj;
-			}
+			if (obj instanceof Tree) treeToBurn = (Tree) obj;
 		}
 		if(!(treeToBurn == null)) treeToBurn.decrementLifePoints();
 	}	
 	
 	public void removeFire(){
-		if(lifePoints == 0) ContextUtils.getContext(this).remove(this);
+		if(lifePoints <= 0) ContextUtils.getContext(this).remove(this);
 		else {
 			// if there is no tree
 			GridPoint pt = grid.getLocation(this);
@@ -253,17 +239,12 @@ public class Fire {
 	 */	
 	public void spreadStepFire(Direction dir, double chance){
 		GridPoint pt = grid.getLocation(this);
-		//System.out.println(pt.getX());
-		//System.out.println(dir.xDiff);
-		//System.out.println(pt.getY());
-		//System.out.println(dir.yDiff);
-		//System.out.println(pt);
 		int cX = pt.getX() + dir.xDiff;
 		int cY = pt.getY() + dir.yDiff;
 		int[] cLoc = {cX, cY}; // Get location of grid to which the fire possibly spreads
 		if(canSpread(cLoc)){
 			if (urng.nextDouble() < chance) { // Spreads with certain "speed" (modeled in stochastic way)
-				Fire fire = new Fire(grid, velocity, lifePoints, maxLifePoints); // Fire spreads with same direction, speed and number of lifepoints
+				Fire fire = new Fire(grid, velocity.clamp(0, SimulationConstants.MAX_FIRE_SPEED), lifePoints, maxLifePoints,fireProb); // Fire spreads with same direction, speed and number of lifepoints
 				ContextUtils.getContext(this).add(fire);
 				grid.moveTo(fire, cX, cY);
 				// If there is a firefighter at the new location, the firefighter is being killed
@@ -293,12 +274,12 @@ public class Fire {
 	 * They appear with the direction of the wind
 	 */
 	public void appear(){
-		if (urng.nextDouble() < SimulationConstants.FIRE_PROB) {
+		if (urng.nextDouble() < fireProb) {
 			RandomGridAdder<Object> ra = new RandomGridAdder<Object>();
 			Vector2 fire_vel = new Vector2();
 			fire_vel.x = rand.nextFloat() * (SimulationConstants.MAX_FIRE_SPEED - 0) + 0;
 			fire_vel.setAngle(rand.nextFloat() * (360 - 0) + 0);
-			Fire fire = new Fire(grid,fire_vel,1,maxLifePoints);
+			Fire fire = new Fire(grid,fire_vel,1,maxLifePoints,fireProb);
 			ContextUtils.getContext(this).add(fire);
 			ra.add(grid, fire);
 		}
@@ -336,12 +317,12 @@ public class Fire {
 		return velocity;
 	}
 	
+	/**
+	 * If lifepoints are 0, set the speed of the fire to 0 so that it can't spread anymore
+	 */
 	public void decrementLifePoints(){
 		this.lifePoints--;
-		if (this.lifePoints-- <= 0) {
-			Context<Object> context = ContextUtils.getContext(this);
-			context.remove(this);
-		}
+		if(lifePoints<=0) setSpeed(0);
 	}
 	
 	/**

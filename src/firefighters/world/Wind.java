@@ -20,23 +20,27 @@ public class Wind {
 	// Velocity vector with speed and direction 
 	// These values are global across the forest
 	private Vector2 velocity; 
+	private float changable; // Influence on how much the wind is changed every step
 	
-	public Wind(Grid<Object> grid, Vector2 velocity){
+	public Wind(Grid<Object> grid, Vector2 velocity, Float changable){
 		this.grid = grid;
 		this.velocity = velocity;
+		if(changable < 0 || changable > 1) throw new IllegalArgumentException("Value changable is out of range!");
+		else this.changable = changable;
 	}
-	
+
 	/**
 	 * With each step some random noise is added so that the direction of the wind changes gradually over time
 	 */
 	@ScheduledMethod(start = 1, interval = 1)
 	public void blow(){
-		/*
-		double variance = direction.len();
-		double mean = direction.
+		float variance = velocity.len() * changable;
+		float mean = 0;
 		java.util.Random r = new java.util.Random();
-		double noise = r.nextGaussian() * Math.sqrt(variance) + mean;
-		*/
+		float noiseSpeed = (float) (r.nextGaussian() * Math.sqrt(variance) + mean);
+		float varianceA = velocity.angle() * changable;
+		float noiseAngle = (float) (r.nextGaussian() * Math.sqrt(varianceA) + mean); 
+		velocity.add(noiseSpeed, noiseAngle);
 	}
 	
 	public Vector2 getDirection(){
@@ -47,4 +51,3 @@ public class Wind {
 		this.velocity = dir;
 	}
 }
-

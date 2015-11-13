@@ -28,6 +28,8 @@ public class VectorUsageExample {
     sample.setAngle(45-90);
 
     System.out.println(sample.angle());
+    
+    System.out.println((int)Math.floor(Math.sqrt(10)));
 
   }
 
