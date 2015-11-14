@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.badlogic.gdx.math.Vector2;
 
+import constants.SimulationConstants;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.query.space.grid.GridCell;
 import repast.simphony.query.space.grid.GridCellNgh;
@@ -11,26 +12,32 @@ import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.ContextUtils;
+import firefighters.utils.Direction;
 import firefighters.world.Fire;
 
-
-// TODO: define dummy class that extends this abstract class and do some basic testing, e.g. for death conditions and moving
+/**
+ * TODO: 
+ * Fix death condition
+ */
 public abstract class Agent {
 	
 	Grid<Object> grid;
 	double money;
 	Vector2 velocity;
 	Fire targetFire;
+	int lifePoints; // Extra help value to prevent problems killing the agents in the Fire-class
 	
   public Agent(Grid<Object> grid, double money, Vector2 velocity) {
     this.grid = grid;
     this.money = money;
     this.velocity = velocity;
+    this.lifePoints = 1; 
   }
 
-  @ScheduledMethod(start = 1, interval = 1)
+  @ScheduledMethod(start = 1, interval = 1, priority = -1)
 	public void step() {
-		if (checkDeath()) kill();
+	  if(lifePoints == 0) kill();
+	  else if (checkDeath()) kill();
 	}
 	
 	/**
@@ -71,21 +78,25 @@ public abstract class Agent {
 	 * Movement is a stochastic process: each agent's movement speed is modeled as 
 	 * the probability of moving to the square it is currently facing.
 	 */
-	//public void move() {
-	//	if (RandomHelper.nextDouble() < movementSpeed) {
-	//		GridPoint pt = grid.getLocation(this);
+	public void move() {
+		if (RandomHelper.nextDouble() < velocity.len()) {
+			GridPoint pt = grid.getLocation(this);
 			/*
 			 * Move the agent according to its current direction. How the direction
 			 * influences its movement in the grid is modeled by the Directions Enum,
 			 * which is used here.
 			 */
-	/*		grid.moveTo(this, pt.getX()+direction.xDiff, pt.getY()+direction.yDiff);
+			Direction dir = new Direction();
+			dir.discretizeVector(velocity);
+			grid.moveTo(this, pt.getX()+dir.xDiff, pt.getY()+dir.yDiff);
 		}
 	}
-	
-	public void turn(Directions direction) {
-		this.direction = direction;
-	}*/
+	/*
+	 * Let the agent turn in a given angle, counter-clockwise
+	 */
+	public void turn(float angle) {
+		velocity.setAngle(velocity.angle()+angle).clamp(0, SimulationConstants.MAX_FIRE_AGENT_SPEED);
+	}
 	
 	/**
 	 * Fight this agent's target fire.
@@ -96,7 +107,7 @@ public abstract class Agent {
 	}
 	
 	public void checkWeather() {
-		// TODO: Need to check rain and wind. First need to know how these are modeled.
+		// TODO: Need to check rain and wind. Need to know how we want to use this in agent's AI/plans.
 		
 	}
 	
@@ -104,5 +115,42 @@ public abstract class Agent {
 		this.targetFire = targetFire;
 	}
 	
-
+	/**
+	 * If fire is in reach of the firefighter
+	 * So if the fire is in the 3 directions in front of him
+	 */
+	public boolean isFireInReach(int x, int y){
+		Direction dir = new Direction();
+		dir.discretizeVector(velocity);
+		return isFireInReachDir(dir, x, y);
+	}
+	
+	/**
+	 * Is fire in reach given another direction of the firefighter
+	 */	
+	public boolean isFireInReachDir(Direction dir, int x, int y){
+		boolean isReachable=false;
+		
+		GridPoint pt = grid.getLocation(this);
+		int cX = pt.getX() + dir.xDiff;
+		int cY = pt.getY() + dir.yDiff;
+		
+		if(x==cX && y==cY) isReachable = true;
+		
+		// 2 other "front"-locations
+		float right = Math.abs(velocity.angle() - 45f ) % 360;
+		float left = Math.abs(velocity.angle() + 45f) % 360;
+		float[] toCheck = {left,right};
+		for(float i: toCheck){
+			dir.fromAngleToDir(i);
+			int cX2 = pt.getX() + dir.xDiff;
+			int cY2 = pt.getY() + dir.yDiff;
+			if(x==cX2 && y==cY2) isReachable = true;
+		}
+		return isReachable;
+	}
+	
+	public void setLifePoints(int i){
+		this.lifePoints = i;
+	}
 }

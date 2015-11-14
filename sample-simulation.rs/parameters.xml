@@ -7,7 +7,7 @@
 									
 		/>
 				<parameter name="fire_count" displayName="Fire Count" type="int" 
-						defaultValue="5" 
+						defaultValue="1" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
@@ -31,7 +31,7 @@
 									
 		/>
 				<parameter name="life_points_tree" displayName="Life Points Tree" type="int" 
-						defaultValue="5" 
+						defaultValue="10" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
@@ -40,12 +40,6 @@
 						defaultValue="90.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$FloatConverter"
-									
-		/>
-				<parameter name="rain_count" displayName="Rain Count" type="int" 
-						defaultValue="20" 
-						isReadOnly="false" 
-						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
 				<parameter name="agent_count" displayName="Agent Count" type="int" 

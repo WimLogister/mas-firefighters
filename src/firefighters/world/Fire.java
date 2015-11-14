@@ -54,7 +54,7 @@ public class Fire {
 	 * Fire may spread to new area (according to direction) with certain chance
 	 * Wildfires can appear suddenly in any part of the forest with a small chance
 	 */
-	@ScheduledMethod(start = 1, interval = 1)
+	@ScheduledMethod(start = 1, interval = 1, priority =0)
 	public void step(){
 		burn();
 		updateVelocity();
@@ -173,7 +173,7 @@ public class Fire {
 	 */
 	public void updateVelocity(){
 		// Adjust velocity vector of fire according to that of the wind
-		velocity.add(getCurrentWindDirection()).clamp(0, SimulationConstants.MAX_FIRE_SPEED);	
+		velocity.add(getCurrentWindVelocity()).clamp(0, SimulationConstants.MAX_FIRE_SPEED);	
 		
 		int noRainHeading = checkRainInHeading();
 		// If it is raining the current grid
@@ -206,13 +206,12 @@ public class Fire {
 	 */
 	public void spread(){
 		double spreadToDirInFront = getSpeed(); // value between 0 and 1, for example direction is North
-		double spreadTo2ClosestDirs = spreadToDirInFront * 0.8; // directions are North-East and North-West
-		double spreadToOther = spreadToDirInFront * 0.1; // Chance with which to spread to another direction than the fire's own direction and the 2 closest directions
+		double spreadTo2ClosestDirs = spreadToDirInFront * 0.5; // directions are North-East and North-West
+		double spreadToOther = spreadTo2ClosestDirs * 0.1; // Chance with which to spread to another direction than the fire's own direction and the 2 closest directions
 		
 		// Spreading to the direction the fire is directly heading 
 		Direction dir = new Direction();
 		dir.discretizeVector(velocity);
-		//System.out.println(dir);
 		spreadStepFire(dir,spreadToDirInFront);
 				
 		// 2 other "front"-locations
@@ -221,7 +220,7 @@ public class Fire {
 		float[] toCheck = {left,right};
 		for(float i: toCheck){
 			dir.fromAngleToDir(i);
-			spreadStepFire(dir,spreadToDirInFront);			
+			spreadStepFire(dir,spreadTo2ClosestDirs);			
 		}
 		// All other locations
 		float j = left;
@@ -249,7 +248,7 @@ public class Fire {
 				grid.moveTo(fire, cX, cY);
 				// If there is a firefighter at the new location, the firefighter is being killed
 				for (Object object : grid.getObjectsAt(cLoc)){
-					if(object instanceof Agent) ContextUtils.getContext(this).remove(object);
+					if(object instanceof Agent) ((Agent) object).setLifePoints(0);
 				}
 			}
 		}
@@ -279,7 +278,7 @@ public class Fire {
 			Vector2 fire_vel = new Vector2();
 			fire_vel.x = rand.nextFloat() * (SimulationConstants.MAX_FIRE_SPEED - 0) + 0;
 			fire_vel.setAngle(rand.nextFloat() * (360 - 0) + 0);
-			Fire fire = new Fire(grid,fire_vel,1,maxLifePoints,fireProb);
+			Fire fire = new Fire(grid,fire_vel,1,1,fireProb);
 			ContextUtils.getContext(this).add(fire);
 			ra.add(grid, fire);
 		}
@@ -337,9 +336,9 @@ public class Fire {
 		if(lifePoints < maxLifePoints) lifePoints ++;
 	}
 	
-	public Vector2 getCurrentWindDirection(){
+	public Vector2 getCurrentWindVelocity(){
 		IndexedIterable<Wind> winds = ContextUtils.getContext(this).getObjects(Wind.class);
 		Wind currentWind = winds.iterator().next();
-		return currentWind.getDirection();
+		return currentWind.getVelocity();
 	}
 }

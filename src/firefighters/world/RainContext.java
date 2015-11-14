@@ -41,7 +41,7 @@ public class RainContext {
 	 * For every rain cloud in the grid the velocity of every rain object is updated
 	 * Rain clouds are removed if they have passed a certain time
 	 */	
-	@ScheduledMethod(start = 1, interval = 1)
+	@ScheduledMethod(start = 1, interval = 1, priority =0)
 	public void rain(){
 		// Let new raingroups appear with a certain chance
 		double chance = appearChance;
@@ -61,8 +61,8 @@ public class RainContext {
 		ArrayList<RainGroup> toRemove = new ArrayList<RainGroup>();
 		for(RainGroup rg : rainGroups){
 			// Get velocity vector of the rain
-			float x = getCurrentWindDirection().x * 0.9f; // Speed is a bit lower than that of the wind
-			float y = getCurrentWindDirection().y;
+			float x = getCurrentWindVelocity().x * 0.9f; // Speed is a bit lower than that of the wind
+			float y = getCurrentWindVelocity().y;
 			Vector2 velRain = new Vector2(x,y);	
 				
 			// Let rain be carried by the wind
@@ -96,9 +96,9 @@ public class RainContext {
 		}
 	}
 
-	public Vector2 getCurrentWindDirection(){
+	public Vector2 getCurrentWindVelocity(){
 		IndexedIterable<Wind> winds = ContextUtils.getContext(this).getObjects(Wind.class);
 		Wind currentWind = winds.iterator().next();
-		return currentWind.getDirection();
+		return currentWind.getVelocity();
 	}
 }

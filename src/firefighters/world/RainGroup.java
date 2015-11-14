@@ -36,9 +36,10 @@ public class RainGroup {
 	private ArrayList<Rain> rainObjects = new ArrayList<Rain>();
 	Random rand = new Random();
 	
-	/*
-	 * Raingroup contains certain amount of rain-objects which is determined by its strengh (the stronger
-	 * the rain, the bigger the size of the raingroup)
+	/**
+	 * Raingroup contains certain amount of rain-objects and travels for a certain amount of time
+	 * which is determined by its strengh (the stronger the rain, the bigger the size of the raingroup
+	 * and the longer it will travel)
 	 */
 	public RainGroup(Context<Object> context, Grid<Object> grid, int strength, int[] location,int gridSize){
 		this.context = context;
@@ -47,25 +48,32 @@ public class RainGroup {
 		this.location = location;
 		this.tick = 0;
 		this.gridSize = gridSize;
+		int maxSize;
+		int minSize;
+		int maxMTick;
+		int minMTick;
+		// Determine the ranges by the strength of the rain
 		if(strength == 1) {
-			this.maxTick = 100;
-			int maxSize = (int) (gridSize * gridSize * 0.05);
-			int minSize = (int) (gridSize * gridSize * 0.001);
-			this.size = rand.nextInt((maxSize - minSize) + 1) + minSize;
+			maxMTick = 100;
+			minMTick = 50;
+			maxSize = (int) (gridSize * gridSize * 0.1);
+			minSize = (int) (gridSize * gridSize * 0.05);
 		}
 		else if(strength == 2) {
-			this.maxTick = 250;
-			int maxSize = (int) (gridSize * gridSize * 0.25);
-			int minSize = (int) (gridSize * gridSize * 0.1);
-			this.size = rand.nextInt((maxSize - minSize) + 1) + minSize;
+			maxMTick = 200;
+			minMTick = 100;
+			maxSize = (int) (gridSize * gridSize * 0.3);
+			minSize = (int) (gridSize * gridSize * 0.1);
 		}
 		else if(strength == 3) {
-			this.maxTick = 500;
-			int maxSize = (int) (gridSize * gridSize * 0.5);
-			int minSize = (int) (gridSize * gridSize * 0.3);
-			this.size = rand.nextInt((maxSize - minSize) + 1) + minSize;
+			maxMTick = 300;
+			minMTick = 20;
+			maxSize = (int) (gridSize * gridSize * 0.5);
+			minSize = (int) (gridSize * gridSize * 0.3);
 		}
 		else throw new IllegalArgumentException("Strength value of rain is out of range!");	
+		this.maxTick = rand.nextInt((maxMTick - minMTick) + 1) + minMTick;
+		this.size = rand.nextInt((maxSize - minSize) + 1) + minSize;
 		fillRain(context, location);
 	}	
 	

@@ -43,11 +43,11 @@ public class Wind {
 		velocity.add(noiseSpeed, noiseAngle);
 	}
 	
-	public Vector2 getDirection(){
+	public Vector2 getVelocity(){
 		return this.velocity;
 	}
 	
-	public void setDirection(Vector2 dir){
+	public void setVelocity(Vector2 dir){
 		this.velocity = dir;
 	}
 }

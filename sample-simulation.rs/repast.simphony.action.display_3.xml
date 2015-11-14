@@ -14,6 +14,10 @@
       <string>firefighters.world.Rain</string>
       <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
     </entry>
+    <entry>
+      <string>firefighters.agent.SimpleAgent</string>
+      <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
+    </entry>
   </styles>
   <editedStyles>
     <entry>
@@ -28,6 +32,10 @@
       <string>firefighters.world.Rain</string>
       <string>firefighters.world.Rain.style_2.xml</string>
     </entry>
+    <entry>
+      <string>firefighters.agent.SimpleAgent</string>
+      <string>firefighters.agent.SimpleAgent.style_2.xml</string>
+    </entry>
   </editedStyles>
   <netStyles/>
   <editedNetStyles/>
@@ -39,7 +47,7 @@
     <pType>LAST</pType>
     <duration>-1.0</duration>
     <frequency>REPEAT</frequency>
-    <hashCode>-1288507128</hashCode>
+    <hashCode>-1940001080</hashCode>
   </schedParams>
   <layoutClassName>foo.bar.baz</layoutClassName>
   <layoutProjection>grid</layoutProjection>
@@ -56,6 +64,10 @@
     <entry>
       <string>firefighters.world.Rain</string>
       <int>2</int>
+    </entry>
+    <entry>
+      <string>firefighters.agent.SimpleAgent</string>
+      <int>3</int>
     </entry>
   </layerOrder>
   <projections>

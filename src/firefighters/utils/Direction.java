@@ -2,6 +2,10 @@ package firefighters.utils;
 
 import com.badlogic.gdx.math.Vector2;
 
+/**
+ * Direction 
+ */
+
 public class Direction {
 
 	public int xDiff;
@@ -9,7 +13,7 @@ public class Direction {
 	
 	/**
 	 * Discretization of velocity vector in grid space
-	 * Method which takes as input a velocity vector and outputs the xDiff and yDiff coordinates\
+	 * Given a velocity vector, outputs the relative xDiff and yDiff coordinates
 	 * Where 0 degrees corresponds to direction East, 90 to North, 180 to West and 270 to South
 	 */	
 	
@@ -19,6 +23,10 @@ public class Direction {
 		this.yDiff = result[1];
 		return result;
 	}
+	
+	/**
+	 * Discretizatin of the angle in relative xDiff and yDiff coordinates of the grid
+	 */
 	
 	public int[] fromAngleToDir(float angle){
 		int[] result = new int[2];
