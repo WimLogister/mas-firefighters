@@ -3,6 +3,11 @@ package firefighters.agent;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.query.space.grid.GridCell;
 import repast.simphony.query.space.grid.GridCellNgh;
@@ -11,17 +16,14 @@ import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.ContextUtils;
 import firefighters.actions.AbstractAction;
-import firefighters.actions.Extinguish;
 import firefighters.utils.Directions;
 import firefighters.world.Fire;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
-import lombok.RequiredArgsConstructor;
 
-@Data
-public abstract class Agent {
+/** The only distinction between agents is going to be their Behavior implementation, so this class is final */
+@Getter
+@Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public final class Agent {
 	
 	final Grid<Object> grid;
 	final double movementSpeed;
@@ -89,12 +91,13 @@ public abstract class Agent {
 	 */
 	public void move(GridPoint newPt) {
 		if (RandomHelper.nextDouble() < movementSpeed) {
-			GridPoint pt = grid.getLocation(this);
+      GridPoint pt = grid.getLocation(this);
 			/*
 			 * Move the agent according to its current direction. How the direction
 			 * influences its movement in the grid is modeled by the Directions Enum,
 			 * which is used here.
 			 */
+      // TODO Check if it's legal to move to newPt
 			grid.moveTo(this, newPt.getX(), newPt.getY());
 		}
 	}
