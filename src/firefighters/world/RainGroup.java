@@ -27,7 +27,6 @@ public class RainGroup {
 	private int size; // Number of rain objects in the "cloud"
 	private Context<Object> context;
 	private Grid<Object> grid;
-	private static final Uniform urng = RandomHelper.getUniform();
 	private int strength; // Value in range [1,3] to indicate its strength
 	private int tick;
 	private int maxTick;

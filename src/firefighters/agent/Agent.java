@@ -16,8 +16,7 @@ import firefighters.utils.Direction;
 import firefighters.world.Fire;
 
 /**
- * TODO: 
- * Fix death condition
+ * 
  */
 public abstract class Agent {
 	
@@ -81,17 +80,13 @@ public abstract class Agent {
 	public void move() {
 		if (RandomHelper.nextDouble() < velocity.len()) {
 			GridPoint pt = grid.getLocation(this);
-			/*
-			 * Move the agent according to its current direction. How the direction
-			 * influences its movement in the grid is modeled by the Directions Enum,
-			 * which is used here.
-			 */
 			Direction dir = new Direction();
 			dir.discretizeVector(velocity);
 			grid.moveTo(this, pt.getX()+dir.xDiff, pt.getY()+dir.yDiff);
 		}
 	}
-	/*
+	
+	/**
 	 * Let the agent turn in a given angle, counter-clockwise
 	 */
 	public void turn(float angle) {
