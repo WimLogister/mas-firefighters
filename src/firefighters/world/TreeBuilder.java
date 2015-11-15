@@ -1,6 +1,7 @@
 package firefighters.world;
 
 
+import static constants.SimulationConstants.AGENT_PERCEPTION_DISTANCE;
 import repast.simphony.context.Context;
 import repast.simphony.context.space.grid.GridFactory;
 import repast.simphony.context.space.grid.GridFactoryFinder;
@@ -15,7 +16,7 @@ import repast.simphony.space.grid.RandomGridAdder;
 import repast.simphony.space.grid.SimpleGridAdder;
 import repast.simphony.space.grid.WrapAroundBorders;
 import cern.jet.random.Uniform;
-import firefighters.agent.SimpleAgent;
+import firefighters.agent.Agent;
 import firefighters.utils.Directions;
 
 
@@ -26,7 +27,7 @@ import firefighters.utils.Directions;
  */
 public class TreeBuilder implements ContextBuilder<Object> {
 
-	@Override
+  @Override
 	public Context build(Context<Object> context) {
 		context.setId("sample-simulation");
 
@@ -89,7 +90,7 @@ public class TreeBuilder implements ContextBuilder<Object> {
     for (int i = 0; i < agentCount; i++) {
       double movementSpeed = 1.0;
       double money = 0;
-      SimpleAgent agent = new SimpleAgent(grid, movementSpeed, money);
+      Agent agent = new Agent(grid, movementSpeed, money, AGENT_PERCEPTION_DISTANCE);
       context.add(agent);
       ra.add(grid, agent);
     }

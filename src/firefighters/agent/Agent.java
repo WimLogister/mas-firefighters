@@ -1,7 +1,13 @@
 package firefighters.agent;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.query.space.grid.GridCell;
 import repast.simphony.query.space.grid.GridCellNgh;
@@ -9,30 +15,41 @@ import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.ContextUtils;
+import firefighters.actions.AbstractAction;
 import firefighters.utils.Directions;
 import firefighters.world.Fire;
 
-
-// TODO: define dummy class that extends this abstract class and do some basic testing, e.g. for death conditions and moving
-public abstract class Agent {
+/** The only distinction between agents is going to be their Behavior implementation, so this class is final */
+@Getter
+@Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public final class Agent {
 	
-	Grid<Object> grid;
-	double movementSpeed;
+	final Grid<Object> grid;
+	final double movementSpeed;
 	double money;
 	Directions direction;
 	Fire targetFire;
+	AbstractAction currentAction;
+	/** The distance at which the agent can perceive the world around him, i.e. the status of the cells */
+	final int perceptionDistance;
 	
-  public Agent(Grid<Object> grid, double movementSpeed, double money) {
+  public Agent(@NonNull Grid<Object> grid, double movementSpeed, double money, int perceptionDistance) {
     this.grid = grid;
     this.movementSpeed = movementSpeed;
     this.money = money;
     this.direction = Directions.getRandomDirection();
+    this.perceptionDistance = perceptionDistance;
   }
 
   @ScheduledMethod(start = 1, interval = 1)
 	public void step() {
 		if (checkDeath()) kill();
-	}
+  }
+  
+  public void execureCurrentAction() {
+	  currentAction.execute();
+  }
 	
 	/**
 	 * Check for death condition: being surrounded by fire
@@ -68,19 +85,20 @@ public abstract class Agent {
 	}
 	
 	/**
-	 * Move this agent in its current direction.
+	 * Move agent to parameter position.
 	 * Movement is a stochastic process: each agent's movement speed is modeled as 
 	 * the probability of moving to the square it is currently facing.
 	 */
-	public void move() {
+	public void move(GridPoint newPt) {
 		if (RandomHelper.nextDouble() < movementSpeed) {
-			GridPoint pt = grid.getLocation(this);
+      GridPoint pt = grid.getLocation(this);
 			/*
 			 * Move the agent according to its current direction. How the direction
 			 * influences its movement in the grid is modeled by the Directions Enum,
 			 * which is used here.
 			 */
-			grid.moveTo(this, pt.getX()+direction.xDiff, pt.getY()+direction.yDiff);
+      // TODO Check if it's legal to move to newPt
+			grid.moveTo(this, newPt.getX(), newPt.getY());
 		}
 	}
 	
@@ -89,11 +107,35 @@ public abstract class Agent {
 	}
 	
 	/**
-	 * Fight this agent's target fire.
-	 * Should first verify somehow that the agent is actually adjacent to a fire. 
+	 * Extinguish any fires directly or diagonally in front of the agent.
 	 */
-	public void extinguish() {
-		targetFire.extinguish();
+	public void hose() {
+		GridPoint agentPosition = grid.getLocation(this);
+		
+		final int extinguishRange = 1;
+		GridCellNgh<Fire> ngh = new GridCellNgh<>(grid, agentPosition,
+				Fire.class, extinguishRange, extinguishRange);
+		
+		List<Fire> toBeExtinguished = new ArrayList<Fire>();
+		
+		List<GridCell<Fire>> fireList = ngh.getNeighborhood(false);
+		for (GridCell<Fire> cell : fireList) {
+			/*
+			 * Fires that can be extinguished need to satisfy two conditions:
+			 * 1. Have to be within 1 square (already satisfied by extinguishRange
+			 * parameter to GridCellNeighborhood).
+			 * 2. Agent has to be facing the fires. Use Directions.xdiff and
+			 * Directions.ydiff for this.
+			 */
+			if (inFrontOfAgent(agentPosition, direction, cell.getPoint())) {
+				for (Fire f : cell.items()) {
+					toBeExtinguished.add(f);
+				}
+			}
+			for (Fire f : toBeExtinguished) {
+				f.extinguish();
+			}
+		}
 	}
 	
 	public void checkWeather() {
@@ -103,6 +145,20 @@ public abstract class Agent {
 	
 	public void setTargetFire(Fire targetFire) {
 		this.targetFire = targetFire;
+	}
+
+	/**
+	 * Check whether the parameter object position is either directly or
+	 * diagonally in front of the parameter agent position, given the
+	 * agent's direction
+	 * @param agentPos
+	 * @param agentDir
+	 * @param objPos
+	 * @return
+	 */
+	private boolean inFrontOfAgent(GridPoint agentPos, Directions agentDir, GridPoint objPos) {
+		return agentPos.getX() + agentDir.xDiff == objPos.getX()
+				|| agentPos.getY() + agentDir.yDiff == objPos.getY();
 	}
 	
 
