@@ -21,7 +21,6 @@ import repast.simphony.space.grid.SimpleGridAdder;
 import repast.simphony.space.grid.WrapAroundBorders;
 import cern.jet.random.Uniform;
 import firefighters.agent.Agent;
-import firefighters.agent.SimpleAgent;
 
 
 /**
@@ -128,13 +127,13 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		/*
 		 * Randomly place agents in grid
 		 */
-		for (int i = 0; i < agentCount; i++) {
+		/*for (int i = 0; i < agentCount; i++) {
 			Vector2 agentVelocity = new Vector2(SimulationConstants.MAX_FIRE_AGENT_SPEED,0);			
 			double money = 0;
 			SimpleAgent agent = new SimpleAgent(grid, money, agentVelocity);
 			context.add(agent);
 			ra.add(grid, agent);
-	    }
+	    }*/
 			
 		/* 
 		 * Randomly place fires in grid

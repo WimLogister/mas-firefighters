@@ -18,11 +18,12 @@ import repast.simphony.util.collections.IndexedIterable;
 import cern.jet.random.Uniform;
 import constants.SimulationConstants;
 import firefighters.agent.Agent;
-import firefighters.utils.Direction;
+import firefighters.utils.Directions;
 
 /*
  * TODO:
  * Appear(): FIX: now fires might randomly appear at already burned grids
+ * Check modeling speed
  */
 public class Fire {
 	
@@ -35,6 +36,8 @@ public class Fire {
 	private int lifePoints;
 	private int maxLifePoints;
 	private double fireProb;
+	// If the fire obtains it maximum speed, this is the chance with which is spreads
+	private double maxChanceSpreading = SimulationConstants.MAX_FIRE_SPEED / SimulationConstants.MAX_FIRE_AGENT_SPEED;
 	
 	public Fire(Grid<Object> grid, Vector2 velocity, int lifePoints, int maxLifePoints, double fireProb) {
 		this.grid = grid;
@@ -134,8 +137,8 @@ public class Fire {
 		// If there is no rain at all, return false
 		if(gridCells.size()==0) return 0;
 		
-		Direction direction = new Direction(); // Direction of the fire in grid cell coordinates		
-		float angle = velocity.angle(); // Angle of the fire
+		// Direction (angle) of the fire
+		float angle = velocity.angle();
 		
 		// If there is rain in the grid the fire is heading to, return true
 		boolean isRaining = false;
@@ -147,8 +150,8 @@ public class Fire {
 				float left = Math.abs(angle + 45f) % 360;
 				float[] toCheck = {left,angle,right};
 				for(float i : toCheck){
-					direction.fromAngleToDir(i);
-					if (rainpt.getX() == pt.getX()+direction.xDiff && rainpt.getY() == pt.getY()+direction.yDiff) noRain++;
+					Directions dir = Directions.fromAngleToDir(i);
+					if (rainpt.getX() == pt.getX()+dir.xDiff && rainpt.getY() == pt.getY()+dir.yDiff) noRain++;
 				}
 			}
 		}
@@ -214,13 +217,16 @@ public class Fire {
 	 * Fire spreads to the next grid in its direction with the highest chance (= speed), but can also spread to other directions with a lower chance
 	 */
 	public void spread(){
+		// Fire spreads with certain speed which is modeled in a stochastic way
+		// The fire whose individual speed is the maximum speed attainable moves with probability
+		// of maximum speed fire / maximum speed agent (because the maximum speed needs to be in ratio
+		// with the maximum speed of the agent
 		double spreadToDirInFront = getSpeed(); // value between 0 and 1, for example direction is North
 		double spreadTo2ClosestDirs = spreadToDirInFront * 0.1; // directions are North-East and North-West
 		double spreadToOther = spreadTo2ClosestDirs * 0.01; // Chance with which to spread to another direction than the fire's own direction and the 2 closest directions
 		
 		// Spreading to the direction the fire is directly heading 
-		Direction dir = new Direction();
-		dir.discretizeVector(velocity);
+		Directions dir = Directions.fromVectorToDir(velocity);
 		spreadStepFire(dir,spreadToDirInFront);
 				
 		// 2 other "front"-locations
@@ -245,7 +251,7 @@ public class Fire {
 	 * @param dir: direction to move to 
 	 * @param chance: chance to move with
 	 */	
-	public void spreadStepFire(Direction dir, double chance){
+	public void spreadStepFire(Directions dir, double chance){
 		GridPoint pt = grid.getLocation(this);
 		int cX = pt.getX() + dir.xDiff;
 		int cY = pt.getY() + dir.yDiff;

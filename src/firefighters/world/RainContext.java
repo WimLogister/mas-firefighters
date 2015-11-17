@@ -7,7 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 
 import constants.SimulationConstants;
 import cern.jet.random.Uniform;
-import firefighters.utils.Direction;
+import firefighters.utils.Directions;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
@@ -61,15 +61,15 @@ public class RainContext {
 		ArrayList<RainGroup> toRemove = new ArrayList<RainGroup>();
 		for(RainGroup rg : rainGroups){
 			// Get velocity vector of the rain
-			float x = getCurrentWindVelocity().x * 0.9f; // Speed is a bit lower than that of the wind
+			float x = getCurrentWindVelocity().x; 
 			float y = getCurrentWindVelocity().y;
 			Vector2 velRain = new Vector2(x,y);	
+			velRain.setLength(getCurrentWindVelocity().len()*0.9f); // Rain speed is a bit lower than that of the wind
 				
 			// Let rain be carried by the wind
 			if (urng.nextDouble() < velRain.len()) {
 				for(Rain rain: rg.getRainObjects()){
-					Direction dir = new Direction();
-					dir.discretizeVector(velRain);
+					Directions dir = Directions.fromVectorToDir(velRain);
 						
 					GridPoint pt = grid.getLocation(rain);
 					int cX = pt.getX() + dir.xDiff;

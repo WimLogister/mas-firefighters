@@ -12,7 +12,7 @@ import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.ContextUtils;
-import firefighters.utils.Direction;
+import firefighters.utils.Directions;
 import firefighters.world.Fire;
 
 /**
@@ -80,8 +80,7 @@ public abstract class Agent {
 	public void move() {
 		if (RandomHelper.nextDouble() < velocity.len()) {
 			GridPoint pt = grid.getLocation(this);
-			Direction dir = new Direction();
-			dir.discretizeVector(velocity);
+			Directions dir = Directions.fromVectorToDir(velocity);
 			grid.moveTo(this, pt.getX()+dir.xDiff, pt.getY()+dir.yDiff);
 		}
 	}
@@ -115,15 +114,14 @@ public abstract class Agent {
 	 * So if the fire is in the 3 directions in front of him
 	 */
 	public boolean isFireInReach(int x, int y){
-		Direction dir = new Direction();
-		dir.discretizeVector(velocity);
+		Directions dir = Directions.fromVectorToDir(velocity);	
 		return isFireInReachDir(dir, x, y);
 	}
 	
 	/**
 	 * Is fire in reach given another direction of the firefighter
 	 */	
-	public boolean isFireInReachDir(Direction dir, int x, int y){
+	public boolean isFireInReachDir(Directions dir, int x, int y){
 		boolean isReachable=false;
 		
 		GridPoint pt = grid.getLocation(this);
@@ -137,7 +135,7 @@ public abstract class Agent {
 		float left = Math.abs(velocity.angle() + 45f) % 360;
 		float[] toCheck = {left,right};
 		for(float i: toCheck){
-			dir.fromAngleToDir(i);
+			dir = Directions.fromAngleToDir(i);
 			int cX2 = pt.getX() + dir.xDiff;
 			int cY2 = pt.getY() + dir.yDiff;
 			if(x==cX2 && y==cY2) isReachable = true;

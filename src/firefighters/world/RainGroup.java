@@ -8,7 +8,6 @@ import java.util.Random;
 import com.badlogic.gdx.math.Vector2;
 
 import cern.jet.random.Uniform;
-import firefighters.utils.Direction;
 import repast.simphony.context.Context;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.random.RandomHelper;
