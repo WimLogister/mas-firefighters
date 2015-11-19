@@ -1,10 +1,16 @@
 package firefighters.agent;
 
+import static firefighters.utils.GridFunctions.getCellNeighborhood;
+import static firefighters.utils.GridFunctions.isInFrontOfAgent;
+
+import java.util.ArrayList;
 import java.util.List;
 
-import com.badlogic.gdx.math.Vector2;
-
-import constants.SimulationConstants;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.query.space.grid.GridCell;
 import repast.simphony.query.space.grid.GridCellNgh;
@@ -12,32 +18,69 @@ import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.ContextUtils;
-import firefighters.utils.Direction;
+import firefighters.actions.Plan;
+import firefighters.actions.Planner;
+import firefighters.utility.UtilityFunction;
+import firefighters.utils.Directions;
 import firefighters.world.Fire;
 
-/**
- * 
- */
-public abstract class Agent {
+/** The only distinction between agents is going to be their Behavior implementation, so this class is final */
+@Getter
+@Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public final class Agent {
 	
-	Grid<Object> grid;
-	double money;
-	Vector2 velocity;
-	Fire targetFire;
-	int lifePoints; // Extra help value to prevent problems killing the agents in the Fire-class
-	
-  public Agent(Grid<Object> grid, double money, Vector2 velocity) {
+  /** Reference to the grid */
+  @NonNull
+	final Grid<Object> grid;
+
+	final double movementSpeed;
+
+  double money;
+  /** The distance at which the agent can perceive the world around him, i.e. the status of the cells */
+  final int perceptionRange;
+
+  /** The direction the agent is facing */
+  Directions direction;
+
+  /** Using to devise the agent's plans */
+  Planner planner;
+
+  /** The agent's current plan */
+  Plan currentPlan;
+
+  @Setter
+  int lifePoints = 1;
+
+  public Agent(Grid<Object> grid,
+               double movementSpeed,
+               double money,
+               int perceptionRange,
+               UtilityFunction utilityFunction) {
     this.grid = grid;
+    this.movementSpeed = movementSpeed;
     this.money = money;
-    this.velocity = velocity;
-    this.lifePoints = 1; 
+    this.direction = Directions.getRandomDirection();
+    this.perceptionRange = perceptionRange;
+
+    planner = new Planner(utilityFunction);
   }
 
-  @ScheduledMethod(start = 1, interval = 1, priority = -1)
+  @ScheduledMethod(start = 1, interval = 1)
 	public void step() {
-	  if(lifePoints == 0) kill();
-	  else if (checkDeath()) kill();
-	}
+		if (checkDeath()) kill();
+    // TODO Check if we should revise the plan
+    if (currentPlan == null || currentPlan.isFinished()) {
+      currentPlan = planner.devisePlan(this);
+    }
+    executeCurrentAction();
+  }
+  
+  public void executeCurrentAction() {
+    if (currentPlan != null && !currentPlan.isFinished()) {
+      currentPlan.executeNextStep(this);
+    }
+  }
 	
 	/**
 	 * Check for death condition: being surrounded by fire
@@ -45,8 +88,7 @@ public abstract class Agent {
 	public boolean checkDeath() {
 		// Set up necessary operators
 		GridPoint cpt = grid.getLocation(this);
-		GridCellNgh<Fire> ngh = new GridCellNgh<>(grid, cpt, Fire.class, 1, 1);
-		List<GridCell<Fire>> gridCells = ngh.getNeighborhood(false);
+    List<GridCell<Fire>> gridCells = getCellNeighborhood(grid, cpt, Fire.class, 1, false);
 
 		// Need at least four fires in neighborhood in order to be surrounded
 		if (gridCells.size() < 4) return false;
@@ -73,79 +115,91 @@ public abstract class Agent {
 	}
 	
 	/**
-	 * Move this agent in its current direction.
+	 * Move agent to parameter position.
 	 * Movement is a stochastic process: each agent's movement speed is modeled as 
 	 * the probability of moving to the square it is currently facing.
 	 */
-	public void move() {
-		if (RandomHelper.nextDouble() < velocity.len()) {
-			GridPoint pt = grid.getLocation(this);
-			Direction dir = new Direction();
-			dir.discretizeVector(velocity);
-			grid.moveTo(this, pt.getX()+dir.xDiff, pt.getY()+dir.yDiff);
+	public void move(GridPoint newPt) {
+		if (RandomHelper.nextDouble() < movementSpeed) {
+      GridPoint pt = grid.getLocation(this);
+			/*
+			 * Move the agent according to its current direction. How the direction
+			 * influences its movement in the grid is modeled by the Directions Enum,
+			 * which is used here.
+			 */
+      // TODO Check if it's legal to move to newPt
+			grid.moveTo(this, newPt.getX(), newPt.getY());
 		}
 	}
 	
-	/**
-	 * Let the agent turn in a given angle, counter-clockwise
-	 */
-	public void turn(float angle) {
-		velocity.setAngle(velocity.angle()+angle).clamp(0, SimulationConstants.MAX_FIRE_AGENT_SPEED);
+	public void turn(Directions direction) {
+		this.direction = direction;
 	}
 	
 	/**
-	 * Fight this agent's target fire.
-	 * Should first verify somehow that the agent is actually adjacent to a fire. 
+	 * Extinguish any fires directly or diagonally in front of the agent.
 	 */
-	public void extinguish() {
-		targetFire.extinguish();
+	public void hose() {
+		GridPoint agentPosition = grid.getLocation(this);
+		
+		final int extinguishRange = 1;
+		GridCellNgh<Fire> ngh = new GridCellNgh<>(grid, agentPosition,
+				Fire.class, extinguishRange, extinguishRange);
+		
+		List<Fire> toBeExtinguished = new ArrayList<Fire>();
+		
+		List<GridCell<Fire>> fireList = ngh.getNeighborhood(false);
+		for (GridCell<Fire> cell : fireList) {
+			/*
+			 * Fires that can be extinguished need to satisfy two conditions:
+			 * 1. Have to be within 1 square (already satisfied by extinguishRange
+			 * parameter to GridCellNeighborhood).
+			 * 2. Agent has to be facing the fires. Use Directions.xdiff and
+			 * Directions.ydiff for this.
+			 */
+      if (isInFrontOfAgent(agentPosition, direction, cell.getPoint())) {
+
+				for (Fire f : cell.items()) {
+					toBeExtinguished.add(f);
+				}
+			}
+			for (Fire f : toBeExtinguished) {
+				f.extinguish();
+			}
+      // Make sure we don't hose multiple fires in the same turn
+      if (toBeExtinguished.size() > 0) {
+        return;
+      }
+		}
 	}
 	
+  public void hose(GridPoint firePosition) {
+    GridPoint agentPosition = grid.getLocation(this);
+
+    List<Fire> toBeExtinguished = new ArrayList<Fire>();
+
+    List<GridCell<Fire>> fireList = getCellNeighborhood(grid, agentPosition, Fire.class, 0, true);
+    for (GridCell<Fire> cell : fireList) {
+      Iterable<Fire> firesInCellIterator = cell.items();
+      int numFires = 0;
+      for (Fire f : firesInCellIterator) {
+        toBeExtinguished.add(f);
+        numFires++;
+      }
+      assert numFires == 1 : "More than 1 fire cell founnd: " + numFires;
+    }
+  }
+
+  /** Returns a list of the locations of fire cells the agent knows of */
+  public List<GridCell<Fire>> getKnownFireLocations() {
+    GridPoint agentPosition = grid.getLocation(this);
+    return getCellNeighborhood(grid, agentPosition, Fire.class, perceptionRange, false);
+  }
+
 	public void checkWeather() {
-		// TODO: Need to check rain and wind. Need to know how we want to use this in agent's AI/plans.
+		// TODO: Need to check rain and wind. First need to know how these are modeled.
 		
 	}
 	
-	public void setTargetFire(Fire targetFire) {
-		this.targetFire = targetFire;
-	}
-	
-	/**
-	 * If fire is in reach of the firefighter
-	 * So if the fire is in the 3 directions in front of him
-	 */
-	public boolean isFireInReach(int x, int y){
-		Direction dir = new Direction();
-		dir.discretizeVector(velocity);
-		return isFireInReachDir(dir, x, y);
-	}
-	
-	/**
-	 * Is fire in reach given another direction of the firefighter
-	 */	
-	public boolean isFireInReachDir(Direction dir, int x, int y){
-		boolean isReachable=false;
-		
-		GridPoint pt = grid.getLocation(this);
-		int cX = pt.getX() + dir.xDiff;
-		int cY = pt.getY() + dir.yDiff;
-		
-		if(x==cX && y==cY) isReachable = true;
-		
-		// 2 other "front"-locations
-		float right = Math.abs(velocity.angle() - 45f ) % 360;
-		float left = Math.abs(velocity.angle() + 45f) % 360;
-		float[] toCheck = {left,right};
-		for(float i: toCheck){
-			dir.fromAngleToDir(i);
-			int cX2 = pt.getX() + dir.xDiff;
-			int cY2 = pt.getY() + dir.yDiff;
-			if(x==cX2 && y==cY2) isReachable = true;
-		}
-		return isReachable;
-	}
-	
-	public void setLifePoints(int i){
-		this.lifePoints = i;
-	}
+
 }

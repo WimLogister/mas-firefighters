@@ -1,11 +1,11 @@
 package firefighters.world;
 
 
+import static constants.SimulationConstants.MAX_FIRE_AGENT_SPEED;
+import static constants.SimulationParameters.gridSize;
+
 import java.util.Random;
 
-import com.badlogic.gdx.math.Vector2;
-
-import constants.SimulationConstants;
 import repast.simphony.context.Context;
 import repast.simphony.context.space.grid.GridFactory;
 import repast.simphony.context.space.grid.GridFactoryFinder;
@@ -20,8 +20,13 @@ import repast.simphony.space.grid.RandomGridAdder;
 import repast.simphony.space.grid.SimpleGridAdder;
 import repast.simphony.space.grid.WrapAroundBorders;
 import cern.jet.random.Uniform;
+
+import com.badlogic.gdx.math.Vector2;
+
+import constants.SimulationConstants;
 import firefighters.agent.Agent;
-import firefighters.agent.SimpleAgent;
+import firefighters.utility.ExpectedBountiesUtilityFunction;
+import firefighters.utility.UtilityFunction;
 
 
 /**
@@ -45,20 +50,28 @@ public class TreeBuilder implements ContextBuilder<Object> {
 
 		Random rand = new Random();
 		Parameters params = RunEnvironment.getInstance().getParameters();
-		int size = (Integer) params.getValue("grid_size"); // Size of the grid
-		int lifePointsTree = (Integer) params.getValue("life_points_tree"); // How many steps it takes before the tree-grid has burned down completely
-		int lifePointsFire = (Integer) params.getValue("life_points_fire"); // How many steps it takes before the fire has been extinguished 
-		int fireCount = (Integer) params.getValue("fire_count"); // How many fires we initialize with
-		int agentCount = (Integer) params.getValue("agent_count"); // How many agents we start with
-		float windDirection = ((Float) params.getValue("wind_direction")); // Initial direction of wind
-		String weather = (String) params.getValue("weather");		
-		final Uniform urng = RandomHelper.getUniform();
-		
-		GridFactory gridFactory = GridFactoryFinder.createGridFactory(null);
-		Grid<Object> grid = gridFactory.createGrid("grid", context,
-				new GridBuilderParameters<Object>(new WrapAroundBorders(),
-						new SimpleGridAdder<Object>(), true, size, size)); // Square grid, variable size
-		
+    // TODO Use simulation parameters
+    int size = (Integer) params.getValue("grid_size"); // Size of the grid
+    int lifePointsTree = (Integer) params.getValue("life_points_tree"); // How many steps it takes before the tree-grid
+                                                                        // has burned down completely
+    int lifePointsFire = (Integer) params.getValue("life_points_fire"); // How many steps it takes before the fire has
+                                                                        // been extinguished
+    int fireCount = (Integer) params.getValue("fire_count"); // How many fires we initialize with
+    int agentCount = (Integer) params.getValue("agent_count"); // How many agents we start with
+    float windDirection = ((Float) params.getValue("wind_direction")); // Initial direction of wind
+    String weather = (String) params.getValue("weather");
+    final Uniform urng = RandomHelper.getUniform();
+
+    GridFactory gridFactory = GridFactoryFinder.createGridFactory(null);
+    Grid<Object> grid = gridFactory.createGrid("grid",
+                                               context,
+                                               new GridBuilderParameters<Object>(new WrapAroundBorders(),
+                                                                                 new SimpleGridAdder<Object>(),
+                                                                                 true,
+                                                                                 gridSize,
+                                                                                 gridSize)); // Square grid, variable
+                                                                                              // size
+
 		GridDimensions dims = grid.getDimensions();
 		RandomGridAdder<Object> ra = new RandomGridAdder<Object>(); // To random add objects in the space
 		
@@ -129,9 +142,9 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		 * Randomly place agents in grid
 		 */
 		for (int i = 0; i < agentCount; i++) {
-			Vector2 agentVelocity = new Vector2(SimulationConstants.MAX_FIRE_AGENT_SPEED,0);			
 			double money = 0;
-			SimpleAgent agent = new SimpleAgent(grid, money, agentVelocity);
+      UtilityFunction utilityFunction = new ExpectedBountiesUtilityFunction();
+      Agent agent = new Agent(grid, MAX_FIRE_AGENT_SPEED, money, agentCount, utilityFunction);
 			context.add(agent);
 			ra.add(grid, agent);
 	    }

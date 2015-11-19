@@ -1,14 +1,12 @@
 package firefighters.world;
 
+import static firefighters.utils.GridFunctions.getCellNeighborhood;
+
 import java.util.List;
 import java.util.Random;
 
-import com.badlogic.gdx.math.Vector2;
-
-import repast.simphony.context.Context;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.query.space.grid.GridCell;
-import repast.simphony.query.space.grid.GridCellNgh;
 import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
@@ -16,6 +14,9 @@ import repast.simphony.space.grid.RandomGridAdder;
 import repast.simphony.util.ContextUtils;
 import repast.simphony.util.collections.IndexedIterable;
 import cern.jet.random.Uniform;
+
+import com.badlogic.gdx.math.Vector2;
+
 import constants.SimulationConstants;
 import firefighters.agent.Agent;
 import firefighters.utils.Direction;
@@ -63,6 +64,7 @@ public class Fire {
 		removeFire();
 	}
 	
+
 	/**
 	 *  If there is a firefighter hosing the fire, the fire decreases in its lifepoints and speed
 	 */
@@ -128,8 +130,8 @@ public class Fire {
 	public int checkRainInHeading(){
 		int noRain = 0;
 		GridPoint pt = grid.getLocation(this);
-		GridCellNgh<Rain> ngh = new GridCellNgh<>(grid, pt, Rain.class, 1, 1);
-		List<GridCell<Rain>> gridCells = ngh.getNeighborhood(false);
+
+    List<GridCell<Rain>> gridCells = getCellNeighborhood(grid, pt, Rain.class, 1, false);
 		
 		// If there is no rain at all, return false
 		if(gridCells.size()==0) return 0;
@@ -252,7 +254,7 @@ public class Fire {
 		int[] cLoc = {cX, cY}; // Get location of grid to which the fire possibly spreads
 		if(canSpread(cLoc)){
 			double test = urng.nextDouble();
-			System.out.println(test + " :: " + chance);
+      // System.out.println(test + " :: " + chance);
 			if (test < chance) { // Spreads with certain "speed" (modeled in stochastic way)
 				Fire fire = new Fire(grid, velocity.clamp(0, SimulationConstants.MAX_FIRE_SPEED), lifePoints, maxLifePoints,fireProb); // Fire spreads with same direction, speed and number of lifepoints
 				ContextUtils.getContext(this).add(fire);
