@@ -1,5 +1,8 @@
 package firefighters.agent;
 
+import static firefighters.utils.GridFunctions.getCellNeighborhood;
+import static firefighters.utils.GridFunctions.isInFrontOfAgent;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,9 +18,12 @@ import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.ContextUtils;
-import firefighters.actions.AbstractAction;
+import firefighters.actions.Plan;
+import firefighters.actions.Planner;
+import firefighters.utility.UtilityFunction;
 import firefighters.utils.Directions;
 import firefighters.world.Fire;
+import firefighters.world.Rain;
 
 /** The only distinction between agents is going to be their Behavior implementation, so this class is final */
 @Getter
@@ -25,30 +31,51 @@ import firefighters.world.Fire;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public final class Agent {
 	
+  /** Reference to the grid */
+  @NonNull
 	final Grid<Object> grid;
+
 	final double movementSpeed;
-	double money;
-	Directions direction;
-	Fire targetFire;
-	AbstractAction currentAction;
-	/** The distance at which the agent can perceive the world around him, i.e. the status of the cells */
-	final int perceptionDistance;
-	
-  public Agent(@NonNull Grid<Object> grid, double movementSpeed, double money, int perceptionDistance) {
+  double money;
+  /** The distance at which the agent can perceive the world around him, i.e. the status of the cells */
+  final int perceptionRange;
+
+  /** The direction the agent is facing */
+  Directions direction;
+
+  /** Using to devise the agent's plans */
+  Planner planner;
+
+  /** The agent's current plan */
+  Plan currentPlan;
+
+  public Agent(Grid<Object> grid,
+               double movementSpeed,
+               double money,
+               int perceptionRange,
+               UtilityFunction utilityFunction) {
     this.grid = grid;
     this.movementSpeed = movementSpeed;
     this.money = money;
     this.direction = Directions.getRandomDirection();
-    this.perceptionDistance = perceptionDistance;
+    this.perceptionRange = perceptionRange;
+
+    planner = new Planner(utilityFunction);
   }
 
   @ScheduledMethod(start = 1, interval = 1)
 	public void step() {
 		if (checkDeath()) kill();
+    // TODO Check if we should revise the plan
+    if (currentPlan == null || currentPlan.isFinished()) {
+      currentPlan = planner.devisePlan(this);
+    }
+    execureCurrentAction();
   }
   
   public void execureCurrentAction() {
-	  currentAction.execute();
+    if (currentPlan != null && !currentPlan.isFinished())
+      currentPlan.executeNextStep(this);
   }
 	
 	/**
@@ -127,7 +154,8 @@ public final class Agent {
 			 * 2. Agent has to be facing the fires. Use Directions.xdiff and
 			 * Directions.ydiff for this.
 			 */
-			if (inFrontOfAgent(agentPosition, direction, cell.getPoint())) {
+      if (isInFrontOfAgent(agentPosition, direction, cell.getPoint())) {
+
 				for (Fire f : cell.items()) {
 					toBeExtinguished.add(f);
 				}
@@ -135,30 +163,42 @@ public final class Agent {
 			for (Fire f : toBeExtinguished) {
 				f.extinguish();
 			}
+      // Make sure we don't hose multiple fires in the same turn
+      if (toBeExtinguished.size() > 0) {
+        return;
+      }
 		}
 	}
 	
+  public void hose(GridPoint firePosition) {
+    GridPoint agentPosition = grid.getLocation(this);
+
+    List<Fire> toBeExtinguished = new ArrayList<Fire>();
+
+    List<GridCell<Fire>> fireList = getCellNeighborhood(grid, agentPosition, Fire.class, 0, true);
+    for (GridCell<Fire> cell : fireList) {
+      Iterable<Fire> firesInCellIterator = cell.items();
+      int numFires = 0;
+      for (Fire f : firesInCellIterator) {
+        toBeExtinguished.add(f);
+        numFires++;
+      }
+      assert numFires == 1 : "More than 1 fire cell founnd: " + numFires;
+    }
+  }
+
+  /** Returns a list of the locations of fire cells the agent knows of */
+  public List<GridCell<Fire>> getKnownFireLocations() {
+    GridPoint agentPosition = grid.getLocation(this);
+    System.out.println("f  " + getCellNeighborhood(grid, agentPosition, Fire.class, perceptionRange, false).size());
+    System.out.println("r " + getCellNeighborhood(grid, agentPosition, Rain.class, perceptionRange, false).size());
+
+    return getCellNeighborhood(grid, agentPosition, Fire.class, perceptionRange, false);
+  }
+
 	public void checkWeather() {
 		// TODO: Need to check rain and wind. First need to know how these are modeled.
 		
-	}
-	
-	public void setTargetFire(Fire targetFire) {
-		this.targetFire = targetFire;
-	}
-
-	/**
-	 * Check whether the parameter object position is either directly or
-	 * diagonally in front of the parameter agent position, given the
-	 * agent's direction
-	 * @param agentPos
-	 * @param agentDir
-	 * @param objPos
-	 * @return
-	 */
-	private boolean inFrontOfAgent(GridPoint agentPos, Directions agentDir, GridPoint objPos) {
-		return agentPos.getX() + agentDir.xDiff == objPos.getX()
-				|| agentPos.getY() + agentDir.yDiff == objPos.getY();
 	}
 	
 

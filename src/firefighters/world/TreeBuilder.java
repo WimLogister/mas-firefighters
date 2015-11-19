@@ -2,6 +2,7 @@ package firefighters.world;
 
 
 import static constants.SimulationConstants.AGENT_PERCEPTION_DISTANCE;
+import static constants.SimulationParameters.gridSize;
 import repast.simphony.context.Context;
 import repast.simphony.context.space.grid.GridFactory;
 import repast.simphony.context.space.grid.GridFactoryFinder;
@@ -16,7 +17,10 @@ import repast.simphony.space.grid.RandomGridAdder;
 import repast.simphony.space.grid.SimpleGridAdder;
 import repast.simphony.space.grid.WrapAroundBorders;
 import cern.jet.random.Uniform;
+import constants.SimulationParameters;
 import firefighters.agent.Agent;
+import firefighters.utility.ExpectedBountiesUtilityFunction;
+import firefighters.utility.UtilityFunction;
 import firefighters.utils.Directions;
 
 
@@ -32,21 +36,29 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		context.setId("sample-simulation");
 
 		Parameters params = RunEnvironment.getInstance().getParameters();
+		// TODO Change to setParams 
 		int size = (Integer) params.getValue("grid_size");
-		int lifePointsTree = (Integer) params.getValue("life_points_tree"); // How many steps it takes before the tree-grid has burned down completely
-		int lifePointsFire = (Integer) params.getValue("life_points_fire");
-		int fireCount = (Integer) params.getValue("fire_count"); // How many fires we initialize with
-		int rainCount = (Integer) params.getValue("rain_count"); // How much rain we initialize with
-		int agentCount = (Integer) params.getValue("agent_count"); // How many agents we start with
-		Directions windDirection = returnWindDirection((String) params.getValue("wind_direction")); // Initial direction of wind
+    SimulationParameters.gridSize = size;
+    int lifePointsTree = (Integer) params.getValue("life_points_tree"); // How many steps it takes before the tree-grid has burned down completely
+    int lifePointsFire = (Integer) params.getValue("life_points_fire");
+    int fireCount = (Integer) params.getValue("fire_count"); // How many fires we initialize with
+    int rainCount = (Integer) params.getValue("rain_count"); // How much rain we initialize with
+    int agentCount = (Integer) params.getValue("agent_count"); // How many agents we start with
+		
+    Directions windDirection = returnWindDirection((String) params.getValue("wind_direction")); // Initial direction of wind
 		
 		final Uniform urng = RandomHelper.getUniform();
-		
-		GridFactory gridFactory = GridFactoryFinder.createGridFactory(null);
-		Grid<Object> grid = gridFactory.createGrid("grid", context,
-				new GridBuilderParameters<Object>(new WrapAroundBorders(),
-						new SimpleGridAdder<Object>(), true, size, size)); // Square grid, variable size
-		
+
+    GridFactory gridFactory = GridFactoryFinder.createGridFactory(null);
+    Grid<Object> grid = gridFactory.createGrid("grid",
+                                               context,
+                                               new GridBuilderParameters<Object>(new WrapAroundBorders(),
+                                                                                 new SimpleGridAdder<Object>(),
+                                                                                 true,
+                                                                                 gridSize,
+                                                                                 gridSize)); // Square grid, variable
+                                                                                              // size
+
 		GridDimensions dims = grid.getDimensions();
 		RandomGridAdder<Object> ra = new RandomGridAdder<Object>(); // To random add objects in the space
 		
@@ -90,7 +102,8 @@ public class TreeBuilder implements ContextBuilder<Object> {
     for (int i = 0; i < agentCount; i++) {
       double movementSpeed = 1.0;
       double money = 0;
-      Agent agent = new Agent(grid, movementSpeed, money, AGENT_PERCEPTION_DISTANCE);
+      UtilityFunction utilityFunction = new ExpectedBountiesUtilityFunction();
+      Agent agent = new Agent(grid, movementSpeed, money, AGENT_PERCEPTION_DISTANCE, utilityFunction);
       context.add(agent);
       ra.add(grid, agent);
     }

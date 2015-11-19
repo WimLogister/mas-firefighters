@@ -1,11 +1,12 @@
 package constants;
 
+import java.util.Random;
 
 public class SimulationConstants {
 
-  public static final int MAX_FIRE_SPEED = 1;
+  public static final double MAX_FIRE_SPEED = 0.01;
   
-  public static final int MAX_FIRE_AGENT_SPEED = 2 * MAX_FIRE_SPEED;
+  public static final int MAX_FIRE_AGENT_SPEED = 2;
   
   /** Chance with which fire can appear out of nowhere */
   public static final double FIRE_PROB = 0.01;
@@ -18,5 +19,12 @@ public class SimulationConstants {
   
   /** The distance around him that an agent can perceive the environment */
   public static final int AGENT_PERCEPTION_DISTANCE = 5;
+
+  /** The reward for each fire cell extinguished */
+  public static final int BOUNTY_PER_FIRE_EXTINGUISHED = 100;
+
+  /** Random instance */
+  public static final Random RANDOM = new Random();
+
 
 }

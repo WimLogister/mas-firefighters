@@ -1,5 +1,7 @@
 package firefighters.world;
 
+import static constants.SimulationConstants.MAX_FIRE_SPEED;
+
 import java.util.List;
 
 import repast.simphony.context.Context;
@@ -61,6 +63,7 @@ public class Fire {
 		appear();
 	}
 	
+
 	/**
 	 *  If there is a firefighter hosing the fire, the fire decreases in its lifepoints and speed
 	 */
@@ -86,6 +89,9 @@ public class Fire {
 		else setSpeed(speed * 1.1);
 		if(checkRainInLocation()) setSpeed(speed - 0.1);
 		else setSpeed(speed + 0.1);
+    if (speed > MAX_FIRE_SPEED) {
+      speed = MAX_FIRE_SPEED;
+    }
 	}
 
 	/**
