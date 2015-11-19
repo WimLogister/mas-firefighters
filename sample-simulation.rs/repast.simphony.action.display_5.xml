@@ -1,5 +1,5 @@
 <repast.simphony.visualization.engine.CartesianDisplayDescriptor>
-  <name>InclAgents</name>
+  <name>SimpleDisplay</name>
   <type>2D</type>
   <styles>
     <entry>
@@ -12,7 +12,7 @@
     </entry>
     <entry>
       <string>firefighters.agent.Agent</string>
-      <string>repast.simphony.visualizationOGL2D.DefaultStyleOGL2D</string>
+      <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
     </entry>
     <entry>
       <string>firefighters.world.Rain</string>
@@ -22,15 +22,19 @@
   <editedStyles>
     <entry>
       <string>firefighters.world.Tree</string>
-      <string>firefighters.world.Tree.style_1.xml</string>
+      <string>firefighters.world.Tree.style_2.xml</string>
     </entry>
     <entry>
       <string>firefighters.world.Fire</string>
-      <string>firefighters.world.Fire.style_2.xml</string>
+      <string>firefighters.world.Fire.style_3.xml</string>
+    </entry>
+    <entry>
+      <string>firefighters.agent.Agent</string>
+      <string>firefighters.agent.Agent.style_0.xml</string>
     </entry>
     <entry>
       <string>firefighters.world.Rain</string>
-      <string>firefighters.world.Rain.style_3.xml</string>
+      <string>firefighters.world.Rain.style_5.xml</string>
     </entry>
   </editedStyles>
   <netStyles/>
@@ -43,7 +47,7 @@
     <pType>LAST</pType>
     <duration>-1.0</duration>
     <frequency>REPEAT</frequency>
-    <hashCode>647431833</hashCode>
+    <hashCode>881896080</hashCode>
   </schedParams>
   <layoutClassName>foo.bar.baz</layoutClassName>
   <layoutProjection>grid</layoutProjection>

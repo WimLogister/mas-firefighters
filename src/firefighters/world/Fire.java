@@ -1,11 +1,13 @@
 package firefighters.world;
 
+import static constants.SimulationConstants.MAX_FIRE_SPEED;
+import static firefighters.utils.GridFunctions.getCellNeighborhood;
+
 import java.util.List;
 
 import repast.simphony.context.Context;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.query.space.grid.GridCell;
-import repast.simphony.query.space.grid.GridCellNgh;
 import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
@@ -61,6 +63,7 @@ public class Fire {
 		appear();
 	}
 	
+
 	/**
 	 *  If there is a firefighter hosing the fire, the fire decreases in its lifepoints and speed
 	 */
@@ -86,6 +89,9 @@ public class Fire {
 		else setSpeed(speed * 1.1);
 		if(checkRainInLocation()) setSpeed(speed - 0.1);
 		else setSpeed(speed + 0.1);
+    if (speed > MAX_FIRE_SPEED) {
+      speed = MAX_FIRE_SPEED;
+    }
 	}
 
 	/**
@@ -94,8 +100,8 @@ public class Fire {
 	 */
 	public boolean checkRainInHeading(){
 		GridPoint pt = grid.getLocation(this);
-		GridCellNgh<Rain> ngh = new GridCellNgh<>(grid, pt, Rain.class, 1, 1);
-		List<GridCell<Rain>> gridCells = ngh.getNeighborhood(false);
+
+    List<GridCell<Rain>> gridCells = getCellNeighborhood(grid, pt, Rain.class, 1, false);
 		
 		// If there is no rain at all, return false
 		if(gridCells.size()==0) return false;
