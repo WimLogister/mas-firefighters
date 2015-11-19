@@ -16,7 +16,7 @@ public class Plan {
 	}
 	
   public boolean isFinished() {
-    return !steps.isEmpty();
+    return steps.isEmpty();
   }
 
 }

@@ -23,7 +23,6 @@ import firefighters.actions.Planner;
 import firefighters.utility.UtilityFunction;
 import firefighters.utils.Directions;
 import firefighters.world.Fire;
-import firefighters.world.Rain;
 
 /** The only distinction between agents is going to be their Behavior implementation, so this class is final */
 @Getter
@@ -70,12 +69,13 @@ public final class Agent {
     if (currentPlan == null || currentPlan.isFinished()) {
       currentPlan = planner.devisePlan(this);
     }
-    execureCurrentAction();
+    executeCurrentAction();
   }
   
-  public void execureCurrentAction() {
-    if (currentPlan != null && !currentPlan.isFinished())
+  public void executeCurrentAction() {
+    if (currentPlan != null && !currentPlan.isFinished()) {
       currentPlan.executeNextStep(this);
+    }
   }
 	
 	/**
@@ -84,8 +84,7 @@ public final class Agent {
 	public boolean checkDeath() {
 		// Set up necessary operators
 		GridPoint cpt = grid.getLocation(this);
-		GridCellNgh<Fire> ngh = new GridCellNgh<>(grid, cpt, Fire.class, 1, 1);
-		List<GridCell<Fire>> gridCells = ngh.getNeighborhood(false);
+    List<GridCell<Fire>> gridCells = getCellNeighborhood(grid, cpt, Fire.class, 1, false);
 
 		// Need at least four fires in neighborhood in order to be surrounded
 		if (gridCells.size() < 4) return false;
@@ -190,9 +189,6 @@ public final class Agent {
   /** Returns a list of the locations of fire cells the agent knows of */
   public List<GridCell<Fire>> getKnownFireLocations() {
     GridPoint agentPosition = grid.getLocation(this);
-    System.out.println("f  " + getCellNeighborhood(grid, agentPosition, Fire.class, perceptionRange, false).size());
-    System.out.println("r " + getCellNeighborhood(grid, agentPosition, Rain.class, perceptionRange, false).size());
-
     return getCellNeighborhood(grid, agentPosition, Fire.class, perceptionRange, false);
   }
 

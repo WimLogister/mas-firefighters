@@ -6,7 +6,6 @@ import static firefighters.utils.GridFunctions.getRandomNeighboringPoint;
 import static firefighters.utils.GridFunctions.isInFrontOfAgent;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,9 +29,7 @@ public class Planner {
 
   /** Returns a plan for the agent */
   public Plan devisePlan(Agent agent) {
-    System.out.println("Planning");
     List<Plan> possiblePlans = discoverPossiblePlans(agent);
-    System.out.println("done");
     return Collections.max(possiblePlans, new PlanUtilityComparator(utilityFunction));
   }
 
@@ -43,13 +40,12 @@ public class Planner {
 
     List<Plan> possiblePlans = new ArrayList<>();
     List<GridCell<Fire>> fireCells = agent.getKnownFireLocations();
-    System.out.println("fire cells: " + fireCells.size());
+    // System.out.println("fire cells: " + fireCells.size());
     for (GridCell<Fire> fireCell : fireCells) {
       GridPoint firePoint = fireCell.getPoint();
       Path<GridState, GridAction> path = findShortestPath(grid, agentPosition, firePoint);
-      System.out.println("found path");
       if (path != null) {
-        System.out.println("ag " + agentPosition + " fire  " + firePoint);
+        // System.out.println("ag " + agentPosition + " fire  " + firePoint);
         List<AbstractAction> actions = convertToPrimitiveActions(path, agent.getDirection());
         actions.add(new Extinguish(firePoint));
         Plan plan = new Plan(actions);
@@ -59,14 +55,15 @@ public class Planner {
     if (possiblePlans.size() == 0) {
       // Move randomly
       GridPoint randomPoint = getRandomNeighboringPoint(grid, agentPosition);
-      List<AbstractAction> actions = Arrays.asList(new MoveAndTurn(randomPoint, Directions.getRandomDirection()));
+      List<AbstractAction> actions = new ArrayList<>();
+      MoveAndTurn move = new MoveAndTurn(randomPoint, Directions.getRandomDirection());
+      actions.add(move);
       possiblePlans.add(new Plan(actions));
     }
     return possiblePlans;
   }
 
   private List<AbstractAction> convertToPrimitiveActions(Path<GridState, GridAction> path, Directions agentDirection) {
-    System.out.println(path);
     GridPoint agentPosition = path.getStart().getPosition();
     GridPoint firePosition = path.getGoal().getPosition();
 

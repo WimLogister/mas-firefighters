@@ -6,7 +6,7 @@ import static constants.SimulationParameters.gridSize;
 import java.util.List;
 
 import repast.simphony.query.space.grid.GridCell;
-import repast.simphony.query.space.grid.GridCellNgh;
+import repast.simphony.query.space.grid.GridCellNeighborhood2d;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import search.AstarSearch;
@@ -111,7 +111,7 @@ public class GridFunctions {
                                                           int xExtent,
                                                           int yExtent,
                                                           boolean includeCenter) {
-    GridCellNgh<T> ngh = new GridCellNgh<>(grid, point, aClass, xExtent, yExtent);
+    GridCellNeighborhood2d<T> ngh = new GridCellNeighborhood2d<>(grid, point, aClass, xExtent, yExtent);
     List<GridCell<T>> gridCells = ngh.getNeighborhood(false);
     return gridCells;
   }

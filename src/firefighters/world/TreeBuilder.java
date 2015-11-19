@@ -15,7 +15,7 @@ import repast.simphony.space.grid.GridBuilderParameters;
 import repast.simphony.space.grid.GridDimensions;
 import repast.simphony.space.grid.RandomGridAdder;
 import repast.simphony.space.grid.SimpleGridAdder;
-import repast.simphony.space.grid.WrapAroundBorders;
+import repast.simphony.space.grid.StrictBorders;
 import cern.jet.random.Uniform;
 import constants.SimulationParameters;
 import firefighters.agent.Agent;
@@ -52,7 +52,7 @@ public class TreeBuilder implements ContextBuilder<Object> {
     GridFactory gridFactory = GridFactoryFinder.createGridFactory(null);
     Grid<Object> grid = gridFactory.createGrid("grid",
                                                context,
-                                               new GridBuilderParameters<Object>(new WrapAroundBorders(),
+                                               new GridBuilderParameters<Object>(new StrictBorders(),
                                                                                  new SimpleGridAdder<Object>(),
                                                                                  true,
                                                                                  gridSize,
