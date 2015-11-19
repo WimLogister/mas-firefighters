@@ -35,6 +35,7 @@ public final class Agent {
 	final Grid<Object> grid;
 
 	final double movementSpeed;
+
   double money;
   /** The distance at which the agent can perceive the world around him, i.e. the status of the cells */
   final int perceptionRange;
@@ -47,6 +48,9 @@ public final class Agent {
 
   /** The agent's current plan */
   Plan currentPlan;
+
+  @Setter
+  int lifePoints = 1;
 
   public Agent(Grid<Object> grid,
                double movementSpeed,

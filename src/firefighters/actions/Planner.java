@@ -44,7 +44,7 @@ public class Planner {
     for (GridCell<Fire> fireCell : fireCells) {
       GridPoint firePoint = fireCell.getPoint();
       Path<GridState, GridAction> path = findShortestPath(grid, agentPosition, firePoint);
-      if (path != null) {
+      if (path != null && path.isValidPath()) {
         // System.out.println("ag " + agentPosition + " fire  " + firePoint);
         List<AbstractAction> actions = convertToPrimitiveActions(path, agent.getDirection());
         actions.add(new Extinguish(firePoint));
@@ -54,6 +54,7 @@ public class Planner {
     }
     if (possiblePlans.size() == 0) {
       // Move randomly
+      // TODO This crashes if the agent is surrounded
       GridPoint randomPoint = getRandomNeighboringPoint(grid, agentPosition);
       List<AbstractAction> actions = new ArrayList<>();
       MoveAndTurn move = new MoveAndTurn(randomPoint, Directions.getRandomDirection());
