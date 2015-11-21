@@ -1,7 +1,6 @@
 package firefighters.agent;
 
 import static firefighters.utils.GridFunctions.getCellNeighborhood;
-import static firefighters.utils.GridFunctions.isInFrontOfAgent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +12,6 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.query.space.grid.GridCell;
-import repast.simphony.query.space.grid.GridCellNgh;
 import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
@@ -68,7 +66,10 @@ public final class Agent {
 
   @ScheduledMethod(start = 1, interval = 1)
 	public void step() {
-		if (checkDeath()) kill();
+    if (lifePoints == 0 || checkDeath()) {
+      kill();
+      return;
+    }
     // TODO Check if we should revise the plan
     if (currentPlan == null || currentPlan.isFinished()) {
       currentPlan = planner.devisePlan(this);
@@ -135,44 +136,8 @@ public final class Agent {
 	public void turn(Directions direction) {
 		this.direction = direction;
 	}
-	
-	/**
-	 * Extinguish any fires directly or diagonally in front of the agent.
-	 */
-	public void hose() {
-		GridPoint agentPosition = grid.getLocation(this);
-		
-		final int extinguishRange = 1;
-		GridCellNgh<Fire> ngh = new GridCellNgh<>(grid, agentPosition,
-				Fire.class, extinguishRange, extinguishRange);
-		
-		List<Fire> toBeExtinguished = new ArrayList<Fire>();
-		
-		List<GridCell<Fire>> fireList = ngh.getNeighborhood(false);
-		for (GridCell<Fire> cell : fireList) {
-			/*
-			 * Fires that can be extinguished need to satisfy two conditions:
-			 * 1. Have to be within 1 square (already satisfied by extinguishRange
-			 * parameter to GridCellNeighborhood).
-			 * 2. Agent has to be facing the fires. Use Directions.xdiff and
-			 * Directions.ydiff for this.
-			 */
-      if (isInFrontOfAgent(agentPosition, direction, cell.getPoint())) {
 
-				for (Fire f : cell.items()) {
-					toBeExtinguished.add(f);
-				}
-			}
-			for (Fire f : toBeExtinguished) {
-				f.extinguish();
-			}
-      // Make sure we don't hose multiple fires in the same turn
-      if (toBeExtinguished.size() > 0) {
-        return;
-      }
-		}
-	}
-	
+  /** Extinguish fire in a specific grid position */
   public void hose(GridPoint firePosition) {
     GridPoint agentPosition = grid.getLocation(this);
 

@@ -14,7 +14,7 @@ public class Extinguish implements PrimitiveAction {
 
 	@Override
   public void execute(Agent agent) {
-		agent.hose();
+    agent.hose(firePosition);
 	}
 	
 	@Override
