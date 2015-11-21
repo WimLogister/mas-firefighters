@@ -54,10 +54,13 @@ public class Planner {
     }
     if (possiblePlans.size() == 0) {
       // Move randomly
-      // TODO This crashes if the agent is surrounded
-      GridPoint randomPoint = getRandomNeighboringPoint(grid, agentPosition);
       List<AbstractAction> actions = new ArrayList<>();
-      MoveAndTurn move = new MoveAndTurn(randomPoint, Directions.getRandomDirection());
+      MoveAndTurn move;
+      GridPoint randomPoint = getRandomNeighboringPoint(grid, agentPosition);
+      if (randomPoint == null)
+        move = new MoveAndTurn(Directions.getRandomDirection());
+      else
+        move = new MoveAndTurn(randomPoint, Directions.getRandomDirection());
       actions.add(move);
       possiblePlans.add(new Plan(actions));
     }

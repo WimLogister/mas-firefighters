@@ -3,19 +3,24 @@ package firefighters.world;
 
 import static constants.SimulationConstants.MAX_FIRE_AGENT_SPEED;
 import static constants.SimulationParameters.gridSize;
+import static firefighters.utils.GridFunctions.getCellNeighborhood;
 
+import java.util.List;
 import java.util.Random;
 
+import logging.Logger;
 import repast.simphony.context.Context;
 import repast.simphony.context.space.grid.GridFactory;
 import repast.simphony.context.space.grid.GridFactoryFinder;
 import repast.simphony.dataLoader.ContextBuilder;
 import repast.simphony.engine.environment.RunEnvironment;
 import repast.simphony.parameter.Parameters;
+import repast.simphony.query.space.grid.GridCell;
 import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridBuilderParameters;
 import repast.simphony.space.grid.GridDimensions;
+import repast.simphony.space.grid.GridPoint;
 import repast.simphony.space.grid.RandomGridAdder;
 import repast.simphony.space.grid.SimpleGridAdder;
 import repast.simphony.space.grid.WrapAroundBorders;
@@ -164,6 +169,13 @@ public class TreeBuilder implements ContextBuilder<Object> {
 			context.add(fire);
 			ra.add(grid, fire);
 		}
+
+    List<GridCell<Fire>> fires = getCellNeighborhood(grid, new GridPoint(0, 0), Fire.class, 5, false);
+
+    for (GridCell<Fire> cell : fires) {
+      Logger.println(cell.getPoint().toString());
+    }
+
 		return context;
 	}	
 }
