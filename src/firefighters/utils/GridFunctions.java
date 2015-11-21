@@ -1,5 +1,6 @@
 package firefighters.utils;
 
+import static constants.SimulationConstants.MAX_SEARCH_DISTANCE;
 import static constants.SimulationConstants.RANDOM;
 import static constants.SimulationParameters.gridSize;
 
@@ -129,7 +130,8 @@ public class GridFunctions {
       createAstarPathFinder(Grid<?> grid, GridPoint target) {
     return new AstarSearch<>(new GridSuccessorFunction(grid),
                              new GridManhattanHeuristic(target),
-                             new GridPointGoalTest(target));
+                             new GridPointGoalTest(target),
+                             MAX_SEARCH_DISTANCE);
   }
 
   /**

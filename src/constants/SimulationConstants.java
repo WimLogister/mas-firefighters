@@ -26,6 +26,9 @@ public class SimulationConstants {
   /** Random instance */
   public static final Random RANDOM = new Random();
 
-
   public static final float MAX_WIND_SPEED = 2;
+
+  /** The agent's won't find paths to a fire further than this distance */
+  public static final int MAX_SEARCH_DISTANCE = 15;
+
 }

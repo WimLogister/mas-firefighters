@@ -28,13 +28,27 @@ public class AstarSearch<State extends SearchState,
 	@NonNull
 	private SuccessorFunction<State, Action> successorFunction;
 	/** The assumption is that the heuristic function is admissible but not necessarily consistent. */
-	@NonNull
+  @NonNull
 	private HeuristicFunction<State> heuristicFunction;
 	@NonNull
 	private GoalTest<State> goalTest;
 
+  /** The search will be terminated if the cost exceeds this value */
+  private double costCutoffThreshold = Double.POSITIVE_INFINITY;
+
 	@Getter
 	private int nodesExpanded;
+
+  public AstarSearch(SuccessorFunction<State, Action> successorFunction,
+                     HeuristicFunction<State> heuristicFunction,
+                     GoalTest<State> goalTest,
+                     double costCutoffThreshold) {
+    this.successorFunction = successorFunction;
+    this.heuristicFunction = heuristicFunction;
+    this.goalTest = goalTest;
+    this.costCutoffThreshold = costCutoffThreshold;
+  }
+
 
 	public SearchNode<State, Action> search(State startState) {
 		SearchNode<State, Action> start = new SearchNode<State, Action>(null, startState, null, 0);
@@ -53,6 +67,9 @@ public class AstarSearch<State extends SearchState,
 			if (goalTest.check(current.getState())) {
 				return current;
 			}
+      if (current.getCost() > costCutoffThreshold) {
+        return null;
+      }
 			if (!explored.contains(current.getState())) {
 				nodesExpanded++;
 				explored.add(current.getState());
@@ -83,7 +100,7 @@ public class AstarSearch<State extends SearchState,
 		return path;
 	}
 
-	private class AstarComparator
+  private class AstarComparator
 			implements Comparator<SearchNode<State, Action>> {
 
 		@Override
