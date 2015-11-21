@@ -111,7 +111,7 @@ public class GridFunctions {
                                                           int xExtent,
                                                           int yExtent,
                                                           boolean includeCenter) {
-    GridCellNeighborhood2d<T> ngh = new GridCellNeighborhood2d<>(grid, point, aClass, xExtent, yExtent);
+    GridCellNeighborhood2d<T> ngh = new GridCellNeighborhood2d<>(grid, point, aClass, xExtent, yExtent, false);
     List<GridCell<T>> gridCells = ngh.getNeighborhood(false);
     return gridCells;
   }
@@ -132,10 +132,15 @@ public class GridFunctions {
                              new GridPointGoalTest(target));
   }
 
-  /** Returns a random point at a distance one from the given point */
+  /**
+   * Returns a random point at a distance one from the given point, or null if it is not legal to move to any
+   * neighboring square
+   */
   public static GridPoint getRandomNeighboringPoint(Grid<?> grid, GridPoint point) {
     GridSuccessorFunction successorFunction = new GridSuccessorFunction(grid);
     List<ImmutableTriple<GridState, GridAction, Double>> successors = successorFunction.apply(new GridState(point));
+    if (successors.size() == 0)
+      return null;
     int rand = RANDOM.nextInt(successors.size());
     return successors.get(rand).getLeft().getPosition();
   }
