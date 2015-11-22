@@ -47,7 +47,7 @@ public class Planner {
         // System.out.println("ag " + agentPosition + " fire  " + firePoint);
         List<AbstractAction> actions = convertToPrimitiveActions(path, agent.getDirection());
         actions.add(new Extinguish(firePoint));
-        Plan plan = new Plan(actions);
+        Plan plan = new ExtinguishFirePlan(actions, firePoint);
         possiblePlans.add(plan);
       }
     }

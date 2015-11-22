@@ -1,6 +1,8 @@
 package firefighters.agent;
 
+import static constants.SimulationConstants.BOUNTY_PER_FIRE_EXTINGUISHED;
 import static firefighters.utils.GridFunctions.getCellNeighborhood;
+import static firefighters.utils.GridFunctions.isOnFire;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,9 +18,9 @@ import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.ContextUtils;
-
-import communication.Message;
-
+import firefighters.actions.AbstractAction;
+import firefighters.actions.ExtinguishFirePlan;
+import firefighters.actions.MoveAndTurn;
 import firefighters.actions.Plan;
 import firefighters.actions.Planner;
 import firefighters.utility.UtilityFunction;
@@ -74,12 +76,32 @@ public final class Agent {
       return;
     }
     // TODO Check if we should revise the plan
-    if (currentPlan == null || currentPlan.isFinished()) {
+    if (currentPlan == null || currentPlan.isFinished() || !isValid(currentPlan)) {
       currentPlan = planner.devisePlan(this);
     }
     executeCurrentAction();
   }
   
+  /** Checks if the current plan is still valid */
+  private boolean isValid(Plan currentPlan) {
+    if (currentPlan instanceof ExtinguishFirePlan) {
+      GridPoint fireLocation = ((ExtinguishFirePlan) currentPlan).getFireLocation();
+      if (!isOnFire(grid, fireLocation))
+        return false;
+    }
+    List<AbstractAction> steps = currentPlan.getSteps();
+    for (int i = 0; i < steps.size(); i++) {
+      AbstractAction action = steps.get(i);
+      if (action instanceof MoveAndTurn) {
+        MoveAndTurn moveAction = (MoveAndTurn) action;
+        GridPoint position = moveAction.getNewPos();
+        if (isOnFire(grid, position))
+          return false;
+      }
+    }
+    return true;
+  }
+
   public void executeCurrentAction() {
     if (currentPlan != null && !currentPlan.isFinished()) {
       currentPlan.executeNextStep(this);
@@ -156,6 +178,11 @@ public final class Agent {
     }
     for (Fire f : toBeExtinguished) {
       f.extinguish();
+      if (f.getLifePoints() == 0) {
+        // Fire is extinguished, receive bounty
+        // TODO If 2 agents hose a fire in the same step they probably should receive half each
+        money += BOUNTY_PER_FIRE_EXTINGUISHED;
+      }
     }
   }
 
@@ -169,10 +196,6 @@ public final class Agent {
 		// TODO: Need to check rain and wind. First need to know how these are modeled.
 		
 	}
-
-  public void messageReceived(Message message) {
-    // TODO Auto-generated method stub
-  }
 	
 
 }
