@@ -1,5 +1,5 @@
 <repast.simphony.visualization.engine.CartesianDisplayDescriptor>
-  <name>ForestDisplay</name>
+  <name>SimpleDisplay</name>
   <type>2D</type>
   <styles>
     <entry>
@@ -11,6 +11,10 @@
       <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
     </entry>
     <entry>
+      <string>firefighters.agent.Agent</string>
+      <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
+    </entry>
+    <entry>
       <string>firefighters.world.Rain</string>
       <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
     </entry>
@@ -18,15 +22,19 @@
   <editedStyles>
     <entry>
       <string>firefighters.world.Tree</string>
-      <string>firefighters.world.Tree.style_0.xml</string>
+      <string>firefighters.world.Tree.style_2.xml</string>
     </entry>
     <entry>
       <string>firefighters.world.Fire</string>
-      <string>firefighters.world.Fire.style_0.xml</string>
+      <string>firefighters.world.Fire.style_3.xml</string>
+    </entry>
+    <entry>
+      <string>firefighters.agent.Agent</string>
+      <string>firefighters.agent.Agent.style_0.xml</string>
     </entry>
     <entry>
       <string>firefighters.world.Rain</string>
-      <string>firefighters.world.Rain.style_2.xml</string>
+      <string>firefighters.world.Rain.style_5.xml</string>
     </entry>
   </editedStyles>
   <netStyles/>
@@ -39,7 +47,7 @@
     <pType>LAST</pType>
     <duration>-1.0</duration>
     <frequency>REPEAT</frequency>
-    <hashCode>287123597</hashCode>
+    <hashCode>881896080</hashCode>
   </schedParams>
   <layoutClassName>foo.bar.baz</layoutClassName>
   <layoutProjection>grid</layoutProjection>
@@ -51,11 +59,15 @@
     </entry>
     <entry>
       <string>firefighters.world.Fire</string>
-      <int>1</int>
+      <int>2</int>
+    </entry>
+    <entry>
+      <string>firefighters.agent.Agent</string>
+      <int>3</int>
     </entry>
     <entry>
       <string>firefighters.world.Rain</string>
-      <int>2</int>
+      <int>1</int>
     </entry>
   </layerOrder>
   <projections>

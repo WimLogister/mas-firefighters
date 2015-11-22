@@ -7,7 +7,7 @@
 									
 		/>
 				<parameter name="fire_count" displayName="Fire Count" type="int" 
-						defaultValue="5" 
+						defaultValue="1" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
@@ -24,22 +24,22 @@
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
-				<parameter name="life_points_tree" displayName="Life Points Tree" type="int" 
-						defaultValue="5" 
-						isReadOnly="false" 
-						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
-									
-		/>
-				<parameter name="wind_direction" displayName="Wind Direction" type="java.lang.String" 
-						defaultValue="north" 
+				<parameter name="weather" displayName="Weather" type="java.lang.String" 
+						defaultValue="sunny" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$StringStringConverter"
 									
 		/>
-				<parameter name="rain_count" displayName="Rain Count" type="int" 
-						defaultValue="20" 
+				<parameter name="life_points_tree" displayName="Life Points Tree" type="int" 
+						defaultValue="10" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+									
+		/>
+				<parameter name="wind_direction" displayName="Wind Direction" type="float" 
+						defaultValue="90.0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$FloatConverter"
 									
 		/>
 				<parameter name="agent_count" displayName="Agent Count" type="int" 

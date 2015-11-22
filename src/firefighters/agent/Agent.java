@@ -1,41 +1,87 @@
 package firefighters.agent;
 
+import static firefighters.utils.GridFunctions.getCellNeighborhood;
+
+import java.util.ArrayList;
 import java.util.List;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.query.space.grid.GridCell;
-import repast.simphony.query.space.grid.GridCellNgh;
 import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.ContextUtils;
-
-import communication.Message;
-
+import firefighters.actions.Plan;
+import firefighters.actions.Planner;
+import firefighters.utility.UtilityFunction;
 import firefighters.utils.Directions;
 import firefighters.world.Fire;
 
+/** The only distinction between agents is going to be their Behavior implementation, so this class is final */
+@Getter
+@Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public final class Agent {
+	
+  /** Reference to the grid */
+  @NonNull
+	final Grid<Object> grid;
 
-// TODO: define dummy class that extends this abstract class and do some basic testing, e.g. for death conditions and moving
-public abstract class Agent {
-	
-	Grid<Object> grid;
-	double movementSpeed;
-	double money;
-	Directions direction;
-	Fire targetFire;
-	
-  public Agent(Grid<Object> grid, double movementSpeed, double money) {
+	final double movementSpeed;
+
+  double money;
+  /** The distance at which the agent can perceive the world around him, i.e. the status of the cells */
+  final int perceptionRange;
+
+  /** The direction the agent is facing */
+  Directions direction;
+
+  /** Using to devise the agent's plans */
+  Planner planner;
+
+  /** The agent's current plan */
+  Plan currentPlan;
+
+  @Setter
+  int lifePoints = 1;
+
+  public Agent(Grid<Object> grid,
+               double movementSpeed,
+               double money,
+               int perceptionRange,
+               UtilityFunction utilityFunction) {
     this.grid = grid;
     this.movementSpeed = movementSpeed;
     this.money = money;
     this.direction = Directions.getRandomDirection();
+    this.perceptionRange = perceptionRange;
+
+    planner = new Planner(utilityFunction);
   }
 
   @ScheduledMethod(start = 1, interval = 1)
 	public void step() {
-		if (checkDeath()) kill();
-	}
+    if (lifePoints == 0 || checkDeath()) {
+      kill();
+      return;
+    }
+    // TODO Check if we should revise the plan
+    if (currentPlan == null || currentPlan.isFinished()) {
+      currentPlan = planner.devisePlan(this);
+    }
+    executeCurrentAction();
+  }
+  
+  public void executeCurrentAction() {
+    if (currentPlan != null && !currentPlan.isFinished()) {
+      currentPlan.executeNextStep(this);
+    }
+  }
 	
 	/**
 	 * Check for death condition: being surrounded by fire
@@ -43,8 +89,7 @@ public abstract class Agent {
 	public boolean checkDeath() {
 		// Set up necessary operators
 		GridPoint cpt = grid.getLocation(this);
-		GridCellNgh<Fire> ngh = new GridCellNgh<>(grid, cpt, Fire.class, 1, 1);
-		List<GridCell<Fire>> gridCells = ngh.getNeighborhood(false);
+    List<GridCell<Fire>> gridCells = getCellNeighborhood(grid, cpt, Fire.class, 1, false);
 
 		// Need at least four fires in neighborhood in order to be surrounded
 		if (gridCells.size() < 4) return false;
@@ -71,46 +116,55 @@ public abstract class Agent {
 	}
 	
 	/**
-	 * Move this agent in its current direction.
+	 * Move agent to parameter position.
 	 * Movement is a stochastic process: each agent's movement speed is modeled as 
 	 * the probability of moving to the square it is currently facing.
 	 */
-	public void move() {
+	public void move(GridPoint newPt) {
 		if (RandomHelper.nextDouble() < movementSpeed) {
-			GridPoint pt = grid.getLocation(this);
+      GridPoint pt = grid.getLocation(this);
 			/*
 			 * Move the agent according to its current direction. How the direction
 			 * influences its movement in the grid is modeled by the Directions Enum,
 			 * which is used here.
 			 */
-			grid.moveTo(this, pt.getX()+direction.xDiff, pt.getY()+direction.yDiff);
+      // TODO Check if it's legal to move to newPt
+			grid.moveTo(this, newPt.getX(), newPt.getY());
 		}
 	}
 	
 	public void turn(Directions direction) {
 		this.direction = direction;
 	}
-	
-	/**
-	 * Fight this agent's target fire.
-	 * Should first verify somehow that the agent is actually adjacent to a fire. 
-	 */
-	public void extinguish() {
-		targetFire.extinguish();
-	}
-	
+
+  /** Extinguish fire in a specific grid position */
+  public void hose(GridPoint firePosition) {
+    GridPoint agentPosition = grid.getLocation(this);
+
+    List<Fire> toBeExtinguished = new ArrayList<Fire>();
+
+    List<GridCell<Fire>> fireList = getCellNeighborhood(grid, agentPosition, Fire.class, 0, true);
+    for (GridCell<Fire> cell : fireList) {
+      Iterable<Fire> firesInCellIterator = cell.items();
+      int numFires = 0;
+      for (Fire f : firesInCellIterator) {
+        toBeExtinguished.add(f);
+        numFires++;
+      }
+      assert numFires == 1 : "More than 1 fire cell founnd: " + numFires;
+    }
+  }
+
+  /** Returns a list of the locations of fire cells the agent knows of */
+  public List<GridCell<Fire>> getKnownFireLocations() {
+    GridPoint agentPosition = grid.getLocation(this);
+    return getCellNeighborhood(grid, agentPosition, Fire.class, perceptionRange, false);
+  }
+
 	public void checkWeather() {
 		// TODO: Need to check rain and wind. First need to know how these are modeled.
 		
 	}
 	
-	public void setTargetFire(Fire targetFire) {
-		this.targetFire = targetFire;
-	}
-	
-  /** Called when another agent sends a message to this agent */
-  public void messageReceived(Message message) {
-    // TODO Implement
-  }
 
 }
