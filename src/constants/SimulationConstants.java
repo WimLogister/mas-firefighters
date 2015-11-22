@@ -31,4 +31,7 @@ public class SimulationConstants {
   /** The agent's won't find paths to a fire further than this distance */
   public static final int MAX_SEARCH_DISTANCE = 15;
 
+  /** Messages sent locally will be received by agents closer than this distance away */
+  public static final int LOCAL_MESSAGE_RANGE = 10;
+
 }

@@ -1,5 +1,6 @@
 package communication.information;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AgentInformationStore {
@@ -10,6 +11,11 @@ public class AgentInformationStore {
   private final int memorySize = 50;
 
   private int index = 0;
+
+  public AgentInformationStore() {
+    super();
+    informationStore = new ArrayList<>();
+  }
 
   public void archive(InformationPiece informationPiece) {
     if (informationStore.size() < memorySize)

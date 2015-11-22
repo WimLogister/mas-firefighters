@@ -20,7 +20,11 @@ import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.ContextUtils;
 
 import communication.Message;
+import communication.MessageContent;
+import communication.MessageMediator;
+import communication.MessageScope;
 import communication.information.AgentInformationStore;
+import communication.information.AgentLocationInformation;
 
 import firefighters.actions.AbstractAction;
 import firefighters.actions.ExtinguishFirePlan;
@@ -74,6 +78,8 @@ public final class Agent {
 
     this.informationStore = new AgentInformationStore();
     this.planner = new Planner(utilityFunction);
+
+    MessageMediator.registerAgent(this);
   }
 
   @ScheduledMethod(start = 1, interval = 1)
@@ -91,7 +97,11 @@ public final class Agent {
   }
   
   private void processInformationAndCommunicate() {
-    // TODO Auto-generated method stub
+    // Example usage, sending the agent's location
+    GridPoint position = grid.getLocation(this);
+    AgentLocationInformation location = new AgentLocationInformation(this, position.getX(), position.getY());
+    Message message = new Message(this, MessageScope.LOCAL, new MessageContent(location));
+    MessageMediator.sendMessage(message);
   }
 
   /** Checks if the current plan is still valid */
@@ -150,6 +160,7 @@ public final class Agent {
 	 */
 	public void kill() {
 		ContextUtils.getContext(this).remove(this);
+    MessageMediator.deregisterAgent(this);
 	}
 	
 	/**
@@ -211,6 +222,7 @@ public final class Agent {
 
   public void messageReceived(Message message) {
     informationStore.archive(message.getInformationContent());
+    // Logger.println("Received " + message.getInformationContent().getClass());
   }
 	
 
