@@ -2,6 +2,9 @@ package communication;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import communication.information.InformationPiece;
+
 import firefighters.agent.Agent;
 
 /** Any message sent by an agent. */
@@ -17,4 +20,8 @@ public class Message {
   
   /** The information content of the message */
   private MessageContent content;
+
+  public InformationPiece getInformationContent() {
+    return content.getInformation();
+  }
 }

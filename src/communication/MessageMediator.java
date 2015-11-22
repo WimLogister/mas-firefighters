@@ -26,7 +26,7 @@ public class MessageMediator {
   /**
    * Sends a message to all other agents in the agent's neighborhood
    */
-  public void broadcastLocally(Message message) {
+  public static void broadcastLocally(Message message) {
 
   }
 

@@ -18,6 +18,10 @@ import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.ContextUtils;
+
+import communication.Message;
+import communication.information.AgentInformationStore;
+
 import firefighters.actions.AbstractAction;
 import firefighters.actions.ExtinguishFirePlan;
 import firefighters.actions.MoveAndTurn;
@@ -55,6 +59,8 @@ public final class Agent {
   @Setter
   int lifePoints = 1;
 
+  AgentInformationStore informationStore;
+
   public Agent(Grid<Object> grid,
                double movementSpeed,
                double money,
@@ -66,7 +72,8 @@ public final class Agent {
     this.direction = Directions.getRandomDirection();
     this.perceptionRange = perceptionRange;
 
-    planner = new Planner(utilityFunction);
+    this.informationStore = new AgentInformationStore();
+    this.planner = new Planner(utilityFunction);
   }
 
   @ScheduledMethod(start = 1, interval = 1)
@@ -75,6 +82,7 @@ public final class Agent {
       kill();
       return;
     }
+    processInformationAndCommunicate();
     // TODO Check if we should revise the plan
     if (currentPlan == null || currentPlan.isFinished() || !isValid(currentPlan)) {
       currentPlan = planner.devisePlan(this);
@@ -82,6 +90,10 @@ public final class Agent {
     executeCurrentAction();
   }
   
+  private void processInformationAndCommunicate() {
+    // TODO Auto-generated method stub
+  }
+
   /** Checks if the current plan is still valid */
   private boolean isValid(Plan currentPlan) {
     if (currentPlan instanceof ExtinguishFirePlan) {
@@ -196,6 +208,10 @@ public final class Agent {
 		// TODO: Need to check rain and wind. First need to know how these are modeled.
 		
 	}
+
+  public void messageReceived(Message message) {
+    informationStore.archive(message.getInformationContent());
+  }
 	
 
 }
