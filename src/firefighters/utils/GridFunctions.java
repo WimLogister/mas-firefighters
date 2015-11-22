@@ -113,7 +113,7 @@ public class GridFunctions {
                                                           int yExtent,
                                                           boolean includeCenter) {
     GridCellNeighborhood2d<T> ngh = new GridCellNeighborhood2d<>(grid, point, aClass, xExtent, yExtent, false);
-    List<GridCell<T>> gridCells = ngh.getNeighborhood(false);
+    List<GridCell<T>> gridCells = ngh.getNeighborhood(includeCenter);
     return gridCells;
   }
 
@@ -128,7 +128,7 @@ public class GridFunctions {
   /** Returns an instance of AstarSearch to search for a path to the specified target point */
   public static AstarSearch<GridState, GridAction, GridSuccessorFunction, GridManhattanHeuristic, GridPointGoalTest>
       createAstarPathFinder(Grid<?> grid, GridPoint target) {
-    return new AstarSearch<>(new GridSuccessorFunction(grid),
+    return new AstarSearch<>(new GridSuccessorFunction(grid, target),
                              new GridManhattanHeuristic(target),
                              new GridPointGoalTest(target),
                              MAX_SEARCH_DISTANCE);
@@ -139,7 +139,7 @@ public class GridFunctions {
    * neighboring square
    */
   public static GridPoint getRandomNeighboringPoint(Grid<?> grid, GridPoint point) {
-    GridSuccessorFunction successorFunction = new GridSuccessorFunction(grid);
+    GridSuccessorFunction successorFunction = new GridSuccessorFunction(grid, null);
     List<ImmutableTriple<GridState, GridAction, Double>> successors = successorFunction.apply(new GridState(point));
     if (successors.size() == 0)
       return null;

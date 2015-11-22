@@ -40,7 +40,6 @@ public class Planner {
 
     List<Plan> possiblePlans = new ArrayList<>();
     List<GridCell<Fire>> fireCells = agent.getKnownFireLocations();
-    // System.out.println("fire cells: " + fireCells.size());
     for (GridCell<Fire> fireCell : fireCells) {
       GridPoint firePoint = fireCell.getPoint();
       Path<GridState, GridAction> path = findShortestPath(grid, agentPosition, firePoint);
@@ -53,6 +52,12 @@ public class Planner {
       }
     }
     if (possiblePlans.size() == 0) {
+      // Logger.println("no plan " + fireCells.size());
+      // if (fireCells.size() > 0) {
+      // GridPoint firePoint = fireCells.get(0).getPoint();
+      // Logger.println(agentPosition + " fr " + firePoint + " mh "
+      // + Metrics.manhattanDistance(agentPosition, firePoint));
+      // }
       // Move randomly
       List<AbstractAction> actions = new ArrayList<>();
       MoveAndTurn move;
@@ -63,6 +68,8 @@ public class Planner {
         move = new MoveAndTurn(randomPoint, Directions.getRandomDirection());
       actions.add(move);
       possiblePlans.add(new Plan(actions));
+    } else {
+      // Logger.println("Found plan");
     }
     return possiblePlans;
   }

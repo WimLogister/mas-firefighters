@@ -23,6 +23,7 @@ public class GridSuccessorFunction
     extends SuccessorFunction<GridState, GridAction> {
 
   private Grid<?> grid;
+  private GridPoint target;
 
   @Override
   public List<ImmutableTriple<GridState, GridAction, Double>> apply(GridState state) {
@@ -31,7 +32,7 @@ public class GridSuccessorFunction
     for (Directions direction : Directions.values()) {
       if (isLegal(currentPosition, direction)) {
         GridPoint neighboringPoint = getNeighboringPoint(currentPosition, direction);
-        if (!isOnFire(grid, neighboringPoint)) {
+        if (neighboringPoint.equals(target) || !isOnFire(grid, neighboringPoint)) {
           ImmutableTriple<GridState, GridAction, Double> successor = ImmutableTriple.of(new GridState(neighboringPoint),
                                                                                         new GridAction(direction),
                                                                                         1.0);
