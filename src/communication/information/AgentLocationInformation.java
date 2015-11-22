@@ -8,7 +8,7 @@ import firefighters.agent.Agent;
 public class AgentLocationInformation
     extends InformationPiece {
 
-  /** x and y coordinate in the grid of the square that is on fire */
+  /** The location of the agent making the request */
   private GridPoint position;
   
   /** The agent whose position is  described*/

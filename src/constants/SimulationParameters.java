@@ -15,8 +15,8 @@ public class SimulationParameters {
   /** How many fires we initialize with */
   public static int fireCount;
 
-  /** How much rain we initialize with */
-  public static int rainCount;
+  // /** How much rain we initialize with */
+  // public static int rainCount;
 
   /** How many agents we start with */
   public static int agentCount;
@@ -28,7 +28,7 @@ public class SimulationParameters {
                                                                     // burned down completely
     lifePointsFire = (Integer) params.getValue("life_points_fire");
     fireCount = (Integer) params.getValue("fire_count"); // How many fires we initialize with
-    rainCount = (Integer) params.getValue("rain_count"); // How much rain we initialize with
+    // rainCount = (Integer) params.getValue("rain_count"); // How much rain we initialize with
     agentCount = (Integer) params.getValue("agent_count"); // How many agents we start with
   }
 }

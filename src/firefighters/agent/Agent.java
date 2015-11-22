@@ -94,6 +94,9 @@ public final class Agent {
       currentPlan = planner.devisePlan(this);
     }
     executeCurrentAction();
+
+    // TODO Temporary before storing the time steps information was received
+    informationStore.clear();
   }
   
   private void processInformationAndCommunicate() {

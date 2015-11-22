@@ -24,6 +24,7 @@ import cern.jet.random.Uniform;
 import com.badlogic.gdx.math.Vector2;
 
 import constants.SimulationConstants;
+import constants.SimulationParameters;
 import firefighters.agent.Agent;
 import firefighters.utility.ExpectedBountiesUtilityFunction;
 import firefighters.utility.UtilityFunction;
@@ -50,6 +51,7 @@ public class TreeBuilder implements ContextBuilder<Object> {
 
 		Random rand = new Random();
 		Parameters params = RunEnvironment.getInstance().getParameters();
+    SimulationParameters.setParameters(params);
     // TODO Use simulation parameters
     int size = (Integer) params.getValue("grid_size"); // Size of the grid
     int lifePointsTree = (Integer) params.getValue("life_points_tree"); // How many steps it takes before the tree-grid

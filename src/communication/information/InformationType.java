@@ -5,5 +5,5 @@ public enum InformationType {
   FireLocation,
   AgentPosition,
   WeatherInformation,
-  AssistanceRequest;
+  HelpRequest;
 }

@@ -24,4 +24,27 @@ public class AgentInformationStore {
       informationStore.set(index, informationPiece);
     index = (index + 1) % memorySize;
   }
+
+  /** Erases all information */
+  public void clear() {
+    informationStore.clear();
+  }
+
+  /**
+   * Get information of a specific type. Example usage: <br>
+   * {@code List<HelpRequestInformation> helpRequests = informationStore.getInformationOfType(HelpRequestInformation.class)}
+   * 
+   * @param informationClass
+   * @return
+   */
+  public <T extends InformationPiece> List<T> getInformationOfType(Class<T> informationClass) {
+    List<T> matchingInformation = new ArrayList<>();
+    for (InformationPiece piece : informationStore) {
+      if (piece.getClass() == informationClass) {
+        T cast = (T) piece;
+        matchingInformation.add(cast);
+      }
+    }
+    return matchingInformation;
+  }
 }
