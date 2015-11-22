@@ -8,6 +8,7 @@ import firefighters.actions.Extinguish;
 public class ExpectedBountiesUtilityFunction
     extends DiscountedUtilityFunction {
 
+  // Bounty for actually extinguishing the fire?
   @Override
   public double calculateUtility(AbstractAction action) {
     if (action instanceof Extinguish)

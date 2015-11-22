@@ -1,6 +1,7 @@
 package firefighters.world;
 
 import repast.simphony.space.grid.Grid;
+import firefighters.world.TreeBuilder;
 import repast.simphony.util.ContextUtils;
 import repast.simphony.context.Context;
 
@@ -19,6 +20,7 @@ public class Tree {
 		if (this.lifePoints-- <= 0) {
 			Context<Object> context = ContextUtils.getContext(this);
 			context.remove(this);
+			TreeBuilder.performance.increaseForestLosses();
 		}
 	}
 	

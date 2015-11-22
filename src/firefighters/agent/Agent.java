@@ -21,6 +21,7 @@ import firefighters.actions.Planner;
 import firefighters.utility.UtilityFunction;
 import firefighters.utils.Directions;
 import firefighters.world.Fire;
+import firefighters.world.TreeBuilder;
 
 /** The only distinction between agents is going to be their Behavior implementation, so this class is final */
 @Getter
@@ -34,6 +35,7 @@ public final class Agent {
 
 	final double movementSpeed;
 
+	@Getter
   double money;
   /** The distance at which the agent can perceive the world around him, i.e. the status of the cells */
   final int perceptionRange;
@@ -46,6 +48,8 @@ public final class Agent {
 
   /** The agent's current plan */
   Plan currentPlan;
+  
+  UtilityFunction utilityFunction;
 
   @Setter
   int lifePoints = 1;
@@ -60,6 +64,7 @@ public final class Agent {
     this.money = money;
     this.direction = Directions.getRandomDirection();
     this.perceptionRange = perceptionRange;
+    this.utilityFunction = utilityFunction;
 
     planner = new Planner(utilityFunction);
   }
@@ -80,6 +85,8 @@ public final class Agent {
   public void executeCurrentAction() {
     if (currentPlan != null && !currentPlan.isFinished()) {
       currentPlan.executeNextStep(this);
+      // With executing an action, the calculated utility is added to the agent's money
+      money = money + utilityFunction.calculateUtility(currentPlan);
     }
   }
 	
@@ -112,6 +119,7 @@ public final class Agent {
 	 * Remove this agent from the simulation
 	 */
 	public void kill() {
+		TreeBuilder.performance.increaseHumanLosses();
 		ContextUtils.getContext(this).remove(this);
 	}
 	
@@ -152,6 +160,9 @@ public final class Agent {
         numFires++;
       }
       assert numFires == 1 : "More than 1 fire cell founnd: " + numFires;
+      for(Fire f : toBeExtinguished){
+    	  f.extinguish();
+      }
     }
   }
 
@@ -162,7 +173,7 @@ public final class Agent {
   }
 
 	public void checkWeather() {
-		// TODO: Need to check rain and wind. First need to know how these are modeled.
+		
 		
 	}
 	

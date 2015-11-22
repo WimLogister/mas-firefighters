@@ -73,7 +73,10 @@ public class Fire {
 	 */
 	public void extinguish(){
 		this.lifePoints--;
-		if(lifePoints<=0) setSpeed(0);
+		if(lifePoints<=0) {
+			TreeBuilder.performance.increaseFiresExtinguished();
+			setSpeed(0);
+		}
 		else {
 			// Substracting a percentage of the maximum fire-speed of from the fire
 			float newSpeed = this.getSpeed() - SimulationConstants.MAX_FIRE_SPEED * 0.5f;
@@ -265,6 +268,7 @@ public class Fire {
 				Fire fire = new Fire(grid, velocity.clamp(0, SimulationConstants.MAX_FIRE_SPEED), lifePoints, maxLifePoints,fireProb); // Fire spreads with same direction, speed and number of lifepoints
 				ContextUtils.getContext(this).add(fire);
 				grid.moveTo(fire, cX, cY);
+				TreeBuilder.performance.increaseFireCount();
 				// If there is a firefighter at the new location, the firefighter is being killed
 				for (Object object : grid.getObjectsAt(cLoc)){
 					if(object instanceof Agent) ((Agent) object).setLifePoints(0);
@@ -298,6 +302,7 @@ public class Fire {
 			fire_vel.x = rand.nextFloat() * (SimulationConstants.MAX_FIRE_SPEED - 0) + 0;
 			fire_vel.setAngle(rand.nextFloat() * (360 - 0) + 0);
 			Fire fire = new Fire(grid,fire_vel,1,1,fireProb);
+			TreeBuilder.performance.increaseFireCount();
 			ContextUtils.getContext(this).add(fire);
 			ra.add(grid, fire);
 		}
