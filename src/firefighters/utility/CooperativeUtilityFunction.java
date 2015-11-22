@@ -35,7 +35,7 @@ public class CooperativeUtilityFunction extends DiscountedUtilityFunction {
 			// Working as a team: ideally on every fire one agent, so ratio 1 is ideal
 			// With a bigger ratio (so more fires than agents) also some bounty, but not for more than 2
 			// times as many fires as agents
-			if(ratio == 1) utility = utility + 200;
+			if(ratio > 0.75 && ratio <= 1) utility = utility + 200;
 			else if(ratio > 1 && ratio <= 1.5) utility = utility + 100;
 			else if(ratio > 1.5 && ratio <= 2) utility = utility + 50;
 		}

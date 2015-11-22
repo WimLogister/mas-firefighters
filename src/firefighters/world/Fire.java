@@ -227,8 +227,8 @@ public class Fire {
 		// of maximum speed fire / maximum speed agent (because the maximum speed needs to be in ratio
 		// with the maximum speed of the agent
 		double spreadToDirInFront = getSpeed(); // value between 0 and 1, for example direction is North
-		double spreadTo2ClosestDirs = spreadToDirInFront * 0.1; // directions are North-East and North-West
-		double spreadToOther = spreadTo2ClosestDirs * 0.01; // Chance with which to spread to another direction than the fire's own direction and the 2 closest directions
+		double spreadTo2ClosestDirs = spreadToDirInFront * 0.3; // directions are North-East and North-West
+		double spreadToOther = spreadTo2ClosestDirs * 0.02; // Chance with which to spread to another direction than the fire's own direction and the 2 closest directions
 		
 		// Spreading to the direction the fire is directly heading 
 		Directions dir = Directions.fromVectorToDir(velocity);
