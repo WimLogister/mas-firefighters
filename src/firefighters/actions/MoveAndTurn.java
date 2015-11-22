@@ -3,6 +3,7 @@ package firefighters.actions;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NonNull;
 import repast.simphony.query.space.grid.GridCell;
 import repast.simphony.space.grid.Grid;
@@ -16,6 +17,7 @@ import firefighters.world.Fire;
 @AllArgsConstructor
 public class MoveAndTurn implements PrimitiveAction {
 
+  @Getter
   private GridPoint newPos;
   @NonNull
   private Directions newDir;
