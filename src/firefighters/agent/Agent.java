@@ -16,6 +16,9 @@ import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.ContextUtils;
+
+import communication.Message;
+
 import firefighters.actions.Plan;
 import firefighters.actions.Planner;
 import firefighters.utility.UtilityFunction;
@@ -166,6 +169,10 @@ public final class Agent {
 		// TODO: Need to check rain and wind. First need to know how these are modeled.
 		
 	}
+
+  public void messageReceived(Message message) {
+    // TODO Auto-generated method stub
+  }
 	
 
 }
