@@ -55,7 +55,7 @@ public class PathFindingTest {
     GridPoint target = new GridPoint(9, 9);
     
     AstarSearch<GridState, GridAction, GridSuccessorFunction, GridManhattanHeuristic, GridPointGoalTest> aStar;
-    aStar = new AstarSearch<>(new GridSuccessorFunction(grid),
+    aStar = new AstarSearch<>(new GridSuccessorFunction(grid, target),
                               new GridManhattanHeuristic(target),
                               new GridPointGoalTest(target));
     

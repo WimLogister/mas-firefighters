@@ -36,6 +36,9 @@ public class AstarSearch<State extends SearchState,
   /** The search will be terminated if the cost exceeds this value */
   private double costCutoffThreshold = Double.POSITIVE_INFINITY;
 
+  @Getter
+  private boolean cutoffOccured;
+
 	@Getter
 	private int nodesExpanded;
 
@@ -68,6 +71,7 @@ public class AstarSearch<State extends SearchState,
 				return current;
 			}
       if (current.getCost() > costCutoffThreshold) {
+        cutoffOccured = true;
         return null;
       }
 			if (!explored.contains(current.getState())) {

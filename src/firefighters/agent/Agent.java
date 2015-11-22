@@ -139,11 +139,9 @@ public final class Agent {
 
   /** Extinguish fire in a specific grid position */
   public void hose(GridPoint firePosition) {
-    GridPoint agentPosition = grid.getLocation(this);
 
     List<Fire> toBeExtinguished = new ArrayList<Fire>();
-
-    List<GridCell<Fire>> fireList = getCellNeighborhood(grid, agentPosition, Fire.class, 0, true);
+    List<GridCell<Fire>> fireList = getCellNeighborhood(grid, firePosition, Fire.class, 0, true);
     for (GridCell<Fire> cell : fireList) {
       Iterable<Fire> firesInCellIterator = cell.items();
       int numFires = 0;
@@ -152,6 +150,9 @@ public final class Agent {
         numFires++;
       }
       assert numFires == 1 : "More than 1 fire cell founnd: " + numFires;
+    }
+    for (Fire f : toBeExtinguished) {
+      f.extinguish();
     }
   }
 

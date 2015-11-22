@@ -30,7 +30,7 @@ public class GridCellNeighborhood2d<T>
     List<GridCell<T>> list = new ArrayList<GridCell<T>>();
     for (int x = mins[0]; x <= maxs[0]; x++) {
       for (int y = mins[1]; y <= maxs[1]; y++) {
-        if ((includeCenter || isNotCenter(x, y)) && isCorrectType(x, y)) {
+        if ((includeCenter || !isCenter(x, y)) && isCorrectType(x, y)) {
           addCell(list, x, y);
         }
       }
@@ -68,8 +68,8 @@ public class GridCellNeighborhood2d<T>
     return false;
   }
 
-  private boolean isNotCenter(int x, int y) {
-    return x != point.getX() || y != point.getY();
+  private boolean isCenter(int x, int y) {
+    return x == point.getX() && y == point.getY();
   }
 
   private void addCell(List<GridCell<T>> list, int... pt) {
