@@ -4,18 +4,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-
 import com.badlogic.gdx.math.Vector2;
-
-import cern.jet.random.Uniform;
+import constants.SimulationParameters;
+import firefighters.utils.Directions;
 import repast.simphony.context.Context;
 import repast.simphony.engine.schedule.ScheduledMethod;
-import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
-import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.ContextUtils;
 import repast.simphony.util.collections.IndexedIterable;
-
 
 /**
  * Contains multiple rain-objects
@@ -26,30 +22,26 @@ public class RainGroup {
 	private int size; // Number of rain objects in the "cloud"
 	private Context<Object> context;
 	private Grid<Object> grid;
-	private int strength; // Value in range [1,3] to indicate its strength
 	private int tick;
 	private int maxTick;
-	private int[] location;
-	private int gridSize;
 	private ArrayList<Rain> rainObjects = new ArrayList<Rain>();
 	Random rand = new Random();
+	private List<int[]> stillToAppear = new ArrayList<int[]>();
 	
 	/**
 	 * Raingroup contains certain amount of rain-objects and travels for a certain amount of time
-	 * which is determined by its strengh (the stronger the rain, the bigger the size of the raingroup
+	 * which is determined by its strength (the stronger the rain, the bigger the size of the raingroup
 	 * and the longer it will travel)
 	 */
-	public RainGroup(Context<Object> context, Grid<Object> grid, int strength, int[] location,int gridSize){
+	public RainGroup(Context<Object> context, Grid<Object> grid, int strength, int[] location){
 		this.context = context;
 		this.grid = grid;
-		this.strength = strength;
-		this.location = location;
 		this.tick = 0;
-		this.gridSize = gridSize;
 		int maxSize;
 		int minSize;
 		int maxMTick;
 		int minMTick;
+		int gridSize = SimulationParameters.gridSize;
 		// Determine the ranges by the strength of the rain
 		if(strength == 1) {
 			maxMTick = 100;
@@ -72,13 +64,26 @@ public class RainGroup {
 		else throw new IllegalArgumentException("Strength value of rain is out of range!");	
 		this.maxTick = rand.nextInt((maxMTick - minMTick) + 1) + minMTick;
 		this.size = rand.nextInt((maxSize - minSize) + 1) + minSize;
-		fillRain(context, location);
+		fillRain(location);
 	}	
+	
+	@ScheduledMethod(start = 1, interval = 1, priority =0)
+	public void step(){
+		Vector2 windVelocity = getCurrentWindVelocity();
+		Directions dir = Directions.fromVectorToDir(windVelocity);
+		List<int[]> newLocs = new ArrayList<int[]>();
+		for(int[] loc : stillToAppear){
+			int x = loc[0] + dir.xDiff;
+			int y = loc[1] + dir.yDiff;
+			checkAddInGrid(x,y);
+		}
+		stillToAppear = newLocs;
+	}
 	
 	/**
 	 * Raingroup is visualized as a square, fill this grid with rain-objects
 	 */
-	public void fillRain(Context<Object> context, int[] location){
+	public void fillRain(int[] location){
 		// Get width and height of grid
 		int width = (int) Math.floor(Math.sqrt(size));
 		int rest = size - (width*width);
@@ -86,13 +91,7 @@ public class RainGroup {
 		// Fill the square		
 		for(int x=location[0]; x<location[0]+width; x++){
 			for(int y=location[1]; y<location[1]+width; y++){
-				Rain rain = new Rain(grid);
-				context.add(rain);
-				int[] newLoc = {x,y};
-				grid.moveTo(rain,newLoc);
-				rainObjects.add(rain);
-				
-				
+				checkAddInGrid(x,y);			
 			}
 		}
 		
@@ -124,12 +123,12 @@ public class RainGroup {
 			toChooseFrom.add(newLoc);
 		}
 		
+		// Choose random locations
 		Collections.shuffle(toChooseFrom);
 		for(int i=0;i<rest;i++){
-			Rain rain = new Rain(grid);
-			context.add(rain);
-			grid.moveTo(rain, toChooseFrom.get(i));
-			rainObjects.add(rain);
+			int x = toChooseFrom.get(i)[0];
+			int y1 = toChooseFrom.get(i)[1];
+			checkAddInGrid(x,y1);
 		}	
 	}
 	
@@ -149,11 +148,35 @@ public class RainGroup {
 		this.tick++;
 	}
 	
+	public void checkAddInGrid(int x, int y){
+		int[] newLoc = {x,y};
+		if(x < 0 || x >= SimulationParameters.gridSize || y < 0 || y >= SimulationParameters.gridSize) {
+			stillToAppear.add(newLoc);
+		}
+		else {
+			Rain rain = new Rain(grid);
+			context.add(rain);
+			grid.moveTo(rain, x, y);
+			rainObjects.add(rain);
+		}
+	}
+	
 	public boolean containsRain(int[] loc){
 		boolean containsRain = false;
 		for (Object object : grid.getObjectsAt(loc)){
 			if(object instanceof Rain) containsRain = true;
 		}
 		return containsRain;
+	}
+	
+	public Vector2 getCurrentWindVelocity(){
+		IndexedIterable<Wind> winds = ContextUtils.getContext(this).getObjects(Wind.class);
+		Wind currentWind = winds.iterator().next();
+		return currentWind.getVelocity();
+	}
+	
+	public void removeRain(Rain rain){
+		context.remove(rain);
+		rainObjects.remove(rain);
 	}
 }

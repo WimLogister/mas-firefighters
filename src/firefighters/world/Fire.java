@@ -18,6 +18,7 @@ import cern.jet.random.Uniform;
 import com.badlogic.gdx.math.Vector2;
 
 import constants.SimulationConstants;
+import constants.SimulationParameters;
 import firefighters.agent.Agent;
 import firefighters.utils.Directions;
 
@@ -257,17 +258,20 @@ public class Fire {
 		GridPoint pt = grid.getLocation(this);
 		int cX = pt.getX() + dir.xDiff;
 		int cY = pt.getY() + dir.yDiff;
-		int[] cLoc = {cX, cY}; // Get location of grid to which the fire possibly spreads
-		if(canSpread(cLoc)){
-			double test = urng.nextDouble();
-      // System.out.println(test + " :: " + chance);
-			if (test < chance) { // Spreads with certain "speed" (modeled in stochastic way)
-				Fire fire = new Fire(grid, velocity.clamp(0, SimulationConstants.MAX_FIRE_SPEED), lifePoints, maxLifePoints,fireProb); // Fire spreads with same direction, speed and number of lifepoints
-				ContextUtils.getContext(this).add(fire);
-				grid.moveTo(fire, cX, cY);
-				// If there is a firefighter at the new location, the firefighter is being killed
-				for (Object object : grid.getObjectsAt(cLoc)){
-					if(object instanceof Agent) ((Agent) object).setLifePoints(0);
+		boolean inGrid = true;
+		if(cX < 0 || cX >= SimulationParameters.gridSize || cY < 0 || cY >= SimulationParameters.gridSize) inGrid = false;
+		if(inGrid){
+			int[] cLoc = {cX, cY}; // Get location of grid to which the fire possibly spreads
+			if(canSpread(cLoc)){
+				double test = urng.nextDouble();
+				if (test < chance) { // Spreads with certain "speed" (modeled in stochastic way)
+					Fire fire = new Fire(grid, velocity.clamp(0, SimulationConstants.MAX_FIRE_SPEED), lifePoints, maxLifePoints,fireProb); // Fire spreads with same direction, speed and number of lifepoints
+					ContextUtils.getContext(this).add(fire);
+					grid.moveTo(fire, cX, cY);
+					// If there is a firefighter at the new location, the firefighter is being killed
+					for (Object object : grid.getObjectsAt(cLoc)){
+						if(object instanceof Agent) ((Agent) object).setLifePoints(0);
+					}
 				}
 			}
 		}
