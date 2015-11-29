@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+
 import com.badlogic.gdx.math.Vector2;
+
 import constants.SimulationParameters;
 import firefighters.utils.Directions;
+import firefighters.utils.GridFunctions;
 import repast.simphony.context.Context;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.space.grid.Grid;
@@ -150,9 +153,7 @@ public class RainGroup {
 	
 	public void checkAddInGrid(int x, int y){
 		int[] newLoc = {x,y};
-		if(x < 0 || x >= SimulationParameters.gridSize || y < 0 || y >= SimulationParameters.gridSize) {
-			stillToAppear.add(newLoc);
-		}
+		if(GridFunctions.isWithinBounds(x, y)) stillToAppear.add(newLoc);
 		else {
 			Rain rain = new Rain(grid);
 			context.add(rain);

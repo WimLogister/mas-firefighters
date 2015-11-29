@@ -21,6 +21,7 @@ import constants.SimulationConstants;
 import constants.SimulationParameters;
 import firefighters.agent.Agent;
 import firefighters.utils.Directions;
+import firefighters.utils.GridFunctions;
 
 /*
  * TODO:
@@ -261,9 +262,7 @@ public class Fire {
 		GridPoint pt = grid.getLocation(this);
 		int cX = pt.getX() + dir.xDiff;
 		int cY = pt.getY() + dir.yDiff;
-		boolean inGrid = true;
-		if(cX < 0 || cX >= SimulationParameters.gridSize || cY < 0 || cY >= SimulationParameters.gridSize) inGrid = false;
-		if(inGrid){
+		if(GridFunctions.isWithinBounds(cX, cY)){
 			int[] cLoc = {cX, cY}; // Get location of grid to which the fire possibly spreads
 			if(canSpread(cLoc)){
 				double test = urng.nextDouble();

@@ -50,7 +50,7 @@ public class Planner {
         Plan plan = new ExtinguishFirePlan(actions, firePoint);
         possiblePlans.add(plan);
         // Equivalent plan created, but with checking weather as first step
-        Plan planWeather = new CheckWeatherExtinguishFirePlan(actions,firePoint);
+        Plan planWeather = new CheckWeatherExtinguishFirePlan(actions,firePoint, path);
         possiblePlans.add(planWeather);
       }
     }

@@ -44,6 +44,7 @@ public class ComponentsUtilityFunction extends DiscountedUtilityFunction{
 	private ExpectedBountiesUtilityFunction fixedFunction;
 	private RiskTakingUtilityFunction riskFunction;
 	private CooperativeUtilityFunction cooperativeFunction;
+	private CheckWeatherUtilityFunction weatherFunction;
 	
 	public ComponentsUtilityFunction(double weightRisk, double weightCooperating, Grid grid){
 		this.weightRisk = weightRisk;
@@ -52,10 +53,11 @@ public class ComponentsUtilityFunction extends DiscountedUtilityFunction{
 		this.fixedFunction = new ExpectedBountiesUtilityFunction();
 		this.riskFunction = new RiskTakingUtilityFunction(grid);
 		this.cooperativeFunction = new CooperativeUtilityFunction(grid);
+		this.weatherFunction = new CheckWeatherUtilityFunction();
 	}
 	
 	@Override
 	public double calculateUtility(AbstractAction action) {
-		return fixedFunction.calculateUtility(action) + weightRisk * riskFunction.calculateUtility(action) + weightCooperating * cooperativeFunction.calculateUtility(action);
+		return fixedFunction.calculateUtility(action) + weightRisk * riskFunction.calculateUtility(action) + weightCooperating * cooperativeFunction.calculateUtility(action) + weatherFunction.calculateUtility(action);
 	}
 }

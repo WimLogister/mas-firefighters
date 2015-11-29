@@ -21,15 +21,21 @@ import firefighters.utils.GridFunctions;
 public class CheckWeatherExtinguishFirePlan extends Plan{
 	
 	@Getter
+	private GridPoint actualFireLocation;
 	private GridPoint predictedFireLocation;
+	// Shortest path to the actual fire
+	private Path<GridState,GridAction> path;
 	
 	/**
 	 * At first, the predicted fire location is equal to the real fire location, will be changed
 	 * if the step of checking the weather is executed
 	 */
-	public CheckWeatherExtinguishFirePlan(List<AbstractAction> steps, GridPoint fireLocation) {
+	public CheckWeatherExtinguishFirePlan(List<AbstractAction> steps, GridPoint actualFireLocation, Path<GridState,GridAction> path) {
 	    super(steps);
-	    this.predictedFireLocation = fireLocation;
+	    this.actualFireLocation = actualFireLocation;
+	    // Has to be calculated
+	    this.predictedFireLocation = null;
+	    this.path = path;
 	}
 
 	/**
@@ -41,17 +47,14 @@ public class CheckWeatherExtinguishFirePlan extends Plan{
 		if(getSteps().get(0) instanceof CheckWeather){
 			getSteps().remove(0).execute(agent);
 			WeatherInformation weather = CheckWeather.getWeather();
-			predictedFireLocation = calculateNewFirePosition(weather, agent);
+			predictedFireLocation = calculateNewFirePosition(weather);
 		}
 		else getSteps().remove(0).execute(agent);	    
 	}
 	
-	public GridPoint calculateNewFirePosition(WeatherInformation weather, Agent agent){
+	public GridPoint calculateNewFirePosition(WeatherInformation weather){
 		Vector2 wind = weather.getWind();
 		// Get shortest path to current fire position to know how many steps we need to take into consideration
-		Grid<?> grid = agent.getGrid();
-		GridPoint agentPosition = grid.getLocation(agent);
-		Path<GridState, GridAction> path = findShortestPath(grid, agentPosition, predictedFireLocation);
 		int noOfSteps = path.getRoute().size();	     
 		
 		if(noOfSteps>0){
@@ -61,8 +64,10 @@ public class CheckWeatherExtinguishFirePlan extends Plan{
 			int xDiff = dir.xDiff*noOfSteps;
 			int yDiff = dir.yDiff*noOfSteps;
 		
-			int newX = predictedFireLocation.getX() + xDiff;
-			int newY = predictedFireLocation.getY() + yDiff;
+			System.out.println("Real fire location: " + actualFireLocation.getX() + "," + actualFireLocation.getY());
+			int newX = actualFireLocation.getX() + xDiff;
+			int newY = actualFireLocation.getY() + yDiff;
+			System.out.println("Predicted fire location: " + newX + "," + newY);
 			
 			GridPoint newPoint = new GridPoint(GridFunctions.clamp(newX), GridFunctions.clamp(newY));
 		
