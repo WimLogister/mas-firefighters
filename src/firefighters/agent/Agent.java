@@ -195,6 +195,14 @@ public final class Agent {
         money += BOUNTY_PER_FIRE_EXTINGUISHED;
       }
     }
+    for (Fire f : toBeExtinguished) {
+      f.extinguish();
+      if (f.getLifePoints() == 0) {
+        // Fire is extinguished, receive bounty
+        // TODO If 2 agents hose a fire in the same step they probably should receive half each
+        money += BOUNTY_PER_FIRE_EXTINGUISHED;
+      }
+    }
   }
 
   /** Returns a list of the locations of fire cells the agent knows of */
