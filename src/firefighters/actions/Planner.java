@@ -10,17 +10,18 @@ import java.util.Collections;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
-import repast.simphony.query.space.grid.GridCell;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import search.Path;
+
+import communication.information.FireLocationInformation;
+
 import firefighters.agent.Agent;
 import firefighters.pathfinding.GridAction;
 import firefighters.pathfinding.GridState;
 import firefighters.utility.PlanUtilityComparator;
 import firefighters.utility.UtilityFunction;
 import firefighters.utils.Directions;
-import firefighters.world.Fire;
 
 @AllArgsConstructor
 public class Planner {
@@ -39,9 +40,9 @@ public class Planner {
     GridPoint agentPosition = grid.getLocation(agent);
 
     List<Plan> possiblePlans = new ArrayList<>();
-    List<GridCell<Fire>> fireCells = agent.getKnownFireLocations();
-    for (GridCell<Fire> fireCell : fireCells) {
-      GridPoint firePoint = fireCell.getPoint();
+    List<FireLocationInformation> fireCells = agent.getKnownFireLocations();
+    for (FireLocationInformation fireInformation : fireCells) {
+      GridPoint firePoint = fireInformation.getPosition();
       Path<GridState, GridAction> path = findShortestPath(grid, agentPosition, firePoint);
       if (path != null && path.isValidPath()) {
         // System.out.println("ag " + agentPosition + " fire  " + firePoint);

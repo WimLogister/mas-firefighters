@@ -25,6 +25,8 @@ import communication.MessageMediator;
 import communication.MessageScope;
 import communication.information.AgentInformationStore;
 import communication.information.AgentLocationInformation;
+import communication.information.FireLocationInformation;
+import communication.information.HelpRequestInformation;
 
 import firefighters.actions.AbstractAction;
 import firefighters.actions.ExtinguishFirePlan;
@@ -60,10 +62,12 @@ public final class Agent {
   /** The agent's current plan */
   Plan currentPlan;
 
-  @Setter
-  int lifePoints = 1;
+  /** The life points of the agent, should be more than 1 to give them a chance of escaping the fire */
+  int lifePoints = 5;
 
   AgentInformationStore informationStore;
+
+  double firesToAgentsDangerThreshold = 5;
 
   public Agent(Grid<Object> grid,
                double movementSpeed,
@@ -100,11 +104,38 @@ public final class Agent {
   }
   
   private void processInformationAndCommunicate() {
+    List<GridCell<Fire>> fireCells = findFiresInNeighborhood();
+    for (GridCell<Fire> fireCell : fireCells) {
+      GridPoint firePoint = fireCell.getPoint();
+      informationStore.archive(new FireLocationInformation(firePoint.getX(), firePoint.getY()));
+    }
     // Example usage, sending the agent's location
+    if (isInDanger()) {
+      sendHelpRequest(BOUNTY_PER_FIRE_EXTINGUISHED / 2);
+    }
+  }
+
+  private List<GridCell<Fire>> findFiresInNeighborhood() {
     GridPoint position = grid.getLocation(this);
-    AgentLocationInformation location = new AgentLocationInformation(this, position.getX(), position.getY());
-    Message message = new Message(this, MessageScope.LOCAL, new MessageContent(location));
-    MessageMediator.sendMessage(message);
+    // Update fire information
+    List<GridCell<Fire>> fireCells = getCellNeighborhood(grid, position, Fire.class, perceptionRange, true);
+    return fireCells;
+  }
+
+  private List<GridCell<Agent>> findAgentsInNeighborhood() {
+    GridPoint position = grid.getLocation(this);
+    // Update fire information
+    List<GridCell<Agent>> agentCells = getCellNeighborhood(grid, position, Agent.class, perceptionRange, true);
+    return agentCells;
+  }
+
+  /** Returns whether the agent is in danger and should request for assistance */
+  private boolean isInDanger() {
+    // TODO Determine some threshold
+    int fireCount = findFiresInNeighborhood().size();
+    int agentCount = findAgentsInNeighborhood().size();
+    double ratio = 1.0 * fireCount / agentCount;
+    return ratio > firesToAgentsDangerThreshold;
   }
 
   /** Checks if the current plan is still valid */
@@ -212,20 +243,33 @@ public final class Agent {
     }
   }
 
+  /** Communicates the agent's position locally */
+  private void communicateLocation() {
+    GridPoint position = grid.getLocation(this);
+    AgentLocationInformation location = new AgentLocationInformation(this, position.getX(), position.getY());
+    Message message = new Message(this, MessageScope.LOCAL, new MessageContent(location));
+    MessageMediator.sendMessage(message);
+  }
+
+  /** Sends a help request message */
+  private void sendHelpRequest(int bountyOffered) {
+    GridPoint position = grid.getLocation(this);
+    HelpRequestInformation helpRequest = new HelpRequestInformation(this, position, bountyOffered);
+    Message message = new Message(this, MessageScope.LOCAL, new MessageContent(helpRequest));
+    MessageMediator.sendMessage(message);
+  }
+
   /** Returns a list of the locations of fire cells the agent knows of */
-  public List<GridCell<Fire>> getKnownFireLocations() {
-    GridPoint agentPosition = grid.getLocation(this);
-    return getCellNeighborhood(grid, agentPosition, Fire.class, perceptionRange, false);
+  public List<FireLocationInformation> getKnownFireLocations() {
+    return informationStore.getInformationOfType(FireLocationInformation.class);
   }
 
 	public void checkWeather() {
 		// TODO: Need to check rain and wind. First need to know how these are modeled.
-		
 	}
 
   public void messageReceived(Message message) {
     informationStore.archive(message.getInformationContent());
-    // Logger.println("Received " + message.getInformationContent().getClass());
   }
 	
 
