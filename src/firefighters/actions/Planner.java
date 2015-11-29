@@ -63,7 +63,7 @@ public class Planner {
       MoveAndTurn move;
       GridPoint randomPoint = getRandomNeighboringPoint(grid, agentPosition);
       if (randomPoint == null)
-        move = new MoveAndTurn(Directions.getRandomDirection());
+        move = new MoveAndTurn(agentPosition, Directions.getRandomDirection());
       else
         move = new MoveAndTurn(randomPoint, Directions.getRandomDirection());
       actions.add(move);
@@ -83,7 +83,7 @@ public class Planner {
     if (gridActions.size() == 1) {
       if (!isInFrontOfAgent(agentPosition, agentDirection, firePosition)) {
         Directions desiredDirection = findDirection(agentPosition, firePosition);
-        abstractActions.add(new MoveAndTurn(desiredDirection));
+        abstractActions.add(new MoveAndTurn(agentPosition, desiredDirection));
       }
       return abstractActions;
     } else {
