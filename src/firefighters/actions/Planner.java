@@ -3,6 +3,7 @@ package firefighters.actions;
 import static firefighters.utils.GridFunctions.findShortestPath;
 import static firefighters.utils.GridFunctions.getCellNeighborhood;
 import static firefighters.utils.GridFunctions.getNeighboringPoint;
+import static firefighters.utils.GridFunctions.getNeighboringPoints;
 import static firefighters.utils.GridFunctions.getRandomNeighboringPoint;
 import static firefighters.utils.GridFunctions.isInFrontOfAgent;
 
@@ -45,8 +46,7 @@ public class Planner {
     List<FireLocationInformation> fireCells = agent.getKnownFireLocations();
 
     if (isAgentCellOnFire(grid, agentPosition)) {
-      System.out.println("On fire ");
-      // return deviseEmergencyPlan();
+      return deviseEmergencyPlans(grid, agentPosition);
     }
 
     for (FireLocationInformation fireInformation : fireCells) {
@@ -71,8 +71,18 @@ public class Planner {
   }
 
   /** Called the agent is on a burning cell */
-  private List<Plan> deviseEmergencyPlan() {
-    return null;
+  private List<Plan> deviseEmergencyPlans(Grid<?> grid, GridPoint agentPosition) {
+    List<Plan> possiblePlans = new ArrayList<>();
+    for (GridPoint point : getNeighboringPoints(grid, agentPosition)) {
+      int xDiff = point.getX() - agentPosition.getX();
+      int yDiff = point.getY() - agentPosition.getY();
+      Directions facingFire = Directions.findDirection(xDiff, yDiff);
+      List<AbstractAction> actions = new ArrayList<>();
+      actions.add(new MoveAndTurn(point, facingFire));
+      Plan plan = new Plan(actions);
+      possiblePlans.add(plan);
+    }
+    return possiblePlans;
   }
 
   private boolean isAgentCellOnFire(Grid<?> grid, GridPoint agentPosition) {
@@ -99,7 +109,8 @@ public class Planner {
     List<AbstractAction> abstractActions = new ArrayList<>();
     List<GridAction> gridActions = path.getRoute();
     if (gridActions.size() == 0) {
-      System.out.println(agentPosition + " " + firePosition);
+      System.out.println("Planner.convertToPrimitiveActions: Warning: this shouldn't happen");
+      // System.out.println(agentPosition + " " + firePosition);
     } else if (gridActions.size() == 1) {
       if (!isInFrontOfAgent(agentPosition, agentDirection, firePosition)) {
         Directions desiredDirection = findDirection(agentPosition, firePosition);

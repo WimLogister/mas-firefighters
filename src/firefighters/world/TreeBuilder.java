@@ -49,7 +49,6 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		Random rand = new Random();
 		Parameters params = RunEnvironment.getInstance().getParameters();
 		SimulationParameters.setParameters(params);
-    System.out.println("ag " + SimulationParameters.agentCount);
 
 		GridFactory gridFactory = GridFactoryFinder.createGridFactory(null);
 		Grid<Object> grid = gridFactory.createGrid("grid",
