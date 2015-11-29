@@ -51,7 +51,6 @@ public class RainContext {
 		double f = urng.nextDouble();
 		if (f < chance) {
 			// Let rain appear 
-			System.out.println("Rain appears");
 			int x = rand.nextInt((gridSize - 0) + 1);
 			int y = rand.nextInt((gridSize - 0) + 1);
 			int[] newLoc = {x,y};
@@ -73,7 +72,6 @@ public class RainContext {
 			// Let rain be carried by the wind
 			if (urng.nextDouble() < velRain.len()) {
 				for(Rain rain: rg.getRainObjects()){
-					System.out.println(rain);
 					Directions dir = Directions.fromVectorToDir(velRain);	
 					GridPoint pt = grid.getLocation(rain);
 					int cX = pt.getX() + dir.xDiff;

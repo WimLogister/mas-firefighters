@@ -29,6 +29,7 @@ import com.badlogic.gdx.math.Vector2;
 import constants.SimulationConstants;
 import constants.SimulationParameters;
 import firefighters.agent.Agent;
+import firefighters.utility.CheckWeatherUtilityFunction;
 import firefighters.utility.ComponentsUtilityFunction;
 import firefighters.utility.ExpectedBountiesUtilityFunction;
 import firefighters.utility.UtilityFunction;
@@ -141,8 +142,9 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		 */
 		for (int i = 0; i < SimulationParameters.agentCount; i++) {
 			double money = 0;
-		UtilityFunction utilityFunction = new ComponentsUtilityFunction(0,0,grid);
+		//UtilityFunction utilityFunction = new ComponentsUtilityFunction(0,0,grid);
 			//UtilityFunction utilityFunction = new ExpectedBountiesUtilityFunction();
+			UtilityFunction utilityFunction = new CheckWeatherUtilityFunction();
 		      
       Agent agent = new Agent(grid, MAX_FIRE_AGENT_SPEED, money, SimulationParameters.perceptionRange, utilityFunction);
 			context.add(agent);

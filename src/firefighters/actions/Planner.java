@@ -50,7 +50,7 @@ public class Planner {
         Plan plan = new ExtinguishFirePlan(actions, firePoint);
         possiblePlans.add(plan);
         // Equivalent plan created, but with checking weather as first step
-        Plan planWeather = new CheckWeatherExtinguishFirePlan(actions,firePoint, path);
+        Plan planWeather = new CheckWeatherExtinguishFirePlan(actions,firePoint, path, agent);
         possiblePlans.add(planWeather);
       }
     }
@@ -77,7 +77,7 @@ public class Planner {
     return possiblePlans;
   }
 
-  private List<AbstractAction> convertToPrimitiveActions(Path<GridState, GridAction> path, Directions agentDirection) {
+  static List<AbstractAction> convertToPrimitiveActions(Path<GridState, GridAction> path, Directions agentDirection) {
     GridPoint agentPosition = path.getStart().getPosition();
     GridPoint firePosition = path.getGoal().getPosition();
 
@@ -106,7 +106,7 @@ public class Planner {
     return abstractActions;
   }
 
-  private Directions findDirection(GridPoint from, GridPoint to) {
+  private static Directions findDirection(GridPoint from, GridPoint to) {
     int xDiff = to.getX() - from.getX();
     int yDiff = to.getY() - from.getY();
     return Directions.findDirection(xDiff, yDiff);

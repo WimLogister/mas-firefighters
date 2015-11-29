@@ -153,7 +153,7 @@ public class RainGroup {
 	
 	public void checkAddInGrid(int x, int y){
 		int[] newLoc = {x,y};
-		if(GridFunctions.isWithinBounds(x, y)) stillToAppear.add(newLoc);
+		if(!GridFunctions.isWithinBounds(x, y)) stillToAppear.add(newLoc);
 		else {
 			Rain rain = new Rain(grid);
 			context.add(rain);

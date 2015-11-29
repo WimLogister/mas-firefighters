@@ -88,6 +88,7 @@ public final class Agent {
     }
     // TODO Check if we should revise the plan
     if (currentPlan == null || currentPlan.isFinished() || !isValid(currentPlan)) {
+    	System.out.println("Plan devised");
       currentPlan = planner.devisePlan(this);
     }
     executeCurrentAction();
@@ -106,6 +107,7 @@ public final class Agent {
       if (action instanceof MoveAndTurn) {
         MoveAndTurn moveAction = (MoveAndTurn) action;
         GridPoint position = moveAction.getNewPos();
+        System.out.println("new position: " + position);
         if (isOnFire(grid, position))
           return false;
       }
