@@ -3,6 +3,7 @@ package firefighters.actions;
 import static firefighters.utils.GridFunctions.isInFrontOfAgent;
 import static firefighters.utils.GridFunctions.isOnFire;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import firefighters.agent.Agent;
@@ -10,7 +11,8 @@ import firefighters.agent.Agent;
 @AllArgsConstructor
 public class Extinguish implements PrimitiveAction {
 
-  private GridPoint firePosition;
+	@Getter 
+	private GridPoint firePosition;
 
 	@Override
   public void execute(Agent agent) {

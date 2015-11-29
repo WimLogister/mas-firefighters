@@ -1,5 +1,6 @@
 package firefighters.actions;
 
+<<<<<<< HEAD
 import lombok.Getter;
 import firefighters.agent.Agent;
 import firefighters.information.WeatherInformation;
@@ -25,4 +26,22 @@ public class CheckWeather implements PrimitiveAction{
 	public boolean checkPreconditions(Agent agent) {
 		return true;
 	}
+=======
+import firefighters.agent.Agent;
+
+public class CheckWeather implements PrimitiveAction {
+
+	@Override
+	public void execute(Agent agent) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean checkPreconditions(Agent agent) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+>>>>>>> master
 }

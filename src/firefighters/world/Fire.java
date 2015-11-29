@@ -74,7 +74,10 @@ public class Fire {
 	 */
 	public void extinguish(){
 		this.lifePoints--;
-		if(lifePoints<=0) setSpeed(0);
+		if(lifePoints<=0) {
+			TreeBuilder.performance.increaseFiresExtinguished();
+			setSpeed(0);
+		}
 		else {
 			// Substracting a percentage of the maximum fire-speed of from the fire
 			float newSpeed = this.getSpeed() - SimulationConstants.MAX_FIRE_SPEED * 0.5f;
@@ -225,8 +228,8 @@ public class Fire {
 		// of maximum speed fire / maximum speed agent (because the maximum speed needs to be in ratio
 		// with the maximum speed of the agent
 		double spreadToDirInFront = getSpeed(); // value between 0 and 1, for example direction is North
-		double spreadTo2ClosestDirs = spreadToDirInFront * 0.1; // directions are North-East and North-West
-		double spreadToOther = spreadTo2ClosestDirs * 0.01; // Chance with which to spread to another direction than the fire's own direction and the 2 closest directions
+		double spreadTo2ClosestDirs = spreadToDirInFront * 0.3; // directions are North-East and North-West
+		double spreadToOther = spreadTo2ClosestDirs * 0.02; // Chance with which to spread to another direction than the fire's own direction and the 2 closest directions
 		
 		// Spreading to the direction the fire is directly heading 
 		Directions dir = Directions.fromVectorToDir(velocity);
@@ -302,6 +305,7 @@ public class Fire {
 			fire_vel.x = rand.nextFloat() * (SimulationConstants.MAX_FIRE_SPEED - 0) + 0;
 			fire_vel.setAngle(rand.nextFloat() * (360 - 0) + 0);
 			Fire fire = new Fire(grid,fire_vel,1,1,fireProb);
+			TreeBuilder.performance.increaseFireCount();
 			ContextUtils.getContext(this).add(fire);
 			ra.add(grid, fire);
 		}

@@ -10,25 +10,36 @@ public class SimulationParameters {
   /** How many steps it takes before the tree-grid has burned down completely */
   public static int lifePointsTree;
 
+  /** How many steps it takes before the fire can be extinguished */
   public static int lifePointsFire;
 
   /** How many fires we initialize with */
   public static int fireCount;
 
-  /** How much rain we initialize with */
-  public static int rainCount;
-
   /** How many agents we start with */
   public static int agentCount;
+  
+  /** How far the agents can look */
+  public static int perceptionRange;
+  
+  /** Initial direction of the wind */
+  public static float windDirection;
+  
+  /** 
+   * We can set different types of weather (sunny, rainy, cloudy and windy) which result in different values for
+   * velocity of the wind, quantity of rain, the chance with which fire can appear out of nowhere, etc.
+   */
+  public static String weather;
 
   /** Sets the simulation's parameters */
   public static void setParameters(Parameters params) {
     gridSize = (Integer) params.getValue("grid_size");
-    lifePointsTree = (Integer) params.getValue("life_points_tree"); // How many steps it takes before the tree-grid has
-                                                                    // burned down completely
+    lifePointsTree = (Integer) params.getValue("life_points_tree");
     lifePointsFire = (Integer) params.getValue("life_points_fire");
-    fireCount = (Integer) params.getValue("fire_count"); // How many fires we initialize with
-    rainCount = (Integer) params.getValue("rain_count"); // How much rain we initialize with
-    agentCount = (Integer) params.getValue("agent_count"); // How many agents we start with
+    fireCount = (Integer) params.getValue("fire_count");
+    agentCount = (Integer) params.getValue("agent_count"); 
+    perceptionRange = (Integer) params.getValue("perception_range"); 
+    windDirection = ((Float) params.getValue("wind_direction"));
+    weather = (String) params.getValue("weather");
   }
 }
