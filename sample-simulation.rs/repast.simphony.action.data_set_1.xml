@@ -1,5 +1,5 @@
 <repast.simphony.data2.engine.DataSetDescriptor>
-  <name>Agent Counts</name>
+  <name>Agent Count</name>
   <type>AGGREGATE</type>
   <inclTick>true</inclTick>
   <inclBatchRun>false</inclBatchRun>
@@ -11,23 +11,30 @@
     <pType>LAST</pType>
     <duration>-1.0</duration>
     <frequency>REPEAT</frequency>
-    <hashCode>106542708</hashCode>
+    <hashCode>1903000380</hashCode>
   </scheduleParams>
   <atEnd>false</atEnd>
   <methodDataSources class="linked-hash-map"/>
   <countSources class="linked-hash-map">
     <entry>
-      <string>Fire Count</string>
+      <string>Firefighter Count</string>
       <repast.simphony.data2.engine.CountSourceDefinition>
-        <typeName>SampleFire</typeName>
-        <id>Fire Count</id>
+        <typeName>firefighters.agent.Agent</typeName>
+        <id>Firefighter Count</id>
       </repast.simphony.data2.engine.CountSourceDefinition>
     </entry>
     <entry>
       <string>Tree Count</string>
       <repast.simphony.data2.engine.CountSourceDefinition>
-        <typeName>SampleTree</typeName>
+        <typeName>firefighters.world.Tree</typeName>
         <id>Tree Count</id>
+      </repast.simphony.data2.engine.CountSourceDefinition>
+    </entry>
+    <entry>
+      <string>Fire Count</string>
+      <repast.simphony.data2.engine.CountSourceDefinition>
+        <typeName>firefighters.world.Fire</typeName>
+        <id>Fire Count</id>
       </repast.simphony.data2.engine.CountSourceDefinition>
     </entry>
   </countSources>
