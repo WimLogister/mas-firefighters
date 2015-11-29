@@ -22,11 +22,6 @@ public class MoveAndTurn implements PrimitiveAction {
   @NonNull
   private Directions newDir;
 
-  /** Constructor used to remain in the position and only change direction */
-  public MoveAndTurn(Directions newDir) {
-    this.newDir = newDir;
-  }
-	
 	/**
 	 * Move the agent to the indicated new position in the grid and turn
 	 * agent in indicated direction.
