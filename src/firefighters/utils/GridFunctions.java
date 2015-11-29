@@ -31,6 +31,13 @@ public class GridFunctions {
   public static boolean isWithinBounds(int xCoord, int yCoord) {
     return xCoord > 0 && xCoord < gridSize && yCoord > 0 && yCoord < gridSize;
   }
+  
+  /** Clamps x or y coordinate into value inside the grid */
+  public static int clamp(int x){
+	  if(x<0) return 0;
+	  else if(x >= gridSize) return gridSize-1;
+	  else return x;
+  }
 
   /**
    * Returns the point reached moving in the specified direction from the given source point. Performs no bounds

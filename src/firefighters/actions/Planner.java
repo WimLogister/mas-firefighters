@@ -49,6 +49,9 @@ public class Planner {
         actions.add(new Extinguish(firePoint));
         Plan plan = new ExtinguishFirePlan(actions, firePoint);
         possiblePlans.add(plan);
+        // Equivalent plan created, but with checking weather as first step
+        Plan planWeather = new CheckWeatherExtinguishFirePlan(actions,firePoint);
+        possiblePlans.add(planWeather);
       }
     }
     if (possiblePlans.size() == 0) {

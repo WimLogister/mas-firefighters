@@ -7,6 +7,8 @@ import static firefighters.utils.GridFunctions.isOnFire;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.badlogic.gdx.math.Vector2;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -18,14 +20,18 @@ import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.ContextUtils;
+import repast.simphony.util.collections.IndexedIterable;
 import firefighters.actions.AbstractAction;
 import firefighters.actions.ExtinguishFirePlan;
 import firefighters.actions.MoveAndTurn;
 import firefighters.actions.Plan;
 import firefighters.actions.Planner;
+import firefighters.information.WeatherInformation;
 import firefighters.utility.UtilityFunction;
 import firefighters.utils.Directions;
 import firefighters.world.Fire;
+import firefighters.world.Rain;
+import firefighters.world.Wind;
 
 /** The only distinction between agents is going to be their Behavior implementation, so this class is final */
 @Getter
@@ -192,10 +198,19 @@ public final class Agent {
     return getCellNeighborhood(grid, agentPosition, Fire.class, perceptionRange, false);
   }
 
-	public void checkWeather() {
-		// TODO: Need to check rain and wind. First need to know how these are modeled.
-		
-	}
-	
+  public WeatherInformation checkWeather() {
+    Vector2 wind = getCurrentWindVelocity();
+	// Check if there is rain in the agent's it surroundings
+    GridPoint agentPosition = grid.getLocation(this);
+    List<GridCell<Rain>> rain = getCellNeighborhood(grid, agentPosition, Rain.class, perceptionRange, true);
+    WeatherInformation currentWeather = new WeatherInformation(wind,rain);
+    return currentWeather;
+  }
+
+  public Vector2 getCurrentWindVelocity(){
+	IndexedIterable<Wind> winds = ContextUtils.getContext(this).getObjects(Wind.class);
+	Wind currentWind = winds.iterator().next();
+	return currentWind.getVelocity();
+  }
 
 }
