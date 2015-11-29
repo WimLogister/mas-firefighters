@@ -42,6 +42,12 @@
 						converter="repast.simphony.parameter.StringConverterFactory$FloatConverter"
 									
 		/>
+				<parameter name="perception_range" displayName="Perception Range" type="int" 
+						defaultValue="20" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+									
+		/>
 				<parameter name="agent_count" displayName="Agent Count" type="int" 
 						defaultValue="25" 
 						isReadOnly="false" 

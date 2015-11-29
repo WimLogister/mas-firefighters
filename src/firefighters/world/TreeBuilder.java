@@ -3,6 +3,7 @@ package firefighters.world;
 
 import static constants.SimulationConstants.MAX_FIRE_AGENT_SPEED;
 import static constants.SimulationParameters.gridSize;
+import static constants.SimulationParameters.setParameters;
 
 import java.util.Random;
 
@@ -26,15 +27,15 @@ import com.badlogic.gdx.math.Vector2;
 import constants.SimulationConstants;
 import constants.SimulationParameters;
 import firefighters.agent.Agent;
+import firefighters.utility.ComponentsUtilityFunction;
 import firefighters.utility.ExpectedBountiesUtilityFunction;
 import firefighters.utility.UtilityFunction;
+import performance.OverallPerformance;
 
 
-/**
- * We can set different types of weather (sunny, rainy, cloudy and windy) which result in different values for
- * velocity of the wind, quantity of rain, the chance with which fire can appear out of nowhere, etc (see code for details)
- */
 public class TreeBuilder implements ContextBuilder<Object> {
+	
+	public static OverallPerformance performance = new OverallPerformance();
 	
 	/*
 	 * Variables influenced by the type of weather
@@ -51,21 +52,12 @@ public class TreeBuilder implements ContextBuilder<Object> {
 
 		Random rand = new Random();
 		Parameters params = RunEnvironment.getInstance().getParameters();
-    SimulationParameters.setParameters(params);
-    // TODO Use simulation parameters
-    int size = (Integer) params.getValue("grid_size"); // Size of the grid
-    int lifePointsTree = (Integer) params.getValue("life_points_tree"); // How many steps it takes before the tree-grid
-                                                                        // has burned down completely
-    int lifePointsFire = (Integer) params.getValue("life_points_fire"); // How many steps it takes before the fire has
-                                                                        // been extinguished
-    int fireCount = (Integer) params.getValue("fire_count"); // How many fires we initialize with
-    int agentCount = (Integer) params.getValue("agent_count"); // How many agents we start with
-    float windDirection = ((Float) params.getValue("wind_direction")); // Initial direction of wind
-    String weather = (String) params.getValue("weather");
-    final Uniform urng = RandomHelper.getUniform();
+		SimulationParameters.setParameters(params);
 
-    GridFactory gridFactory = GridFactoryFinder.createGridFactory(null);
-    Grid<Object> grid = gridFactory.createGrid("grid",
+		final Uniform urng = RandomHelper.getUniform();
+
+		GridFactory gridFactory = GridFactoryFinder.createGridFactory(null);
+		Grid<Object> grid = gridFactory.createGrid("grid",
                                                context,
                                                new GridBuilderParameters<Object>(new WrapAroundBorders(),
                                                                                  new SimpleGridAdder<Object>(),
@@ -73,7 +65,6 @@ public class TreeBuilder implements ContextBuilder<Object> {
                                                                                  gridSize,
                                                                                  gridSize)); // Square grid, variable
                                                                                               // size
-
 		GridDimensions dims = grid.getDimensions();
 		RandomGridAdder<Object> ra = new RandomGridAdder<Object>(); // To random add objects in the space
 		
@@ -81,7 +72,7 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		for (int d0=0; d0<dims.getDimension(0); d0++){
 			for (int d1=0; d1<dims.getDimension(1); d1++){
 				int[] nextLoc = {d0,d1};
-				Tree tree = new Tree(grid,lifePointsTree);
+				Tree tree = new Tree(grid,SimulationParameters.lifePointsTree);
 				context.add(tree);
 				grid.moveTo(tree, nextLoc);
 			}
@@ -90,7 +81,7 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		/*
 		 * Very small chance for rain to appear, mild wind
 		 */
-		if(weather.equals("sunny")){
+		if(SimulationParameters.weather.equals("sunny")){
 			FIRE_PROB = 0.0005; // Chance with which fire can appear out of nowhere
 			RAIN_PROB = 0.002; // Chance with which new cloud can appear out of nowhere
 			wind_changable = 0.05f; // Factor with which random noise is added
@@ -100,7 +91,7 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		/*
 		 * High chance for rain to appear and appear in bigger quantities, stronger wind
 		 */
-		else if(weather.equals("rainy")){
+		else if(SimulationParameters.weather.equals("rainy")){
 			FIRE_PROB = 0.00005;
 			RAIN_PROB = 0.1;
 			wind_changable = 0.1f;
@@ -111,7 +102,7 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		/*
 		 * Higher chance for rain to appear
 		 */
-		else if(weather.equals("cloudy")){
+		else if(SimulationParameters.weather.equals("cloudy")){
 			FIRE_PROB = 0.001;
 			RAIN_PROB = 0.01;
 			wind_changable = 0.15f;
@@ -122,7 +113,7 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		/*
 		 * A strong wind with which fire and rain can appear more often
 		 */
-		else if(weather.equals("windy")){
+		else if(SimulationParameters.weather.equals("windy")){
 			FIRE_PROB = 0.002;
 			RAIN_PROB = 0.008;
 			wind_changable = 0.3f;
@@ -132,24 +123,31 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		}	
 		else throw new IllegalArgumentException("Weather-parameter must be one of the following strings: \"sunny\", \"cloudy\", \"rainy\" or \"windy\""); 
 		
-		windVelocity.setAngle(windDirection); // Set direction of the wind;
+		windVelocity.setAngle(SimulationParameters.windDirection); // Set direction of the wind;
 		Wind wind = new Wind(grid, windVelocity, wind_changable); // Add wind to the forest
 		context.add(wind);
 		
+		// Adding performance into the context so that we can visuale the performance in a chart
+		context.add(performance);
+		
 		// Add raincontext to the forest which will add rain given the parameters
-		RainContext rc = new RainContext(grid,RAIN_PROB,size,rain_strength); 
+		RainContext rc = new RainContext(grid,RAIN_PROB,SimulationParameters.gridSize,rain_strength); 
 		context.add(rc);
 		
 		/*
 		 * Randomly place agents in grid
 		 */
-		for (int i = 0; i < agentCount; i++) {
+		for (int i = 0; i < SimulationParameters.agentCount; i++) {
 			double money = 0;
-      UtilityFunction utilityFunction = new ExpectedBountiesUtilityFunction();
-      Agent agent = new Agent(grid, MAX_FIRE_AGENT_SPEED, money, agentCount, utilityFunction);
+     // UtilityFunction utilityFunction = new ComponentsUtilityFunction(-10,1,grid);
+			UtilityFunction utilityFunction = new ExpectedBountiesUtilityFunction();
+		      
+      Agent agent = new Agent(grid, MAX_FIRE_AGENT_SPEED, money, SimulationParameters.perceptionRange, utilityFunction);
 			context.add(agent);
 			ra.add(grid, agent);
 	    }
+		
+	
 			
 		/* 
 		 * Randomly place fires in grid
@@ -157,15 +155,42 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		 * Fire starts as a 'small' fire with 1 lifepoint
 		 * Fire is initalized with random direction
 		 */
-		for (int i = 0; i < fireCount; i++) {
+		/*for (int i = 0; i < SimulationParameters.fireCount; i++) {
 			Vector2 fire_vel = new Vector2();
 			// Initialize with random speed (with a maximum value 25% of the maximum fire speed) and direction
 			fire_vel.x = rand.nextFloat() * ((SimulationConstants.MAX_FIRE_SPEED * 0.25f) - 0) + 0;
 			fire_vel.setAngle(rand.nextFloat() * (360 - 0) + 0);
-			Fire fire = new Fire(grid,fire_vel,1,lifePointsFire,FIRE_PROB);
+			Fire fire = new Fire(grid,fire_vel,1,SimulationParameters.lifePointsFire,FIRE_PROB);
 			context.add(fire);
 			ra.add(grid, fire);
-		}
+		}*/
+		
+		Vector2 fire_vel = new Vector2();
+		// Initialize with random speed (with a maximum value 25% of the maximum fire speed) and direction
+		fire_vel.x = rand.nextFloat() * ((SimulationConstants.MAX_FIRE_SPEED * 0.25f) - 0) + 0;
+		fire_vel.setAngle(rand.nextFloat() * (360 - 0) + 0);
+		int[] loc1 = {10,10};
+		int[] loc2 = {10,40};
+		int[] loc3 = {40,10};
+		int[] loc4 = {40,40};
+		Fire fire = new Fire(grid,fire_vel,1,SimulationParameters.lifePointsFire,FIRE_PROB);
+		context.add(fire);
+		grid.moveTo(fire, loc1);
+		
+		Fire fire2 = new Fire(grid,fire_vel,1,SimulationParameters.lifePointsFire,FIRE_PROB);
+		context.add(fire2);
+		grid.moveTo(fire2, loc2);
+		
+		Fire fire3 = new Fire(grid,fire_vel,1,SimulationParameters.lifePointsFire,FIRE_PROB);
+		context.add(fire3);
+		grid.moveTo(fire3, loc3);
+		
+		Fire fire4 = new Fire(grid,fire_vel,1,SimulationParameters.lifePointsFire,FIRE_PROB);
+		context.add(fire4);
+		grid.moveTo(fire4, loc4);
+		
+		
+		
 
 		return context;
 	}	
