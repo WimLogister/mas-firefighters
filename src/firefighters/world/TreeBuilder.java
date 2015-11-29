@@ -141,7 +141,7 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		 */
 		for (int i = 0; i < SimulationParameters.agentCount; i++) {
 			double money = 0;
-		UtilityFunction utilityFunction = new ComponentsUtilityFunction(1,1,grid);
+		UtilityFunction utilityFunction = new ComponentsUtilityFunction(0,0,grid);
 			//UtilityFunction utilityFunction = new ExpectedBountiesUtilityFunction();
 		      
       Agent agent = new Agent(grid, MAX_FIRE_AGENT_SPEED, money, SimulationParameters.perceptionRange, utilityFunction);

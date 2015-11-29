@@ -45,6 +45,7 @@ public class CheckWeatherExtinguishFirePlan extends Plan{
 	@Override
 	public void executeNextStep(Agent agent) {
 		if(getSteps().get(0) instanceof CheckWeather){
+			System.out.println("Checking the weather");
 			getSteps().remove(0).execute(agent);
 			WeatherInformation weather = CheckWeather.getWeather();
 			predictedFireLocation = calculateNewFirePosition(weather);
