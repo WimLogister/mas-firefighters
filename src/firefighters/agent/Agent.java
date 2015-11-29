@@ -28,7 +28,9 @@ import communication.information.AgentInformationStore;
 import communication.information.AgentLocationInformation;
 import communication.information.FireLocationInformation;
 import communication.information.HelpRequestInformation;
+import communication.information.InformationPiece;
 
+import constants.SimulationParameters;
 import firefighters.actions.AbstractAction;
 import firefighters.actions.ExtinguishFirePlan;
 import firefighters.actions.MoveAndTurn;
@@ -79,6 +81,10 @@ public final class Agent {
   /** The number of agents alive in the world */
   static AgentStatistics agentStatistics = new AgentStatistics();
 
+  // TODO Combine with the utility function
+  /** If true new fires will be broadcast to other agents */
+  private boolean shareFireInformation = SimulationParameters.cooperativeAgents;
+
   public Agent(Grid<Object> grid,
                double movementSpeed,
                double money,
@@ -115,25 +121,47 @@ public final class Agent {
     }
     executeCurrentAction();
 
-    // TODO Temporary before storing the time steps information was received
-    informationStore.clear();
+
   }
   
   private void processInformationAndCommunicate() {
-    updateFireInformation();
-    // Example usage, sending the agent's location
+    List<GridPoint> newFires = updateFireInformation();
+    if(shareFireInformation) {
+      for(GridPoint newFirePoint : newFires) {
+        FireLocationInformation fireLocation = new FireLocationInformation(newFirePoint);
+        sendLocalMessage(fireLocation);
+      }
+    }
+    
     if (isInDanger()) {
       sendHelpRequest(BOUNTY_PER_FIRE_EXTINGUISHED / 2);
     }
   }
 
-  private void updateFireInformation() {
+  private List<GridPoint> updateFireInformation() {
+    List<FireLocationInformation> previouslyKnownFires = informationStore.getInformationOfType(FireLocationInformation.class);
+    List<GridPoint> previouslyKnownFirePoints = new ArrayList<>();
+    List<GridPoint> newFires = new ArrayList<>();
+    for (FireLocationInformation fireInfo : previouslyKnownFires) {
+      previouslyKnownFirePoints.add(fireInfo.getPosition());
+    }
+
     List<GridCell<Fire>> fireCells = findFiresInNeighborhood();
+    for (GridCell<Fire> fireCell : fireCells) {
+      GridPoint firePoint = fireCell.getPoint();
+      if (!previouslyKnownFirePoints.contains(firePoint)) {
+        newFires.add(firePoint);
+      }
+    }
+
+    // TODO Temporary before storing the time steps information was received
+    informationStore.clear();
     for (GridCell<Fire> fireCell : fireCells) {
       GridPoint firePoint = fireCell.getPoint();
       FireLocationInformation fireInformation = new FireLocationInformation(firePoint.getX(), firePoint.getY());
       informationStore.archive(fireInformation);
     }
+    return newFires;
   }
 
   private List<GridCell<Fire>> findFiresInNeighborhood() {
@@ -275,15 +303,18 @@ public final class Agent {
   private void communicateLocation() {
     GridPoint position = grid.getLocation(this);
     AgentLocationInformation location = new AgentLocationInformation(this, position.getX(), position.getY());
-    Message message = new Message(this, MessageScope.LOCAL, new MessageContent(location));
-    MessageMediator.sendMessage(message);
+    sendLocalMessage(location);
   }
 
   /** Sends a help request message */
   private void sendHelpRequest(int bountyOffered) {
     GridPoint position = grid.getLocation(this);
     HelpRequestInformation helpRequest = new HelpRequestInformation(this, position, bountyOffered);
-    Message message = new Message(this, MessageScope.LOCAL, new MessageContent(helpRequest));
+    sendLocalMessage(helpRequest);
+  }
+
+  private void sendLocalMessage(InformationPiece information) {
+    Message message = new Message(this, MessageScope.LOCAL, new MessageContent(information));
     MessageMediator.sendMessage(message);
   }
 

@@ -15,4 +15,9 @@ public class FireLocationInformation
     super(InformationType.FireLocation);
     position = new GridPoint(x, y);
   }
+
+  public FireLocationInformation(GridPoint position) {
+    super(InformationType.FireLocation);
+    this.position = position;
+  }
 }
