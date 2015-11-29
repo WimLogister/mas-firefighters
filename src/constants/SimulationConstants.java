@@ -17,6 +17,9 @@ public class SimulationConstants {
   /** Change with which wind is changing direction */
   public static final double WIND_CHANGE_PROB = 0.1;
   
+  /** The life points of each agent, fire deals 1 damage per step */
+  public static final int AGENT_LIFE_POINTS = 3;
+
   /** The distance around him that an agent can perceive the environment */
   public static final int AGENT_PERCEPTION_DISTANCE = 5;
 
@@ -33,5 +36,11 @@ public class SimulationConstants {
 
   /** Messages sent locally will be received by agents closer than this distance away */
   public static final int LOCAL_MESSAGE_RANGE = 10;
+
+  /** The cost of sending a message locally */
+  public static final int LOCAL_MESSAGE_COST = 1;
+
+  /** The cost of sending a message locally */
+  public static final int GLOBAL_MESSAGE_COST = 5 * LOCAL_MESSAGE_COST;
 
 }

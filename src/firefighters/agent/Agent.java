@@ -1,5 +1,6 @@
 package firefighters.agent;
 
+import static constants.SimulationConstants.AGENT_LIFE_POINTS;
 import static constants.SimulationConstants.BOUNTY_PER_FIRE_EXTINGUISHED;
 import static firefighters.utils.GridFunctions.getCellNeighborhood;
 import static firefighters.utils.GridFunctions.isOnFire;
@@ -67,11 +68,16 @@ public final class Agent {
   UtilityFunction utilityFunction;
 
   /** The life points of the agent, should be more than 1 to give them a chance of escaping the fire */
-  int lifePoints = 5;
+  @Setter(AccessLevel.PRIVATE)
+  int lifePoints = AGENT_LIFE_POINTS;
 
   AgentInformationStore informationStore;
 
+  /** Ratio of fires to agents in the region to request help */
   double firesToAgentsDangerThreshold = 5;
+      
+  /** The number of agents alive in the world */
+  static AgentStatistics agentStatistics = new AgentStatistics();
 
   public Agent(Grid<Object> grid,
                double movementSpeed,
@@ -89,6 +95,11 @@ public final class Agent {
     this.planner = new Planner(utilityFunction);
 
     MessageMediator.registerAgent(this);
+    agentStatistics.addAgent();
+  }
+
+  public void subtractMoney(int amount) {
+    money -= amount;
   }
 
   @ScheduledMethod(start = 1, interval = 1)
@@ -109,14 +120,19 @@ public final class Agent {
   }
   
   private void processInformationAndCommunicate() {
-    List<GridCell<Fire>> fireCells = findFiresInNeighborhood();
-    for (GridCell<Fire> fireCell : fireCells) {
-      GridPoint firePoint = fireCell.getPoint();
-      informationStore.archive(new FireLocationInformation(firePoint.getX(), firePoint.getY()));
-    }
+    updateFireInformation();
     // Example usage, sending the agent's location
     if (isInDanger()) {
       sendHelpRequest(BOUNTY_PER_FIRE_EXTINGUISHED / 2);
+    }
+  }
+
+  private void updateFireInformation() {
+    List<GridCell<Fire>> fireCells = findFiresInNeighborhood();
+    for (GridCell<Fire> fireCell : fireCells) {
+      GridPoint firePoint = fireCell.getPoint();
+      FireLocationInformation fireInformation = new FireLocationInformation(firePoint.getX(), firePoint.getY());
+      informationStore.archive(fireInformation);
     }
   }
 
@@ -166,8 +182,6 @@ public final class Agent {
   public void executeCurrentAction() {
     if (currentPlan != null && !currentPlan.isFinished()) {
       currentPlan.executeNextStep(this);
-      // With executing an action, the calculated utility is added to the agent's money
-      money = money + utilityFunction.calculateUtility(currentPlan);
     }
   }
 	
@@ -203,6 +217,7 @@ public final class Agent {
 		TreeBuilder.performance.increaseHumanLosses();
 		ContextUtils.getContext(this).remove(this);
     MessageMediator.deregisterAgent(this);
+    agentStatistics.removeAgent();
 	}
 	
 	/**
@@ -240,26 +255,20 @@ public final class Agent {
         numFires++;
       }
       assert numFires == 1 : "More than 1 fire cell founnd: " + numFires;
-      for(Fire f : toBeExtinguished){
-    	  f.extinguish();
-      }
     }
     for (Fire f : toBeExtinguished) {
       f.extinguish();
       if (f.getLifePoints() == 0) {
         // Fire is extinguished, receive bounty
         // TODO If 2 agents hose a fire in the same step they probably should receive half each
-        money += BOUNTY_PER_FIRE_EXTINGUISHED;
+        receiveBounty();
       }
     }
-    for (Fire f : toBeExtinguished) {
-      f.extinguish();
-      if (f.getLifePoints() == 0) {
-        // Fire is extinguished, receive bounty
-        // TODO If 2 agents hose a fire in the same step they probably should receive half each
-        money += BOUNTY_PER_FIRE_EXTINGUISHED;
-      }
-    }
+  }
+
+  private double receiveBounty() {
+    agentStatistics.addBounty();
+    return money += BOUNTY_PER_FIRE_EXTINGUISHED;
   }
 
   /** Communicates the agent's position locally */
@@ -289,6 +298,10 @@ public final class Agent {
 
   public void messageReceived(Message message) {
     informationStore.archive(message.getInformationContent());
+  }
+
+  public void decrementLifePoints() {
+    lifePoints--;
   }
 	
 

@@ -1,6 +1,7 @@
 package firefighters.actions;
 
 import static firefighters.utils.GridFunctions.findShortestPath;
+import static firefighters.utils.GridFunctions.getCellNeighborhood;
 import static firefighters.utils.GridFunctions.getNeighboringPoint;
 import static firefighters.utils.GridFunctions.getRandomNeighboringPoint;
 import static firefighters.utils.GridFunctions.isInFrontOfAgent;
@@ -22,6 +23,7 @@ import firefighters.pathfinding.GridState;
 import firefighters.utility.PlanUtilityComparator;
 import firefighters.utility.UtilityFunction;
 import firefighters.utils.Directions;
+import firefighters.world.Fire;
 
 @AllArgsConstructor
 public class Planner {
@@ -31,7 +33,7 @@ public class Planner {
   /** Returns a plan for the agent */
   public Plan devisePlan(Agent agent) {
     List<Plan> possiblePlans = discoverPossiblePlans(agent);
-    return Collections.max(possiblePlans, new PlanUtilityComparator(utilityFunction));
+    return Collections.max(possiblePlans, new PlanUtilityComparator(utilityFunction, agent));
   }
 
   // TODO Check if the square the agent is on is on fire
@@ -41,6 +43,12 @@ public class Planner {
 
     List<Plan> possiblePlans = new ArrayList<>();
     List<FireLocationInformation> fireCells = agent.getKnownFireLocations();
+
+    if (isAgentCellOnFire(grid, agentPosition)) {
+      System.out.println("On fire ");
+      // return deviseEmergencyPlan();
+    }
+
     for (FireLocationInformation fireInformation : fireCells) {
       GridPoint firePoint = fireInformation.getPosition();
       Path<GridState, GridAction> path = findShortestPath(grid, agentPosition, firePoint);
@@ -53,26 +61,35 @@ public class Planner {
       }
     }
     if (possiblePlans.size() == 0) {
-      // Logger.println("no plan " + fireCells.size());
-      // if (fireCells.size() > 0) {
-      // GridPoint firePoint = fireCells.get(0).getPoint();
-      // Logger.println(agentPosition + " fr " + firePoint + " mh "
-      // + Metrics.manhattanDistance(agentPosition, firePoint));
-      // }
       // Move randomly
-      List<AbstractAction> actions = new ArrayList<>();
-      MoveAndTurn move;
-      GridPoint randomPoint = getRandomNeighboringPoint(grid, agentPosition);
-      if (randomPoint == null)
-        move = new MoveAndTurn(Directions.getRandomDirection());
-      else
-        move = new MoveAndTurn(randomPoint, Directions.getRandomDirection());
-      actions.add(move);
-      possiblePlans.add(new Plan(actions));
+      Plan randomPlan = deviseRandomPlan(grid, agentPosition);
+      possiblePlans.add(randomPlan);
     } else {
       // Logger.println("Found plan");
     }
     return possiblePlans;
+  }
+
+  /** Called the agent is on a burning cell */
+  private List<Plan> deviseEmergencyPlan() {
+    return null;
+  }
+
+  private boolean isAgentCellOnFire(Grid<?> grid, GridPoint agentPosition) {
+    return getCellNeighborhood(grid, agentPosition, Fire.class, 0, true).size() > 0;
+  }
+
+  private Plan deviseRandomPlan(Grid<?> grid, GridPoint agentPosition) {
+    List<AbstractAction> actions = new ArrayList<>();
+    MoveAndTurn move;
+    GridPoint randomPoint = getRandomNeighboringPoint(grid, agentPosition);
+    if (randomPoint == null)
+      move = new MoveAndTurn(agentPosition, Directions.getRandomDirection());
+    else
+      move = new MoveAndTurn(randomPoint, Directions.getRandomDirection());
+    actions.add(move);
+    Plan randomPlan = new Plan(actions);
+    return randomPlan;
   }
 
   private List<AbstractAction> convertToPrimitiveActions(Path<GridState, GridAction> path, Directions agentDirection) {
@@ -81,10 +98,12 @@ public class Planner {
 
     List<AbstractAction> abstractActions = new ArrayList<>();
     List<GridAction> gridActions = path.getRoute();
-    if (gridActions.size() == 1) {
+    if (gridActions.size() == 0) {
+      System.out.println(agentPosition + " " + firePosition);
+    } else if (gridActions.size() == 1) {
       if (!isInFrontOfAgent(agentPosition, agentDirection, firePosition)) {
         Directions desiredDirection = findDirection(agentPosition, firePosition);
-        abstractActions.add(new MoveAndTurn(desiredDirection));
+        abstractActions.add(new MoveAndTurn(agentPosition, desiredDirection));
       }
       return abstractActions;
     } else {

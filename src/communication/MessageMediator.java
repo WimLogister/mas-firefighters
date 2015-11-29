@@ -1,5 +1,7 @@
 package communication;
 
+import static constants.SimulationConstants.GLOBAL_MESSAGE_COST;
+import static constants.SimulationConstants.LOCAL_MESSAGE_COST;
 import static constants.SimulationConstants.LOCAL_MESSAGE_RANGE;
 import static firefighters.utils.GridFunctions.getCellNeighborhood;
 
@@ -41,11 +43,11 @@ public class MessageMediator {
       INSTANCE.broadcastLocally(message);
     else if (message.getScope() == MessageScope.GLOBAL)
       INSTANCE.broadcastToAll(message);
-
   }
 
   /** Sends a message to all other agents */
   private void broadcastToAll(Message message) {
+    message.getSender().subtractMoney(GLOBAL_MESSAGE_COST);
     sendMessageTo(message, activeAgents);
   }
 
@@ -62,6 +64,8 @@ public class MessageMediator {
    */
   private void broadcastLocally(Message message) {
     Agent sender = message.getSender();
+    sender.subtractMoney(LOCAL_MESSAGE_COST);
+
     Grid<Object> grid = sender.getGrid();
     List<Agent> receivers = new ArrayList<Agent>();
     List<GridCell<Agent>> agentCells = getCellNeighborhood(grid,

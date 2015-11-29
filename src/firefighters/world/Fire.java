@@ -271,7 +271,8 @@ public class Fire {
 				TreeBuilder.performance.increaseFireCount();
 				// If there is a firefighter at the new location, the firefighter is being killed
 				for (Object object : grid.getObjectsAt(cLoc)){
-					if(object instanceof Agent) ((Agent) object).setLifePoints(0);
+          if (object instanceof Agent)
+            ((Agent) object).decrementLifePoints();
 				}
 			}
 		}
