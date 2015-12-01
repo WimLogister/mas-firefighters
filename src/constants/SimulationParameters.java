@@ -25,6 +25,9 @@ public class SimulationParameters {
   /** Initial direction of the wind */
   public static float windDirection;
   
+  /** Whether agents will share information about the fire */
+  public static boolean cooperativeAgents = true;
+
   /** 
    * We can set different types of weather (sunny, rainy, cloudy and windy) which result in different values for
    * velocity of the wind, quantity of rain, the chance with which fire can appear out of nowhere, etc.

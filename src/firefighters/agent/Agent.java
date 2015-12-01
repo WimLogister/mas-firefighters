@@ -1,5 +1,6 @@
 package firefighters.agent;
 
+import static constants.SimulationConstants.AGENT_LIFE_POINTS;
 import static constants.SimulationConstants.BOUNTY_PER_FIRE_EXTINGUISHED;
 import static firefighters.utils.GridFunctions.getCellNeighborhood;
 import static firefighters.utils.GridFunctions.isOnFire;
@@ -18,6 +19,18 @@ import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.ContextUtils;
+
+import communication.Message;
+import communication.MessageContent;
+import communication.MessageMediator;
+import communication.MessageScope;
+import communication.information.AgentInformationStore;
+import communication.information.AgentLocationInformation;
+import communication.information.FireLocationInformation;
+import communication.information.HelpRequestInformation;
+import communication.information.InformationPiece;
+
+import constants.SimulationParameters;
 import firefighters.actions.AbstractAction;
 import firefighters.actions.ExtinguishFirePlan;
 import firefighters.actions.MoveAndTurn;
@@ -56,8 +69,21 @@ public final class Agent {
   
   UtilityFunction utilityFunction;
 
-  @Setter
-  int lifePoints = 1;
+  /** The life points of the agent, should be more than 1 to give them a chance of escaping the fire */
+  @Setter(AccessLevel.PRIVATE)
+  int lifePoints = AGENT_LIFE_POINTS;
+
+  AgentInformationStore informationStore;
+
+  /** Ratio of fires to agents in the region to request help */
+  double firesToAgentsDangerThreshold = 5;
+      
+  /** The number of agents alive in the world */
+  static AgentStatistics agentStatistics = new AgentStatistics();
+
+  // TODO Combine with the utility function
+  /** If true new fires will be broadcast to other agents */
+  private boolean shareFireInformation = SimulationParameters.cooperativeAgents;
 
   public Agent(Grid<Object> grid,
                double movementSpeed,
@@ -71,7 +97,15 @@ public final class Agent {
     this.perceptionRange = perceptionRange;
     this.utilityFunction = utilityFunction;
 
-    planner = new Planner(utilityFunction);
+    this.informationStore = new AgentInformationStore();
+    this.planner = new Planner(utilityFunction);
+
+    MessageMediator.registerAgent(this);
+    agentStatistics.addAgent();
+  }
+
+  public void subtractMoney(int amount) {
+    money -= amount;
   }
 
   @ScheduledMethod(start = 1, interval = 1)
@@ -80,13 +114,79 @@ public final class Agent {
       kill();
       return;
     }
+    processInformationAndCommunicate();
     // TODO Check if we should revise the plan
     if (currentPlan == null || currentPlan.isFinished() || !isValid(currentPlan)) {
       currentPlan = planner.devisePlan(this);
     }
     executeCurrentAction();
+
+
   }
   
+  private void processInformationAndCommunicate() {
+    List<GridPoint> newFires = updateFireInformation();
+    if(shareFireInformation) {
+      for(GridPoint newFirePoint : newFires) {
+        FireLocationInformation fireLocation = new FireLocationInformation(newFirePoint);
+        sendLocalMessage(fireLocation);
+      }
+    }
+    
+    if (isInDanger()) {
+      sendHelpRequest(BOUNTY_PER_FIRE_EXTINGUISHED / 2);
+    }
+  }
+
+  private List<GridPoint> updateFireInformation() {
+    List<FireLocationInformation> previouslyKnownFires = informationStore.getInformationOfType(FireLocationInformation.class);
+    List<GridPoint> previouslyKnownFirePoints = new ArrayList<>();
+    List<GridPoint> newFires = new ArrayList<>();
+    for (FireLocationInformation fireInfo : previouslyKnownFires) {
+      previouslyKnownFirePoints.add(fireInfo.getPosition());
+    }
+
+    List<GridCell<Fire>> fireCells = findFiresInNeighborhood();
+    for (GridCell<Fire> fireCell : fireCells) {
+      GridPoint firePoint = fireCell.getPoint();
+      if (!previouslyKnownFirePoints.contains(firePoint)) {
+        newFires.add(firePoint);
+      }
+    }
+
+    // TODO Temporary before storing the time steps information was received
+    informationStore.clear();
+    for (GridCell<Fire> fireCell : fireCells) {
+      GridPoint firePoint = fireCell.getPoint();
+      FireLocationInformation fireInformation = new FireLocationInformation(firePoint.getX(), firePoint.getY());
+      informationStore.archive(fireInformation);
+    }
+    return newFires;
+  }
+
+  private List<GridCell<Fire>> findFiresInNeighborhood() {
+    GridPoint position = grid.getLocation(this);
+    // Update fire information
+    List<GridCell<Fire>> fireCells = getCellNeighborhood(grid, position, Fire.class, perceptionRange, true);
+    return fireCells;
+  }
+
+  private List<GridCell<Agent>> findAgentsInNeighborhood() {
+    GridPoint position = grid.getLocation(this);
+    // Update fire information
+    List<GridCell<Agent>> agentCells = getCellNeighborhood(grid, position, Agent.class, perceptionRange, true);
+    return agentCells;
+  }
+
+  /** Returns whether the agent is in danger and should request for assistance */
+  private boolean isInDanger() {
+    // TODO Determine some threshold
+    int fireCount = findFiresInNeighborhood().size();
+    int agentCount = findAgentsInNeighborhood().size();
+    double ratio = 1.0 * fireCount / agentCount;
+    return ratio > firesToAgentsDangerThreshold;
+  }
+
   /** Checks if the current plan is still valid */
   private boolean isValid(Plan currentPlan) {
     if (currentPlan instanceof ExtinguishFirePlan) {
@@ -110,8 +210,6 @@ public final class Agent {
   public void executeCurrentAction() {
     if (currentPlan != null && !currentPlan.isFinished()) {
       currentPlan.executeNextStep(this);
-      // With executing an action, the calculated utility is added to the agent's money
-      money = money + utilityFunction.calculateUtility(currentPlan);
     }
   }
 	
@@ -146,6 +244,8 @@ public final class Agent {
 	public void kill() {
 		TreeBuilder.performance.increaseHumanLosses();
 		ContextUtils.getContext(this).remove(this);
+    MessageMediator.deregisterAgent(this);
+    agentStatistics.removeAgent();
 	}
 	
 	/**
@@ -183,38 +283,57 @@ public final class Agent {
         numFires++;
       }
       assert numFires == 1 : "More than 1 fire cell founnd: " + numFires;
-      for(Fire f : toBeExtinguished){
-    	  f.extinguish();
-      }
     }
     for (Fire f : toBeExtinguished) {
       f.extinguish();
       if (f.getLifePoints() == 0) {
         // Fire is extinguished, receive bounty
         // TODO If 2 agents hose a fire in the same step they probably should receive half each
-        money += BOUNTY_PER_FIRE_EXTINGUISHED;
+        receiveBounty();
       }
     }
-    for (Fire f : toBeExtinguished) {
-      f.extinguish();
-      if (f.getLifePoints() == 0) {
-        // Fire is extinguished, receive bounty
-        // TODO If 2 agents hose a fire in the same step they probably should receive half each
-        money += BOUNTY_PER_FIRE_EXTINGUISHED;
-      }
-    }
+  }
+
+  private double receiveBounty() {
+    agentStatistics.addBounty();
+    return money += BOUNTY_PER_FIRE_EXTINGUISHED;
+  }
+
+  /** Communicates the agent's position locally */
+  private void communicateLocation() {
+    GridPoint position = grid.getLocation(this);
+    AgentLocationInformation location = new AgentLocationInformation(this, position.getX(), position.getY());
+    sendLocalMessage(location);
+  }
+
+  /** Sends a help request message */
+  private void sendHelpRequest(int bountyOffered) {
+    GridPoint position = grid.getLocation(this);
+    HelpRequestInformation helpRequest = new HelpRequestInformation(this, position, bountyOffered);
+    sendLocalMessage(helpRequest);
+  }
+
+  private void sendLocalMessage(InformationPiece information) {
+    Message message = new Message(this, MessageScope.LOCAL, new MessageContent(information));
+    MessageMediator.sendMessage(message);
   }
 
   /** Returns a list of the locations of fire cells the agent knows of */
-  public List<GridCell<Fire>> getKnownFireLocations() {
-    GridPoint agentPosition = grid.getLocation(this);
-    return getCellNeighborhood(grid, agentPosition, Fire.class, perceptionRange, false);
+  public List<FireLocationInformation> getKnownFireLocations() {
+    return informationStore.getInformationOfType(FireLocationInformation.class);
   }
 
 	public void checkWeather() {
-		
-		
+		// TODO: Need to check rain and wind. First need to know how these are modeled.
 	}
+
+  public void messageReceived(Message message) {
+    informationStore.archive(message.getInformationContent());
+  }
+
+  public void decrementLifePoints() {
+    lifePoints--;
+  }
 	
 
 }

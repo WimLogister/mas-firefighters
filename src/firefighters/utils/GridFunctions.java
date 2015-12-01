@@ -4,6 +4,7 @@ import static constants.SimulationConstants.MAX_SEARCH_DISTANCE;
 import static constants.SimulationConstants.RANDOM;
 import static constants.SimulationParameters.gridSize;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import repast.simphony.query.space.grid.GridCell;
@@ -134,16 +135,26 @@ public class GridFunctions {
                              MAX_SEARCH_DISTANCE);
   }
 
+  public static List<GridPoint> getNeighboringPoints(Grid<?> grid, GridPoint point) {
+    GridSuccessorFunction successorFunction = new GridSuccessorFunction(grid, null);
+    List<ImmutableTriple<GridState, GridAction, Double>> successors = successorFunction.apply(new GridState(point));
+    List<GridPoint> neighboringPoints = new ArrayList<>();
+    for (ImmutableTriple<GridState, GridAction, Double> successor : successors) {
+      GridPoint position = successor.getLeft().getPosition();
+      neighboringPoints.add(position);
+    }
+    return neighboringPoints;
+  }
+
   /**
    * Returns a random point at a distance one from the given point, or null if it is not legal to move to any
    * neighboring square
    */
   public static GridPoint getRandomNeighboringPoint(Grid<?> grid, GridPoint point) {
-    GridSuccessorFunction successorFunction = new GridSuccessorFunction(grid, null);
-    List<ImmutableTriple<GridState, GridAction, Double>> successors = successorFunction.apply(new GridState(point));
-    if (successors.size() == 0)
+    List<GridPoint> neighboringPoints = getNeighboringPoints(grid, point);
+    if (neighboringPoints.isEmpty())
       return null;
-    int rand = RANDOM.nextInt(successors.size());
-    return successors.get(rand).getLeft().getPosition();
+    int rand = RANDOM.nextInt(neighboringPoints.size());
+    return neighboringPoints.get(rand);
   }
 }

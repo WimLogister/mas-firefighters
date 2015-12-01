@@ -4,6 +4,7 @@ import java.util.Comparator;
 
 import lombok.AllArgsConstructor;
 import firefighters.actions.Plan;
+import firefighters.agent.Agent;
 
 /** Compares plans according to their utility */
 @AllArgsConstructor
@@ -12,9 +13,12 @@ public class PlanUtilityComparator
 
   private UtilityFunction utilityFunction;
 
+  private Agent agent;
+
   @Override
   public int compare(Plan planA, Plan planB) {
-    double utilityDifference = utilityFunction.calculateUtility(planA) - utilityFunction.calculateUtility(planB);
+    double utilityDifference = utilityFunction.calculateUtility(planA, agent)
+                               - utilityFunction.calculateUtility(planB, agent);
     return (int) Math.signum(utilityDifference);
   }
 
