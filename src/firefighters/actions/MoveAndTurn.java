@@ -43,6 +43,10 @@ public class MoveAndTurn implements PrimitiveAction {
     GridPoint currentPosition = grid.getLocation(agent);
     return GridFunctions.areAdjacent(currentPosition , newPos);
   }
+	
+	public String toString(){
+		return "Move and turn";
+	}
 
 
 }

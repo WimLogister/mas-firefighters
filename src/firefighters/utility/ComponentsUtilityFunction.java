@@ -58,6 +58,11 @@ public class ComponentsUtilityFunction extends DiscountedUtilityFunction{
 	
 	@Override
 	public double calculateUtility(AbstractAction action) {
+		//System.out.println("Fixed utility: " + fixedFunction.calculateUtility(action));
+		//System.out.println("Risk utility: " + weightRisk * riskFunction.calculateUtility(action));
+		//System.out.println("Cooperating utility: " + weightCooperating * cooperativeFunction.calculateUtility(action) );
+		//System.out.println("Checking weather utility: " + weatherFunction.calculateUtility(action));
+		
 		return fixedFunction.calculateUtility(action) + weightRisk * riskFunction.calculateUtility(action) + weightCooperating * cooperativeFunction.calculateUtility(action) + weatherFunction.calculateUtility(action);
 	}
 }

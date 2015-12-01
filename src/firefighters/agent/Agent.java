@@ -22,10 +22,12 @@ import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.ContextUtils;
 import repast.simphony.util.collections.IndexedIterable;
 import firefighters.actions.AbstractAction;
+import firefighters.actions.CheckWeather;
 import firefighters.actions.ExtinguishFirePlan;
 import firefighters.actions.MoveAndTurn;
 import firefighters.actions.Plan;
 import firefighters.actions.Planner;
+import firefighters.actions.PrimitiveAction;
 import firefighters.information.WeatherInformation;
 import firefighters.utility.UtilityFunction;
 import firefighters.utils.Directions;
@@ -61,9 +63,19 @@ public final class Agent {
   Plan currentPlan;
   
   UtilityFunction utilityFunction;
+  
+  AbstractAction previousAction;
+  
+  @Getter @Setter
+  List<GridPoint> knownFireLocations;
 
   @Setter
   int lifePoints = 1;
+  
+  @Getter
+  int tickWeatherLastChecked;
+  
+  int tick;
 
   public Agent(Grid<Object> grid,
                double movementSpeed,
@@ -76,19 +88,27 @@ public final class Agent {
     this.direction = Directions.getRandomDirection();
     this.perceptionRange = perceptionRange;
     this.utilityFunction = utilityFunction;
+    this.previousAction = null;
+    this.knownFireLocations = new ArrayList<GridPoint>();
+    this.tickWeatherLastChecked = 0;
+    this.tick = 0;
 
     planner = new Planner(utilityFunction);
   }
 
   @ScheduledMethod(start = 1, interval = 1)
 	public void step() {
+	  tick++;
     if (lifePoints == 0 || checkDeath()) {
       kill();
       return;
     }
+    if(!(previousAction instanceof CheckWeather)){
+    	//System.out.println("Previous action was not checking weather");
+    	knownFireLocations = lookForFires();
+    }
     // TODO Check if we should revise the plan
     if (currentPlan == null || currentPlan.isFinished() || !isValid(currentPlan)) {
-    	System.out.println("Plan devised");
       currentPlan = planner.devisePlan(this);
     }
     executeCurrentAction();
@@ -107,7 +127,6 @@ public final class Agent {
       if (action instanceof MoveAndTurn) {
         MoveAndTurn moveAction = (MoveAndTurn) action;
         GridPoint position = moveAction.getNewPos();
-        System.out.println("new position: " + position);
         if (isOnFire(grid, position))
           return false;
       }
@@ -117,9 +136,9 @@ public final class Agent {
 
   public void executeCurrentAction() {
     if (currentPlan != null && !currentPlan.isFinished()) {
+      previousAction = currentPlan.getSteps().get(0);
+      //System.out.println(previousAction);
       currentPlan.executeNextStep(this);
-      // With executing an action, the calculated utility is added to the agent's money
-      money = money + utilityFunction.calculateUtility(currentPlan);
     }
   }
 	
@@ -214,12 +233,20 @@ public final class Agent {
   }
 
   /** Returns a list of the locations of fire cells the agent knows of */
-  public List<GridCell<Fire>> getKnownFireLocations() {
+  public List<GridPoint> lookForFires() {
     GridPoint agentPosition = grid.getLocation(this);
-    return getCellNeighborhood(grid, agentPosition, Fire.class, perceptionRange, false);
+    List<GridCell<Fire>> fireCells = getCellNeighborhood(grid, agentPosition, Fire.class, perceptionRange, false);
+    List<GridPoint> firePoints = new ArrayList<GridPoint>();
+    for (GridCell<Fire> fireCell : fireCells) {
+        GridPoint firePoint = fireCell.getPoint();
+        firePoints.add(firePoint);
+    }
+    return firePoints;
   }
 
   public WeatherInformation checkWeather() {
+	tickWeatherLastChecked = tick;
+  	System.out.println("weather last checked agent: " + tickWeatherLastChecked);
     Vector2 wind = getCurrentWindVelocity();
 	// Check if there is rain in the agent's it surroundings
     GridPoint agentPosition = grid.getLocation(this);

@@ -12,7 +12,8 @@ public class Plan {
 	@NonNull @Getter private List<AbstractAction> steps;
 	
   public void executeNextStep(Agent agent) {
-    steps.remove(0).execute(agent);
+
+	  steps.remove(0).execute(agent);
 	}
 	
   public boolean isFinished() {

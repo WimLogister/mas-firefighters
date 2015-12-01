@@ -25,5 +25,9 @@ public class Extinguish implements PrimitiveAction {
     GridPoint agentPosition = grid.getLocation(agent);
     return isOnFire(grid, firePosition) && isInFrontOfAgent(agentPosition, agent.getDirection(), firePosition);
 	}
+	
+	public String toString(){
+		return "Extinguish fire at location: " + firePosition.getX() + "," + firePosition.getY();
+	}
 
 }

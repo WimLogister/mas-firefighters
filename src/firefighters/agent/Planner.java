@@ -31,37 +31,33 @@ public class Planner {
   public Plan devisePlan(Agent agent) {
     List<Plan> possiblePlans = discoverPossiblePlans(agent);
     Plan bestPlan = Collections.max(possiblePlans, new PlanUtilityComparator(utilityFunction));
+    if(bestPlan instanceof CheckWeatherExtinguishFirePlan) System.out.println("Chosen is the check weather plan");
+    else System.out.println("Chosen is any other plan");
     return bestPlan;
   }
-  
+
   // TODO Check if the square the agent is on is on fire
   private List<Plan> discoverPossiblePlans(Agent agent) {
     Grid<?> grid = agent.getGrid();
     GridPoint agentPosition = grid.getLocation(agent);
 
     List<Plan> possiblePlans = new ArrayList<>();
-    List<GridPoint> firePoints = agent.getKnownFireLocations();
-    for (GridPoint firePoint : firePoints) {
+    List<GridCell<Fire>> fireCells = agent.getKnownFireLocations();
+    for (GridCell<Fire> fireCell : fireCells) {
+      GridPoint firePoint = fireCell.getPoint();
       Path<GridState, GridAction> path = findShortestPath(grid, agentPosition, firePoint);
       if (path != null && path.isValidPath()) {
         // System.out.println("ag " + agentPosition + " fire  " + firePoint);
         List<AbstractAction> actions = convertToPrimitiveActions(path, agent.getDirection());
         actions.add(new Extinguish(firePoint));
-        Plan plan = new ExtinguishFirePlan(actions, firePoint);
-        possiblePlans.add(plan);
+        //Plan plan = new ExtinguishFirePlan(actions, firePoint);
+        //possiblePlans.add(plan);
         // Equivalent plan created, but with checking weather as first step
-        //Plan planWeather = new CheckWeatherExtinguishFirePlan(actions,firePoint, path, agent);
-        //possiblePlans.add(planWeather);
+        Plan planWeather = new CheckWeatherExtinguishFirePlan(actions,firePoint, path, agent);
+        possiblePlans.add(planWeather);
       }
     }
-    // Add the plan of checking the weather to the list of possible plans
-    AbstractAction cw = new CheckWeather();
-    List<AbstractAction> pw = new ArrayList<AbstractAction>();
-    pw.add(cw);
-    Plan plan = new Plan(pw);
-    possiblePlans.add(plan);
-    // If there are no plans, or only the plan of checking the weather
-    if (possiblePlans.size() == 0 || possiblePlans.size() == 1) {
+    if (possiblePlans.size() == 0) {
       // Logger.println("no plan " + fireCells.size());
       // if (fireCells.size() > 0) {
       // GridPoint firePoint = fireCells.get(0).getPoint();
