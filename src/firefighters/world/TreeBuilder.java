@@ -3,30 +3,36 @@ package firefighters.world;
 
 import static constants.SimulationConstants.MAX_FIRE_AGENT_SPEED;
 import static constants.SimulationParameters.gridSize;
+import static constants.SimulationParameters.setParameters;
 
 import java.util.Random;
 
-import performance.OverallPerformance;
 import repast.simphony.context.Context;
 import repast.simphony.context.space.grid.GridFactory;
 import repast.simphony.context.space.grid.GridFactoryFinder;
 import repast.simphony.dataLoader.ContextBuilder;
 import repast.simphony.engine.environment.RunEnvironment;
 import repast.simphony.parameter.Parameters;
+import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridBuilderParameters;
 import repast.simphony.space.grid.GridDimensions;
 import repast.simphony.space.grid.RandomGridAdder;
 import repast.simphony.space.grid.SimpleGridAdder;
+import repast.simphony.space.grid.StickyBorders;
+import repast.simphony.space.grid.StrictBorders;
 import repast.simphony.space.grid.WrapAroundBorders;
+import cern.jet.random.Uniform;
 
 import com.badlogic.gdx.math.Vector2;
 
 import constants.SimulationConstants;
 import constants.SimulationParameters;
 import firefighters.agent.Agent;
+import firefighters.utility.ComponentsUtilityFunction;
 import firefighters.utility.ExpectedBountiesUtilityFunction;
 import firefighters.utility.UtilityFunction;
+import performance.OverallPerformance;
 
 
 public class TreeBuilder implements ContextBuilder<Object> {
@@ -50,10 +56,12 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		Parameters params = RunEnvironment.getInstance().getParameters();
 		SimulationParameters.setParameters(params);
 
+		final Uniform urng = RandomHelper.getUniform();
+
 		GridFactory gridFactory = GridFactoryFinder.createGridFactory(null);
 		Grid<Object> grid = gridFactory.createGrid("grid",
                                                context,
-                                               new GridBuilderParameters<Object>(new WrapAroundBorders(),
+                                               new GridBuilderParameters<Object>(new StrictBorders(),
                                                                                  new SimpleGridAdder<Object>(),
                                                                                  true,
                                                                                  gridSize,
@@ -133,8 +141,9 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		 */
 		for (int i = 0; i < SimulationParameters.agentCount; i++) {
 			double money = 0;
-     // UtilityFunction utilityFunction = new ComponentsUtilityFunction(-10,1,grid);
-			UtilityFunction utilityFunction = new ExpectedBountiesUtilityFunction();
+		UtilityFunction utilityFunction = new ComponentsUtilityFunction(1,1,grid);
+			//UtilityFunction utilityFunction = new ExpectedBountiesUtilityFunction();
+			//UtilityFunction utilityFunction = new CheckWeatherUtilityFunction();
 		      
       Agent agent = new Agent(grid, MAX_FIRE_AGENT_SPEED, money, SimulationParameters.perceptionRange, utilityFunction);
 			context.add(agent);

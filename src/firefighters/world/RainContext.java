@@ -1,11 +1,13 @@
 package firefighters.world;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import com.badlogic.gdx.math.Vector2;
 
 import constants.SimulationConstants;
+import constants.SimulationParameters;
 import cern.jet.random.Uniform;
 import firefighters.utils.Directions;
 import repast.simphony.engine.schedule.ScheduledMethod;
@@ -48,12 +50,12 @@ public class RainContext {
 		if(noRainGroups > 0) chance = (chance / (noRainGroups)) * 0.01;
 		double f = urng.nextDouble();
 		if (f < chance) {
-			//System.out.println(f + " ::: " + chance);
+			// Let rain appear 
 			int x = rand.nextInt((gridSize - 0) + 1);
 			int y = rand.nextInt((gridSize - 0) + 1);
 			int[] newLoc = {x,y};
 			// Let new raingroup appear in random location
-			RainGroup rg = new RainGroup(ContextUtils.getContext(this),grid,strength,newLoc,gridSize);
+			RainGroup rg = new RainGroup(ContextUtils.getContext(this),grid,strength,newLoc);
 			noRainGroups++;
 			rainGroups.add(rg);
 		}
@@ -65,17 +67,27 @@ public class RainContext {
 			float y = getCurrentWindVelocity().y;
 			Vector2 velRain = new Vector2(x,y);	
 			velRain.setLength(getCurrentWindVelocity().len()*0.9f); // Rain speed is a bit lower than that of the wind
-				
+			
+			List<Rain> toRemove1 = new ArrayList<Rain>();
 			// Let rain be carried by the wind
 			if (urng.nextDouble() < velRain.len()) {
 				for(Rain rain: rg.getRainObjects()){
-					Directions dir = Directions.fromVectorToDir(velRain);
-						
+					Directions dir = Directions.fromVectorToDir(velRain);	
 					GridPoint pt = grid.getLocation(rain);
 					int cX = pt.getX() + dir.xDiff;
-					int cY = pt.getY() + dir.yDiff;				
-					grid.moveTo(rain, cX, cY);
+					int cY = pt.getY() + dir.yDiff;
+					
+					// If new rain-location is out of borders, delete this rain object
+					// In this way the cloud "travels" out of the grid
+					if(cX < 0 || cX >= SimulationParameters.gridSize || cY < 0 || cY >= SimulationParameters.gridSize){
+						toRemove1.add(rain);
+					}
+					else grid.moveTo(rain, cX, cY);
 				}
+			}
+			
+			for(Rain r : toRemove1){
+				rg.removeRain(r);
 			}
 			
 			// Remove the raingroup from the grid and from our list if it passed a certain max time
