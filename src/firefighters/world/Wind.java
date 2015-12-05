@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2;
 
 import constants.SimulationConstants;
 import cern.jet.random.Uniform;
+import firefighters.utils.Directions;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
@@ -22,15 +23,17 @@ public class Wind {
 	private Vector2 velocity; 
 	private float changable; // Influence on how much the wind is changed every step
 	
-	public Wind(Grid<Object> grid, Vector2 velocity, Float changable){
+	public Wind(Grid<Object> grid, float windFactorSpeed, Directions direction, Float changable){
 		this.grid = grid;
-		this.velocity = velocity;
-		if(changable < 0 || changable > 1) throw new IllegalArgumentException("Value changable is out of range!");
-		else this.changable = changable;
+		Vector2 windVelocity = new Vector2();
+		windVelocity.x = windFactorSpeed * SimulationConstants.MAX_WIND_SPEED;
+		windVelocity.setAngle(Directions.fromDirToAngle(direction));
+		this.velocity = windVelocity;
+		this.changable = changable;
 	}
 
 	/**
-	 * With each step some random noise is added so that the direction of the wind changes gradually over time
+	 * With each step some random noise is added so that the direction of the wind can change gradually over time
 	 */
 	@ScheduledMethod(start = 1, interval = 1)
 	public void blow(){

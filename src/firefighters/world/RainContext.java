@@ -22,20 +22,15 @@ import repast.simphony.util.collections.IndexedIterable;
 public class RainContext {
 	
 	private Grid<Object> grid;
-	private double appearChance;
 	private int noRainGroups;
 	private static final Uniform urng = RandomHelper.getUniform();
 	Random rand = new Random();
-	private int gridSize;
 	private ArrayList<RainGroup> rainGroups = new ArrayList<RainGroup>();
 	private int strength;
 	
-	public RainContext(Grid<Object> grid, double appearChance, int gridSize, int strength){
+	public RainContext(Grid<Object> grid){
 		this.grid = grid;
-		this.appearChance = appearChance;
 		this.noRainGroups = 0;
-		this.gridSize = gridSize;
-		this.strength = strength;
 	}
 	
 	/**
@@ -46,16 +41,20 @@ public class RainContext {
 	@ScheduledMethod(start = 1, interval = 1, priority =0)
 	public void rain(){
 		// Let new raingroups appear with a certain chance
-		double chance = appearChance;
-		if(noRainGroups > 0) chance = (chance / (noRainGroups)) * 0.01;
+		double chance = SimulationParameters.rainProb;
+		// The probability of rain appearing decreases if there is already rain in the grid
+		if(noRainGroups == 1) chance = (chance / (noRainGroups)) * 0.5;
+		if(noRainGroups == 2) chance = (chance / (noRainGroups)) * 0.1;
+		if(noRainGroups > 2) chance = (chance / (noRainGroups)) * 0.01;
 		double f = urng.nextDouble();
 		if (f < chance) {
 			// Let rain appear 
-			int x = rand.nextInt((gridSize - 0) + 1);
-			int y = rand.nextInt((gridSize - 0) + 1);
+			System.out.println("appear");
+			int x = rand.nextInt((SimulationParameters.gridSize - 0) + 1);
+			int y = rand.nextInt((SimulationParameters.gridSize - 0) + 1);
 			int[] newLoc = {x,y};
 			// Let new raingroup appear in random location
-			RainGroup rg = new RainGroup(ContextUtils.getContext(this),grid,strength,newLoc);
+			RainGroup rg = new RainGroup(ContextUtils.getContext(this),grid,newLoc);
 			noRainGroups++;
 			rainGroups.add(rg);
 		}
@@ -89,16 +88,6 @@ public class RainContext {
 			for(Rain r : toRemove1){
 				rg.removeRain(r);
 			}
-			
-			// Remove the raingroup from the grid and from our list if it passed a certain max time
-			if(rg.getTick()>rg.getMaxTick()) {
-				for(Rain rain : rg.getRainObjects()){
-					ContextUtils.getContext(this).remove(rain);
-				}
-				ContextUtils.getContext(this).remove(rg);
-				toRemove.add(rg);
-			}
-			rg.incrementTick();
 		}
 		
 		// Remove the raingroups from our list which were removed from the context

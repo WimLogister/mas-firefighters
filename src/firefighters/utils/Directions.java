@@ -66,8 +66,35 @@ public enum Directions {
       dir = Directions.SOUTH_EAST;
     return dir;
   }
+  
+  /**
+   * Projection of direction to angle
+   */
+  public static float fromDirToAngle(Directions dir){
+	  float angle;
+	  if(dir.equals(EAST)) angle = 0;
+	  else if(dir.equals(NORTH_EAST)) angle = 45;
+	  else if(dir.equals(NORTH)) angle = 90;
+	  else if(dir.equals(NORTH_WEST)) angle = 135;
+	  else if(dir.equals(WEST)) angle = 180;
+	  else if(dir.equals(SOUTH_WEST)) angle = 225;
+	  else if(dir.equals(SOUTH)) angle = 270;
+	  else angle = 315;
+	  return angle;
+  }
 
   public String toString() {
     return "(" + xDiff + "," + yDiff + ")";
+  }
+  
+  public static Directions fromStringToDir(String string){
+	  if(string.equalsIgnoreCase("north")) return Directions.NORTH;
+	  else if(string.equalsIgnoreCase("north_east")) return Directions.NORTH_EAST;
+	  else if(string.equalsIgnoreCase("north_west")) return Directions.NORTH_WEST;
+	  else if(string.equalsIgnoreCase("east")) return Directions.EAST;
+	  else if(string.equalsIgnoreCase("west")) return Directions.WEST;
+	  else if(string.equalsIgnoreCase("south_west")) return Directions.SOUTH_WEST;
+	  else if(string.equalsIgnoreCase("south")) return Directions.SOUTH;
+	  else return Directions.SOUTH_EAST;
   }
 }

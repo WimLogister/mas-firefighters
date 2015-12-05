@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import lombok.Getter;
+
 import com.badlogic.gdx.math.Vector2;
 
 import constants.SimulationParameters;
@@ -18,55 +20,28 @@ import repast.simphony.util.collections.IndexedIterable;
 
 /**
  * Contains multiple rain-objects
- * Travels for a certain amount of time
  */
 public class RainGroup {
 
 	private int size; // Number of rain objects in the "cloud"
 	private Context<Object> context;
 	private Grid<Object> grid;
-	private int tick;
-	private int maxTick;
+	@Getter
 	private ArrayList<Rain> rainObjects = new ArrayList<Rain>();
 	Random rand = new Random();
 	private List<int[]> stillToAppear = new ArrayList<int[]>();
 	
 	/**
-	 * Raingroup contains certain amount of rain-objects and travels for a certain amount of time
-	 * which is determined by its strength (the stronger the rain, the bigger the size of the raingroup
-	 * and the longer it will travel)
+	 * Raingroup contains certain amount of rain-objects
 	 */
-	public RainGroup(Context<Object> context, Grid<Object> grid, int strength, int[] location){
+	public RainGroup(Context<Object> context, Grid<Object> grid, int[] location){
 		this.context = context;
 		this.grid = grid;
-		this.tick = 0;
-		int maxSize;
-		int minSize;
-		int maxMTick;
-		int minMTick;
-		int gridSize = SimulationParameters.gridSize;
-		// Determine the ranges by the strength of the rain
-		if(strength == 1) {
-			maxMTick = 100;
-			minMTick = 50;
-			maxSize = (int) (gridSize * gridSize * 0.1);
-			minSize = (int) (gridSize * gridSize * 0.05);
-		}
-		else if(strength == 2) {
-			maxMTick = 200;
-			minMTick = 100;
-			maxSize = (int) (gridSize * gridSize * 0.3);
-			minSize = (int) (gridSize * gridSize * 0.1);
-		}
-		else if(strength == 3) {
-			maxMTick = 300;
-			minMTick = 20;
-			maxSize = (int) (gridSize * gridSize * 0.5);
-			minSize = (int) (gridSize * gridSize * 0.3);
-		}
-		else throw new IllegalArgumentException("Strength value of rain is out of range!");	
-		this.maxTick = rand.nextInt((maxMTick - minMTick) + 1) + minMTick;
-		this.size = rand.nextInt((maxSize - minSize) + 1) + minSize;
+		int averageSize = SimulationParameters.averageRainSize;
+		// Size can vary with 10 percent of the average size given
+		int plusOrMin = rand.nextInt(2);
+		if(plusOrMin==0) this.size = (int) ((int) averageSize + rand.nextDouble() * 0.1);
+		else this.size = (int) ((int) averageSize - rand.nextDouble() * 0.1);
 		fillRain(location);
 	}	
 	
@@ -88,9 +63,9 @@ public class RainGroup {
 	 */
 	public void fillRain(int[] location){
 		// Get width and height of grid
-		int width = (int) Math.floor(Math.sqrt(size));
-		int rest = size - (width*width);
-		
+		//int width = (int) Math.floor(Math.sqrt(size));
+		//int rest = size - (width*width);
+		int width = size;
 		// Fill the square		
 		for(int x=location[0]; x<location[0]+width; x++){
 			for(int y=location[1]; y<location[1]+width; y++){
@@ -100,7 +75,7 @@ public class RainGroup {
 		
 		// Add the remaining rain-objects in random places around
 		// Make list of locations to choose from
-		ArrayList<int[]> toChooseFrom = new ArrayList<int[]>();
+		/*ArrayList<int[]> toChooseFrom = new ArrayList<int[]>();
 		// Start, down left
 		int y=location[1]-1;
 		for(int x = location[0]-1; x<location[0]+width; x++){
@@ -132,23 +107,7 @@ public class RainGroup {
 			int x = toChooseFrom.get(i)[0];
 			int y1 = toChooseFrom.get(i)[1];
 			checkAddInGrid(x,y1);
-		}	
-	}
-	
-	public int getTick(){
-		return tick;
-	}
-	
-	public int getMaxTick(){
-		return maxTick;
-	}
-	
-	public ArrayList<Rain> getRainObjects(){
-		return rainObjects;
-	}
-	
-	public void incrementTick(){
-		this.tick++;
+		}	*/
 	}
 	
 	public void checkAddInGrid(int x, int y){

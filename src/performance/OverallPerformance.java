@@ -34,13 +34,8 @@ public class OverallPerformance {
 		this.humanLosses = 0;
 		this.forestLosses = 0;
 		this.firesExtinguished = 0;
-		int difficulty;
 		// Influence of weather on difficulty for fighting the fire
-		if(SimulationParameters.weather == "sunny") difficulty = 4;
-		else if(SimulationParameters.weather == "windy") difficulty = 3;
-		else if(SimulationParameters.weather == "rainy") difficulty = 1;
-		else difficulty = 2; // cloudy
-		this.difficulty = difficulty;
+		this.difficulty = 1;
 		this.performance = 0;
 	}
 	
