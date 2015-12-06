@@ -97,12 +97,12 @@ public class OverallPerformance {
 		double windPer = getWindFraction() * 100;
 		
 		// Value between 0 and 10.000
-		System.out.println("ratioPoints " + ratioPoints + " ratioFireAgent " + ratioFireAgent + " forestLostPer " + forestLostPer + " humanlostper " + humanLostPer + " firesexper " + firesExtinguishedPer + " rain per " + rainPer + " windPer " + windPer);
+		//System.out.println("ratioPoints " + ratioPoints + " ratioFireAgent " + ratioFireAgent + " forestLostPer " + forestLostPer + " humanlostper " + humanLostPer + " firesexper " + firesExtinguishedPer + " rain per " + rainPer + " windPer " + windPer);
 		performance = (this.ratioPoints + this.ratioFireAgent) * (windPer + (100-rainPer) + 3 * firesExtinguishedPer + 5 * (100-humanLostPer) - 2 * forestLostPer);
 		if(performance<0) performance = 0;
 		if(performance>10000) performance = 10000;
 		
-		System.out.println(performance);
+		//System.out.println(performance);
 		this.performance = performance;
 		return performance;
 	}

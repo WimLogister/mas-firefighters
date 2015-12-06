@@ -11,14 +11,14 @@ public abstract class DiscountedUtilityFunction
   /** The discount factor */
   private double alpha;
 
-  public abstract double calculateUtility(AbstractAction action);
+  public abstract double calculateUtility(AbstractAction action, Agent agent);
 
   @Override
   public double calculateUtility(Plan plan, Agent agent) {
     double planUtility = 0;
     double discountFactor = 1;
     for (AbstractAction action : plan.getSteps()) {
-      planUtility = calculateUtility(action) * discountFactor;
+      planUtility = calculateUtility(action, agent) * discountFactor;
       discountFactor *= alpha;
     }
     return planUtility;

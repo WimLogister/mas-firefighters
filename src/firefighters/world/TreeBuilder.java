@@ -32,6 +32,7 @@ import firefighters.agent.Agent;
 import firefighters.utility.ComponentsUtilityFunction;
 import firefighters.utility.ExpectedBountiesUtilityFunction;
 import firefighters.utility.UtilityFunction;
+import firefighters.utils.TickCounter;
 import performance.OverallPerformance;
 
 
@@ -60,6 +61,9 @@ public class TreeBuilder implements ContextBuilder<Object> {
                                                                                               // size
 		GridDimensions dims = grid.getDimensions();
 		RandomGridAdder<Object> ra = new RandomGridAdder<Object>(); // To random add objects in the space
+		
+		TickCounter tickCounter = new TickCounter();
+		context.add(tickCounter);
 		
 		// Fill the grid completely with trees
 		for (int d0=0; d0<dims.getDimension(0); d0++){

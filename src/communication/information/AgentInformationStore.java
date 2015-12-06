@@ -29,6 +29,18 @@ public class AgentInformationStore {
   public void clear() {
     informationStore.clear();
   }
+  
+  public void clearType(InformationType type){
+    List<InformationPiece> toRemove = new ArrayList<>();
+	for(InformationPiece p : informationStore){
+	  if(p.getInformationType().equals(type)) {
+	    toRemove.add(p);
+	  }
+	}
+	for(InformationPiece p : toRemove){
+	  informationStore.remove(p);
+	}
+  }
 
   /**
    * Get information of a specific type. Example usage: <br>

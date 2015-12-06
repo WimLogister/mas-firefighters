@@ -63,14 +63,19 @@ public class Planner {
     if (possiblePlans.size() == 0) {
       // Move randomly
       Plan randomPlan = deviseRandomPlan(grid, agentPosition);
-      possiblePlans.add(randomPlan);
+      possiblePlans.add(randomPlan);	
     } else {
-      // Logger.println("Found plan");
+    	// Logger.println("Found plan");
     }
+    List<AbstractAction> steps = new ArrayList<AbstractAction>();
+    steps.add(new CheckWeather());
+    Plan planWeather = new CheckWeatherPlan(steps);
+    possiblePlans.add(planWeather);
+  
     return possiblePlans;
   }
 
-  /** Called the agent is on a burning cell */
+  /** Called when the agent is on a burning cell */
   private List<Plan> deviseEmergencyPlans(Grid<?> grid, GridPoint agentPosition) {
     List<Plan> possiblePlans = new ArrayList<>();
     for (GridPoint point : getNeighboringPoints(grid, agentPosition)) {

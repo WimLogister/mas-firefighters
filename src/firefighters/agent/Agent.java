@@ -8,6 +8,8 @@ import static firefighters.utils.GridFunctions.isOnFire;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.badlogic.gdx.math.Vector2;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -19,7 +21,6 @@ import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.ContextUtils;
-
 import communication.Message;
 import communication.MessageContent;
 import communication.MessageMediator;
@@ -29,7 +30,8 @@ import communication.information.AgentLocationInformation;
 import communication.information.FireLocationInformation;
 import communication.information.HelpRequestInformation;
 import communication.information.InformationPiece;
-
+import communication.information.InformationType;
+import communication.information.WeatherInformation;
 import constants.SimulationParameters;
 import firefighters.actions.AbstractAction;
 import firefighters.actions.ExtinguishFirePlan;
@@ -38,8 +40,11 @@ import firefighters.actions.Plan;
 import firefighters.actions.Planner;
 import firefighters.utility.UtilityFunction;
 import firefighters.utils.Directions;
+import firefighters.utils.TickCounter;
 import firefighters.world.Fire;
+import firefighters.world.Rain;
 import firefighters.world.TreeBuilder;
+import firefighters.world.Wind;
 
 /** The only distinction between agents is going to be their Behavior implementation, so this class is final */
 @Getter
@@ -80,6 +85,8 @@ public final class Agent {
       
   /** The number of agents alive in the world */
   static AgentStatistics agentStatistics = new AgentStatistics();
+  
+  int tickWeatherLastChecked;
 
   // TODO Combine with the utility function
   /** If true new fires will be broadcast to other agents */
@@ -96,6 +103,7 @@ public final class Agent {
     this.direction = Directions.getRandomDirection();
     this.perceptionRange = perceptionRange;
     this.utilityFunction = utilityFunction;
+    this.tickWeatherLastChecked = 0;
 
     this.informationStore = new AgentInformationStore();
     this.planner = new Planner(utilityFunction);
@@ -115,13 +123,11 @@ public final class Agent {
       return;
     }
     processInformationAndCommunicate();
-    // TODO Check if we should revise the plan
+    // TODO Check if we should revise the plan   
     if (currentPlan == null || currentPlan.isFinished() || !isValid(currentPlan)) {
       currentPlan = planner.devisePlan(this);
     }
     executeCurrentAction();
-
-
   }
   
   private void processInformationAndCommunicate() {
@@ -155,7 +161,7 @@ public final class Agent {
     }
 
     // TODO Temporary before storing the time steps information was received
-    informationStore.clear();
+    informationStore.clearType(InformationType.FireLocation);
     for (GridCell<Fire> fireCell : fireCells) {
       GridPoint firePoint = fireCell.getPoint();
       FireLocationInformation fireInformation = new FireLocationInformation(firePoint.getX(), firePoint.getY());
@@ -322,10 +328,22 @@ public final class Agent {
   public List<FireLocationInformation> getKnownFireLocations() {
     return informationStore.getInformationOfType(FireLocationInformation.class);
   }
+  
+  public WeatherInformation getWeatherInformation(){
+	  return (WeatherInformation) informationStore.getInformationOfType(WeatherInformation.class);
+  }
 
-	public void checkWeather() {
-		// TODO: Need to check rain and wind. First need to know how these are modeled.
-	}
+  /** Check weather and store in agent's information store */
+  public void checkWeather() {
+	informationStore.clearType(InformationType.WeatherInformation);
+    Vector2 wind = Wind.getWindVelocity();
+	// Check if there is rain in the agent's it surroundings
+	GridPoint agentPosition = grid.getLocation(this);
+	List<GridCell<Rain>> rain = getCellNeighborhood(grid, agentPosition, Rain.class, perceptionRange, true);
+	WeatherInformation currentWeather = new WeatherInformation(wind,rain);
+	informationStore.archive(currentWeather);
+	this.tickWeatherLastChecked = TickCounter.getTick();
+  }
 
   public void messageReceived(Message message) {
     informationStore.archive(message.getInformationContent());

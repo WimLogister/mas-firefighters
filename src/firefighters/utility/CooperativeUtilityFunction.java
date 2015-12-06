@@ -20,7 +20,7 @@ public class CooperativeUtilityFunction extends DiscountedUtilityFunction {
 	private Grid<Object> grid;
 	
 	@Override
-	public double calculateUtility(AbstractAction action) {
+	public double calculateUtility(AbstractAction action, Agent agent) {
 		double utility = 0;
 		
 		if (action instanceof Extinguish) {
