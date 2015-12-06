@@ -47,7 +47,7 @@ public class RainGroup {
 	
 	@ScheduledMethod(start = 1, interval = 1, priority =0)
 	public void step(){
-		Vector2 windVelocity = getCurrentWindVelocity();
+		Vector2 windVelocity = Wind.getWindVelocity();
 		Directions dir = Directions.fromVectorToDir(windVelocity);
 		List<int[]> newLocs = new ArrayList<int[]>();
 		for(int[] loc : stillToAppear){
@@ -116,6 +116,7 @@ public class RainGroup {
 		else {
 			Rain rain = new Rain(grid);
 			context.add(rain);
+			TreeBuilder.performance.increaseRainCount();
 			grid.moveTo(rain, x, y);
 			rainObjects.add(rain);
 		}
@@ -129,13 +130,8 @@ public class RainGroup {
 		return containsRain;
 	}
 	
-	public Vector2 getCurrentWindVelocity(){
-		IndexedIterable<Wind> winds = ContextUtils.getContext(this).getObjects(Wind.class);
-		Wind currentWind = winds.iterator().next();
-		return currentWind.getVelocity();
-	}
-	
 	public void removeRain(Rain rain){
+		TreeBuilder.performance.decreaseRainCount();
 		context.remove(rain);
 		rainObjects.remove(rain);
 	}

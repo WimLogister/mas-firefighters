@@ -49,7 +49,6 @@ public class RainContext {
 		double f = urng.nextDouble();
 		if (f < chance) {
 			// Let rain appear 
-			System.out.println("appear");
 			int x = rand.nextInt((SimulationParameters.gridSize - 0) + 1);
 			int y = rand.nextInt((SimulationParameters.gridSize - 0) + 1);
 			int[] newLoc = {x,y};
@@ -62,10 +61,10 @@ public class RainContext {
 		ArrayList<RainGroup> toRemove = new ArrayList<RainGroup>();
 		for(RainGroup rg : rainGroups){
 			// Get velocity vector of the rain
-			float x = getCurrentWindVelocity().x; 
-			float y = getCurrentWindVelocity().y;
+			float x = Wind.getWindVelocity().x; 
+			float y = Wind.getWindVelocity().y;
 			Vector2 velRain = new Vector2(x,y);	
-			velRain.setLength(getCurrentWindVelocity().len()*0.9f); // Rain speed is a bit lower than that of the wind
+			velRain.setLength(Wind.getWindVelocity().len()*0.9f); // Rain speed is a bit lower than that of the wind
 			
 			List<Rain> toRemove1 = new ArrayList<Rain>();
 			// Let rain be carried by the wind
@@ -87,6 +86,7 @@ public class RainContext {
 			
 			for(Rain r : toRemove1){
 				rg.removeRain(r);
+				TreeBuilder.performance.decreaseRainCount();
 			}
 		}
 		
@@ -95,11 +95,5 @@ public class RainContext {
 			rainGroups.remove(rg);
 			noRainGroups--;
 		}
-	}
-
-	public Vector2 getCurrentWindVelocity(){
-		IndexedIterable<Wind> winds = ContextUtils.getContext(this).getObjects(Wind.class);
-		Wind currentWind = winds.iterator().next();
-		return currentWind.getVelocity();
 	}
 }

@@ -192,7 +192,7 @@ public class Fire {
 	 */
 	public void updateVelocity(){
 		// Adjust velocity vector of fire according to that of the wind
-		velocity.add(getCurrentWindVelocity()).clamp(0, SimulationConstants.MAX_FIRE_SPEED);	
+		velocity.add(Wind.getWindVelocity()).clamp(0, SimulationConstants.MAX_FIRE_SPEED);	
 		
 		int noRainHeading = checkRainInHeading();
 		// If it is raining the current grid
@@ -361,11 +361,5 @@ public class Fire {
 	
 	public void incrementLifePoints(){
 		if(lifePoints < maxLifePoints) lifePoints ++;
-	}
-	
-	public Vector2 getCurrentWindVelocity(){
-		IndexedIterable<Wind> winds = ContextUtils.getContext(this).getObjects(Wind.class);
-		Wind currentWind = winds.iterator().next();
-		return currentWind.getVelocity();
 	}
 }

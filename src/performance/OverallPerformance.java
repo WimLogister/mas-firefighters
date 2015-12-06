@@ -1,7 +1,9 @@
 package performance;
 
 import repast.simphony.engine.schedule.ScheduledMethod;
+import constants.SimulationConstants;
 import constants.SimulationParameters;
+import firefighters.world.Wind;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,17 +28,31 @@ public class OverallPerformance {
 	@Getter
 	private int fireCount;
 	@Getter
-	private int difficulty;
+	private int rainCount;
 	@Getter @Setter
 	private double performance;
+	private double ratioPoints;
+	private double ratioFireAgent;
 	
 	public OverallPerformance(){
 		this.humanLosses = 0;
 		this.forestLosses = 0;
 		this.firesExtinguished = 0;
-		// Influence of weather on difficulty for fighting the fire
-		this.difficulty = 1;
 		this.performance = 0;
+	}
+	
+	public void init(){
+		// Difficulty is determined by the ratio of lifePointsTree : lifePointsFire
+		// If the fire is stronger than the trees, the fire is harder to extinguish
+		this.ratioPoints = (double) SimulationParameters.lifePointsFire / (double) SimulationParameters.lifePointsTree; 
+		// Clamp values of ratio
+		if(ratioPoints<0.5) ratioPoints = 0.5;
+		if(ratioPoints>5) ratioPoints = 5;
+		
+		// Ratio initial number of fires : agents. Normalized by ratio 1 : 25
+		this.ratioFireAgent = ((double) SimulationParameters.fireCount / (double) SimulationParameters.agentCount) / 0.04;
+		if(ratioFireAgent<0.5) ratioFireAgent = 0.5;
+		if(ratioFireAgent>5) ratioPoints = 5;
 	}
 	
 	@ScheduledMethod(start = 1, interval = 1, priority =0)
@@ -60,28 +76,34 @@ public class OverallPerformance {
 		fireCount++;
 	}
 	
-	public double calculate(){
-		double forestLostPer = ((double)forestLosses / (double)(SimulationParameters.gridSize * SimulationParameters.gridSize)) * 100;
-		double humanLostPer = ((double)humanLosses / (double) SimulationParameters.agentCount) * 100;
-		
-		// Category of fire, determined by combination of forest losses and human losses
-		int category;
-		if(forestLostPer + humanLostPer < 25) category = 1;
-		else if(forestLostPer + humanLostPer < 50) category = 2;
-		else if(forestLostPer + humanLostPer < 75) category = 3;
-		else if(forestLostPer + humanLostPer < 100) category = 4;
-		else if(forestLostPer + humanLostPer < 150) category = 5;
-		else category = 6;
-			
-		int noStartFires = SimulationParameters.fireCount;
-		int lifePointsFire = SimulationParameters.lifePointsFire;
-		int lifePointsTree = SimulationParameters.lifePointsTree;
-		
-		double firesExtinguishedPer = ((double)firesExtinguished / (double)(fireCount + noStartFires)) * 100;
-		
-		return firesExtinguishedPer + category * 10 + difficulty * 20 + noStartFires * 10 + lifePointsFire * 10 - forestLostPer - humanLostPer - (lifePointsTree -1) * 10;
-		
+	public void increaseRainCount(){
+		rainCount++;
 	}
 	
-
+	public void decreaseRainCount(){
+		rainCount--;
+	}
+	
+	/** What fraction of the maximum wind speed is the current wind speed */
+	public float getWindFraction(){
+		return SimulationConstants.MAX_WIND_SPEED / Wind.getWindVelocity().len();
+	}
+	
+	public double calculate(){
+		double forestLostPer = ((double) forestLosses / (double)(SimulationParameters.gridSize * SimulationParameters.gridSize)) * 100;
+		double humanLostPer = ((double) humanLosses / (double) SimulationParameters.agentCount) * 100;		
+		double firesExtinguishedPer = ((double) firesExtinguished / (double)(fireCount + SimulationParameters.fireCount)) * 100;
+		double rainPer = ((double) rainCount / (double)(SimulationParameters.gridSize * SimulationParameters.gridSize)) * 100;
+		double windPer = getWindFraction() * 100;
+		
+		// Value between 0 and 10.000
+		System.out.println("ratioPoints " + ratioPoints + " ratioFireAgent " + ratioFireAgent + " forestLostPer " + forestLostPer + " humanlostper " + humanLostPer + " firesexper " + firesExtinguishedPer + " rain per " + rainPer + " windPer " + windPer);
+		performance = (this.ratioPoints + this.ratioFireAgent) * (windPer + (100-rainPer) + 3 * firesExtinguishedPer + 5 * (100-humanLostPer) - 2 * forestLostPer);
+		if(performance<0) performance = 0;
+		if(performance>10000) performance = 10000;
+		
+		System.out.println(performance);
+		this.performance = performance;
+		return performance;
+	}
 }

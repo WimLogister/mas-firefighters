@@ -135,7 +135,8 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		Fire fire4 = new Fire(grid,fire_vel,1,SimulationParameters.lifePointsFire,FIRE_PROB);
 		context.add(fire4);
 		grid.moveTo(fire4, loc4);*/
-
+		
+		performance.init();
 		return context;
 	}	
 }
