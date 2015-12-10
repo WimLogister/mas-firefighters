@@ -41,6 +41,15 @@ public class AgentInformationStore {
 	  informationStore.remove(p);
 	}
   }
+  
+  public InformationPiece getLatestInformationOfType(InformationType type){
+	  if(informationStore.isEmpty()) return null;
+	  for(int n = informationStore.size()-1; n>=0; n--){
+		  InformationPiece p = informationStore.get(n);
+		  if(p.getInformationType().equals(type)) return p;
+	  }
+	  return null;
+  }
 
   /**
    * Get information of a specific type. Example usage: <br>

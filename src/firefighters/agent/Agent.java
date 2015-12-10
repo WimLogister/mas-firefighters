@@ -91,6 +91,9 @@ public final class Agent {
   // TODO Combine with the utility function
   /** If true new fires will be broadcast to other agents */
   private boolean shareFireInformation = SimulationParameters.cooperativeAgents;
+  
+  @Getter
+  private static GridPoint agentPosition;
 
   public Agent(Grid<Object> grid,
                double movementSpeed,
@@ -118,6 +121,7 @@ public final class Agent {
 
   @ScheduledMethod(start = 1, interval = 1)
 	public void step() {
+	  agentPosition = grid.getLocation(this); 
     if (lifePoints == 0 || checkDeath()) {
       kill();
       return;
@@ -127,8 +131,23 @@ public final class Agent {
     if (currentPlan == null || currentPlan.isFinished() || !isValid(currentPlan)) {
       currentPlan = planner.devisePlan(this);
     }
-    executeCurrentAction();
+    //executeCurrentAction();
+    executeCurrentActionInclWeather(25);
   }
+  
+  // For now: let agent check weather every n steps
+  private void executeCurrentActionInclWeather(int n){
+	  if(TickCounter.getTick() % n == 0){
+		  //System.out.println(TickCounter.getTick());
+		  //System.out.println("Checking weather");
+		  this.checkWeather();
+		  currentPlan = null;
+	  } else {
+		  if (currentPlan != null && !currentPlan.isFinished()) {
+		      currentPlan.executeNextStep(this);
+		  }
+	  }
+  } 
   
   private void processInformationAndCommunicate() {
     List<GridPoint> newFires = updateFireInformation();
@@ -288,7 +307,7 @@ public final class Agent {
         toBeExtinguished.add(f);
         numFires++;
       }
-      assert numFires == 1 : "More than 1 fire cell founnd: " + numFires;
+      assert numFires == 1 : "More than 1 fire cell found: " + numFires;
     }
     for (Fire f : toBeExtinguished) {
       f.extinguish();
@@ -335,6 +354,7 @@ public final class Agent {
 
   /** Check weather and store in agent's information store */
   public void checkWeather() {
+	//System.out.println("checking the weather");
 	informationStore.clearType(InformationType.WeatherInformation);
     Vector2 wind = Wind.getWindVelocity();
 	// Check if there is rain in the agent's it surroundings

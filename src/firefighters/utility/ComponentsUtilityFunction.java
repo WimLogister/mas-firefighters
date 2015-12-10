@@ -11,6 +11,7 @@ import repast.simphony.space.grid.GridPoint;
 import constants.SimulationConstants;
 import constants.SimulationParameters;
 import firefighters.actions.AbstractAction;
+import firefighters.actions.CheckWeather;
 import firefighters.actions.Extinguish;
 import firefighters.actions.Plan;
 import firefighters.agent.Agent;
@@ -23,10 +24,6 @@ import static firefighters.utils.GridFunctions.getCellNeighborhood;
  * Risk taking versus playing safe agents (how dangerous is the fire they try to extinguish, determined by ratio fire:agents in its surrounding)
  * Selfish versus cooperative agents (bounty received for helping other agents)
  * Honest versus lying agents (providing wrong information results in lower/higher utility or less costs for lying/)
- * 
- * Important for all agents:
- * Saving the forest: utility for hosing the fire
- * Bonus for really extinguishing it? 
  */
 
 public class ComponentsUtilityFunction extends DiscountedUtilityFunction{
@@ -39,6 +36,8 @@ public class ComponentsUtilityFunction extends DiscountedUtilityFunction{
 	private double weightCooperating;
 	// ... lying
 	//private double weightLying;
+	// If weather information is not used, this weight is set to 0, else to 1
+	private double weightWeather;
 	private Grid<Object> grid;
 	
 	private ExpectedBountiesUtilityFunction expectedBounties;
@@ -50,17 +49,24 @@ public class ComponentsUtilityFunction extends DiscountedUtilityFunction{
 		this.weightRisk = weightRisk;
 		this.weightCooperating = weightCooperating;
 		this.grid = grid;
+		if(SimulationParameters.useWeatherInformation) this.weightWeather = 1;
+		else this.weightWeather = 0;
 		this.expectedBounties = new ExpectedBountiesUtilityFunction();
 		this.riskFunction = new RiskTakingUtilityFunction(grid);
 		this.cooperativeFunction = new CooperativeUtilityFunction(grid);
-		this.weatherFunction = new WeatherUtilityFunction();
+		this.weatherFunction = new WeatherUtilityFunction(grid);
 	}
 	
 	@Override
 	public double calculateUtility(AbstractAction action, Agent agent) {
-		return expectedBounties.calculateUtility(action, agent) 
-				+ weatherFunction.calculateUtility(action, agent)
+		double utility = expectedBounties.calculateUtility(action, agent) 
+				// TODO: finetune check weather utility function
+				//+ weightWeather * weatherFunction.calculateUtility(action, agent)
 				+ weightRisk * riskFunction.calculateUtility(action, agent) 
 				+ weightCooperating * cooperativeFunction.calculateUtility(action, agent);
+		//if(action instanceof CheckWeather){
+			//System.out.println(agent + ":: " + action + " :: " + utility);
+		//}
+		return utility;
 	}
 }

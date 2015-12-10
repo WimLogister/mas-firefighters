@@ -60,12 +60,6 @@
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
-				<parameter name="weather" displayName="Weather" type="java.lang.String" 
-						defaultValue="sunny" 
-						isReadOnly="false" 
-						converter="repast.simphony.parameter.StringConverterFactory$StringStringConverter"
-									
-		/>
 				<parameter name="wind_speed" displayName="Fraction Max Wind Speed" type="float" 
 						defaultValue="0.5" 
 						isReadOnly="false" 

@@ -11,13 +11,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.badlogic.gdx.math.Vector2;
+import com.jogamp.opengl.math.VectorUtil.Winding;
+
 import lombok.AllArgsConstructor;
+import repast.simphony.query.space.grid.GridCell;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import search.Path;
-
 import communication.information.FireLocationInformation;
-
+import communication.information.InformationType;
+import communication.information.WeatherInformation;
 import firefighters.agent.Agent;
 import firefighters.pathfinding.GridAction;
 import firefighters.pathfinding.GridState;
@@ -25,6 +29,7 @@ import firefighters.utility.PlanUtilityComparator;
 import firefighters.utility.UtilityFunction;
 import firefighters.utils.Directions;
 import firefighters.world.Fire;
+import communication.information.InformationType;
 
 @AllArgsConstructor
 public class Planner {
@@ -48,6 +53,10 @@ public class Planner {
     if (isAgentCellOnFire(grid, agentPosition)) {
       return deviseEmergencyPlans(grid, agentPosition);
     }
+    
+    if(dangerOfSpreading(agent,grid,agentPosition)){
+      return deviseEmergencyPlans(grid,agentPosition);
+    }
 
     for (FireLocationInformation fireInformation : fireCells) {
       GridPoint firePoint = fireInformation.getPosition();
@@ -66,11 +75,11 @@ public class Planner {
       possiblePlans.add(randomPlan);	
     } else {
     	// Logger.println("Found plan");
+        List<AbstractAction> steps = new ArrayList<AbstractAction>();
+        steps.add(new CheckWeather());
+        Plan planWeather = new CheckWeatherPlan(steps);
+        possiblePlans.add(planWeather);
     }
-    List<AbstractAction> steps = new ArrayList<AbstractAction>();
-    steps.add(new CheckWeather());
-    Plan planWeather = new CheckWeatherPlan(steps);
-    possiblePlans.add(planWeather);
   
     return possiblePlans;
   }
@@ -92,6 +101,26 @@ public class Planner {
 
   private boolean isAgentCellOnFire(Grid<?> grid, GridPoint agentPosition) {
     return getCellNeighborhood(grid, agentPosition, Fire.class, 0, true).size() > 0;
+  }
+  
+  /** With wind direction taken into account, returns true if the wind is blowing the fire
+   * to the agent's grid soon
+   */
+  private boolean dangerOfSpreading(Agent agent, Grid<?> grid, GridPoint agentPosition){
+	// If there is weather information available see if the wind is blowing the fire in the agent's direction
+	boolean result = false;
+	if(agent.getInformationStore().getLatestInformationOfType(InformationType.WeatherInformation) != null){
+      WeatherInformation weatherInfo = (WeatherInformation) agent.getInformationStore().getLatestInformationOfType(InformationType.WeatherInformation);
+	  for (GridCell<Fire> fireCell : getCellNeighborhood(grid, agentPosition, Fire.class, 1, false)) {
+		GridPoint gp = fireCell.getPoint();
+		int fireX = gp.getX();
+		int fireY = gp.getY();
+	    Vector2 wind = weatherInfo.getWind();
+	    Directions dir = Directions.fromAngleToDir(wind.angle());
+	    if(fireX + dir.xDiff == agentPosition.getX() && fireY + dir.yDiff == agentPosition.getY()) result = true;
+	  }    	
+	}
+	return result;
   }
 
   private Plan deviseRandomPlan(Grid<?> grid, GridPoint agentPosition) {

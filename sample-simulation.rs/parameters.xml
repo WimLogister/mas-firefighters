@@ -54,6 +54,12 @@
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
+				<parameter name="use_weather_information" displayName="Use Weather Information" type="boolean" 
+						defaultValue="true" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$BooleanConverter"
+									
+		/>
 				<parameter name="life_points_fire" displayName="Life Points Fire" type="int" 
 						defaultValue="3" 
 						isReadOnly="false" 

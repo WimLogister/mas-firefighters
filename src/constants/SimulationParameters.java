@@ -43,6 +43,9 @@ public class SimulationParameters {
   
   /** Whether agents will share information about the fire */
   public static boolean cooperativeAgents = true;
+  
+  /** Wether or not agents will use weather information, useful for experiment */
+  public static boolean useWeatherInformation;
 
   /** Sets the simulation's parameters */
   public static void setParameters(Parameters params) {
@@ -63,6 +66,7 @@ public class SimulationParameters {
     rainProb = ((Double) params.getValue("rain_prob"));
     checkBound("rain_prob",rainProb);
     averageRainSize = (Integer) params.getValue("average_rain_size");
+    useWeatherInformation = (boolean) params.getValue("use_weather_information");
     if(averageRainSize<0|averageRainSize>gridSize)
     	throw new IllegalArgumentException("Value of average rain size out of range!");
   }
