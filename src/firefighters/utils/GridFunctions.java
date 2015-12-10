@@ -15,7 +15,7 @@ import search.AstarSearch;
 import search.ImmutableTriple;
 import search.Path;
 import firefighters.pathfinding.GridAction;
-import firefighters.pathfinding.GridManhattanHeuristic;
+import firefighters.pathfinding.GridHammingDistanceHeuristic;
 import firefighters.pathfinding.GridPointGoalTest;
 import firefighters.pathfinding.GridState;
 import firefighters.pathfinding.GridSuccessorFunction;
@@ -120,17 +120,17 @@ public class GridFunctions {
 
   /** Returns the shortest path from the source to the target point */
   public static Path<GridState, GridAction> findShortestPath(Grid<?> grid, GridPoint source, GridPoint target) {
-    AstarSearch<GridState, GridAction, GridSuccessorFunction, GridManhattanHeuristic, GridPointGoalTest> aStar = createAstarPathFinder(grid,
+    AstarSearch<GridState, GridAction, GridSuccessorFunction, GridHammingDistanceHeuristic, GridPointGoalTest> aStar = createAstarPathFinder(grid,
                                                                                                                                        target);
     Path<GridState, GridAction> shortestPath = aStar.findPath(new GridState(source));
     return shortestPath;
   }
 
   /** Returns an instance of AstarSearch to search for a path to the specified target point */
-  public static AstarSearch<GridState, GridAction, GridSuccessorFunction, GridManhattanHeuristic, GridPointGoalTest>
+  public static AstarSearch<GridState, GridAction, GridSuccessorFunction, GridHammingDistanceHeuristic, GridPointGoalTest>
       createAstarPathFinder(Grid<?> grid, GridPoint target) {
     return new AstarSearch<>(new GridSuccessorFunction(grid, target),
-                             new GridManhattanHeuristic(target),
+                             new GridHammingDistanceHeuristic(target),
                              new GridPointGoalTest(target),
                              MAX_SEARCH_DISTANCE);
   }
