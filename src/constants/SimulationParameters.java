@@ -1,7 +1,7 @@
 package constants;
 
-import firefighters.utils.Directions;
 import repast.simphony.parameter.Parameters;
+import firefighters.utils.Directions;
 
 public class SimulationParameters {
 
@@ -42,7 +42,7 @@ public class SimulationParameters {
   public static int averageRainSize;
   
   /** Whether agents will share information about the fire */
-  public static boolean cooperativeAgents = true;
+  public static boolean cooperativeAgents = false;
 
   /** Sets the simulation's parameters */
   public static void setParameters(Parameters params) {

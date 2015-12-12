@@ -4,19 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import com.badlogic.gdx.math.Vector2;
-
-import constants.SimulationConstants;
-import constants.SimulationParameters;
-import cern.jet.random.Uniform;
-import firefighters.utils.Directions;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
-import repast.simphony.space.grid.RandomGridAdder;
 import repast.simphony.util.ContextUtils;
 import repast.simphony.util.collections.IndexedIterable;
+import cern.jet.random.Uniform;
+
+import com.badlogic.gdx.math.Vector2;
+
+import constants.SimulationParameters;
+import firefighters.utils.Directions;
 
 
 public class RainContext {
@@ -49,7 +48,7 @@ public class RainContext {
 		double f = urng.nextDouble();
 		if (f < chance) {
 			// Let rain appear 
-			System.out.println("appear");
+      // System.out.println("appear");
 			int x = rand.nextInt((SimulationParameters.gridSize - 0) + 1);
 			int y = rand.nextInt((SimulationParameters.gridSize - 0) + 1);
 			int[] newLoc = {x,y};

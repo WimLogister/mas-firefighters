@@ -4,3 +4,4 @@
 /debug.log
 /Repast.settings
 *.log.*
+/output/
