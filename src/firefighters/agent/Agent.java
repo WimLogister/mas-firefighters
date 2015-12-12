@@ -92,7 +92,7 @@ public final class Agent {
   int currentTick;
   
   @Getter
-  private static GridPoint agentPosition;
+  private GridPoint agentPosition;
 
   public Agent(Grid<Object> grid,
                double movementSpeed,
@@ -352,14 +352,14 @@ public final class Agent {
   }
   
   /** Communicates the information about the wind globally */
-  /*private void communicateWindInfo(){
-	  if(this.hasWeatherInfo()){
-		  WeatherInformation weather = (WeatherInformation) informationStore.getLatestInformationOfType(InformationType.WeatherInformation);
-		  Vector2 windInfo = weather.getWind();
-		  WeatherInformation toCommunicate = new WeatherInformation(windInfo, new ArrayList<GridCell<Rain>>(),currentTick);
-		  sendGlobalMessage(toCommunicate);
-	  }
-  }*/
+  private void communicateWindInfo() {
+    if (this.hasWeatherInfo()) {
+      WeatherInformation weather = (WeatherInformation) informationStore.getInformationOfType(WeatherInformation.class);
+      Vector2 windInfo = weather.getWind();
+      WeatherInformation toCommunicate = new WeatherInformation(windInfo, new ArrayList<GridCell<Rain>>(), currentTick);
+      sendGlobalMessage(toCommunicate);
+    }
+  }
 
   private void sendLocalMessage(InformationPiece information) {
 	if(money >= SimulationConstants.LOCAL_MESSAGE_COST){
@@ -471,7 +471,7 @@ public final class Agent {
 					// Has to do with the way the rain is influencing the speed of the fire in Fire.java
 					if(!rainInFireLoc && rainInNewPoint){
 						float newSpeed = fireVelocity.len() - SimulationConstants.MAX_FIRE_SPEED * 0.2f;
-						fireVelocity.setLength(newSpeed);
+              fireVelocity.setLength(newSpeed);
 						fireVelocity.clamp(0, SimulationConstants.MAX_FIRE_SPEED);
 					}
 					// Value between 0 and 1
