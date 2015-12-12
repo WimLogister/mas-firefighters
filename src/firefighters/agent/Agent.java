@@ -195,7 +195,7 @@ public final class Agent {
     }
 
     // TODO Temporary before storing the time steps information was received
-    informationStore.clearType(InformationType.FireLocation);
+    informationStore.clear(FireLocationInformation.class);
     for (GridCell<Fire> fireCell : fireCells) {
       GridPoint firePoint = fireCell.getPoint();
       FireLocationInformation fireInformation = new FireLocationInformation(firePoint.getX(), firePoint.getY());
@@ -348,6 +348,7 @@ public final class Agent {
 
   /** Sends a help request message */
   private void sendHelpRequest(int bountyOffered) {
+    // System.out.println("Requesting help ");
     GridPoint position = grid.getLocation(this);
     HelpRequestInformation helpRequest = new HelpRequestInformation(this, position, bountyOffered);
     sendLocalMessage(helpRequest);

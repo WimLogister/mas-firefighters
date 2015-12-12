@@ -16,9 +16,6 @@ import firefighters.actions.CheckWeather;
 import firefighters.actions.Extinguish;
 import firefighters.actions.Plan;
 import firefighters.agent.Agent;
-import firefighters.utils.Directions;
-import firefighters.world.Fire;
-import static firefighters.utils.GridFunctions.getCellNeighborhood;
 
 /**
  * Utility is determined by setting different weights to the different components of the utility function:
@@ -27,7 +24,8 @@ import static firefighters.utils.GridFunctions.getCellNeighborhood;
  * Honest versus lying agents (providing wrong information results in lower/higher utility or less costs for lying/)
  */
 
-public class ComponentsUtilityFunction extends DiscountedUtilityFunction{
+public class ComponentsUtilityFunction
+    implements UtilityFunction {
 	
 	// Weight for different components of the utility function,
 	// the higher the weight the more the particular agent is tended to act ...
@@ -43,7 +41,7 @@ public class ComponentsUtilityFunction extends DiscountedUtilityFunction{
 	private double weightWeather;
 	private Grid<Object> grid;
 	
-	private ExpectedBountiesUtilityFunction expectedBounties;
+	private ExpectedBountiesUtilityFunction fixedFunction;
 	private RiskTakingUtilityFunction riskFunction;
 	private CooperativeUtilityFunction cooperativeFunction;
 	private WeatherUtilityFunction weatherFunction;
@@ -54,26 +52,22 @@ public class ComponentsUtilityFunction extends DiscountedUtilityFunction{
 		this.grid = grid;
 		if(SimulationParameters.useWeatherInformation) this.weightWeather = 1;
 		else this.weightWeather = 0;
-		this.expectedBounties = new ExpectedBountiesUtilityFunction();
+		this.fixedFunction = new ExpectedBountiesUtilityFunction();
 		this.riskFunction = new RiskTakingUtilityFunction(grid);
 		this.cooperativeFunction = new CooperativeUtilityFunction(grid);
 		this.weatherFunction = new WeatherUtilityFunction(grid);
 	}
 	
-	@Override
-	public double calculateUtility(AbstractAction action, Agent agent) {
-		double weatherUtility;
+	}
+	
+  @Override
+  public double calculateUtility(Plan plan, Agent agent) {
+  	double weatherUtility;
 		if(SimulationParameters.useWeatherInformation) 
 			weatherUtility = weightWeather * weatherFunction.calculateUtility(action, agent);
 		else 
 			weatherUtility = 0;
-		double utility = expectedBounties.calculateUtility(action, agent) 
-				// TODO: finetune check weather utility function
-				+ weightRisk * riskFunction.calculateUtility(action, agent) 
-				+ weightCooperating * cooperativeFunction.calculateUtility(action, agent);
-		//if(action instanceof CheckWeather){
-			//System.out.println(agent + ":: " + action + " :: " + utility);
-		//}
-		return utility;
-	}
+    return fixedFunction.calculateUtility(plan, agent) + weightRisk * riskFunction.calculateUtility(plan, agent)
+           + weightCooperating * cooperativeFunction.calculateUtility(plan, agent);
+  }
 }

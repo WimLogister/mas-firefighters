@@ -7,6 +7,8 @@ import firefighters.world.Wind;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import repast.simphony.engine.schedule.ScheduledMethod;
+import constants.SimulationParameters;
 
 /**
  * How well the agents perform in terms of conditions of the world, weather, fire-category,
@@ -57,7 +59,7 @@ public class OverallPerformance {
 	
 	@ScheduledMethod(start = 1, interval = 1, priority =0)
 	public void step(){
-		this.setPerformance(calculate());		
+    this.setPerformance(calculate());
 	}
 	
 	public void increaseHumanLosses(){

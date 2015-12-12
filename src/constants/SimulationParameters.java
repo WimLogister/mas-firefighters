@@ -1,7 +1,7 @@
 package constants;
 
-import firefighters.utils.Directions;
 import repast.simphony.parameter.Parameters;
+import firefighters.utils.Directions;
 
 public class SimulationParameters {
 

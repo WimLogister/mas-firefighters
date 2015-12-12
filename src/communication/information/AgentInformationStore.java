@@ -51,6 +51,17 @@ public class AgentInformationStore {
 	  return null;
   }
 
+  /** Erases all information of the specified type */
+  public <T extends InformationPiece> void clear(Class<T> informationClass) {
+    List<InformationPiece> retainedInformation = new ArrayList<>();
+    for (InformationPiece infoPiece : informationStore) {
+      if (infoPiece.getClass() != informationClass) {
+        retainedInformation.add(infoPiece);
+      }
+    }
+    informationStore = retainedInformation;
+  }
+
   /**
    * Get information of a specific type. Example usage: <br>
    * {@code List<HelpRequestInformation> helpRequests = informationStore.getInformationOfType(HelpRequestInformation.class)}
