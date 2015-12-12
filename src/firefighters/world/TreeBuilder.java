@@ -112,30 +112,6 @@ public class TreeBuilder implements ContextBuilder<Object> {
 			ra.add(grid, fire);
 		}
 		
-		/*Vector2 fire_vel = new Vector2();
-		// Initialize with random speed (with a maximum value 25% of the maximum fire speed) and direction
-		fire_vel.x = rand.nextFloat() * ((SimulationConstants.MAX_FIRE_SPEED * 0.25f) - 0) + 0;
-		fire_vel.setAngle(rand.nextFloat() * (360 - 0) + 0);
-		int[] loc1 = {10,10};
-		int[] loc2 = {10,40};
-		int[] loc3 = {40,10};
-		int[] loc4 = {40,40};
-		Fire fire = new Fire(grid,fire_vel,1,SimulationParameters.lifePointsFire,FIRE_PROB);
-		context.add(fire);
-		grid.moveTo(fire, loc1);
-		
-		Fire fire2 = new Fire(grid,fire_vel,1,SimulationParameters.lifePointsFire,FIRE_PROB);
-		context.add(fire2);
-		grid.moveTo(fire2, loc2);
-		
-		Fire fire3 = new Fire(grid,fire_vel,1,SimulationParameters.lifePointsFire,FIRE_PROB);
-		context.add(fire3);
-		grid.moveTo(fire3, loc3);
-		
-		Fire fire4 = new Fire(grid,fire_vel,1,SimulationParameters.lifePointsFire,FIRE_PROB);
-		context.add(fire4);
-		grid.moveTo(fire4, loc4);*/
-		
 		performance.init();
 		return context;
 	}	
