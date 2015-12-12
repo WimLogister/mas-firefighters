@@ -134,16 +134,17 @@ public final class Agent {
     }
     processInformationAndCommunicate();
     // TODO Check if we should revise the plan
+    // Emergency plan for if the fire is likely to blow to the agent's current cell
     if (this.danger(this.getAgentPosition())>1.5){
     	currentPlan = planner.deviseEmergencyPlan(this);
     }
     else if (currentPlan == null || currentPlan.isFinished() || !isValid(currentPlan)) {
       currentPlan = planner.devisePlan(this);
     }
-    //executeCurrentAction();
+    executeCurrentAction();
     // TODO: process in utility function
     // Letting the agent checking the weather every 25 steps
-    executeCurrentActionInclWeather(25);
+    //executeCurrentActionInclWeather(25);
   }
   
   // For now: let agent check weather every n steps
@@ -173,9 +174,10 @@ public final class Agent {
       sendHelpRequest(BOUNTY_PER_FIRE_EXTINGUISHED / 2);
     }
     
-    // Process weather information 
-    // (communicating weather information happens in checkWeather())
-    
+    // TODO: Process weather information by merging the rain information of different information pieces into one
+    //if(hasWeatherInfo()){
+    	
+   // }
   }
 
   private List<GridPoint> updateFireInformation() {
@@ -390,11 +392,10 @@ public final class Agent {
   /** 
    * Check weather and store this information in agent's information store 
    * Agent communicates this information directly with certain probability
-   * TODO: probability of sharing information
    */
   public void checkWeather() {
 	// Clears any old weather information
-	informationStore.clearType(InformationType.WeatherInformation);
+	informationStore.clear(WeatherInformation.class);
     Vector2 wind = Wind.getWindVelocity();
 	// Check if there is rain in the agent's it surroundings
 	GridPoint agentPosition = grid.getLocation(this);
@@ -403,7 +404,7 @@ public final class Agent {
 	informationStore.archive(currentWeather);
 	this.tickWeatherLastChecked = currentTick;
 	if(willShare()){
-		sendLocalMessage(currentWeather);
+		sendGlobalMessage(currentWeather);
 	}
   }
   
@@ -421,7 +422,9 @@ public final class Agent {
 	if(this.hasWeatherInfo()){
 		int toCheckX = toCheck.getX();
 		int toCheckY = toCheck.getY();
-		WeatherInformation weatherInfo = (WeatherInformation) this.getInformationStore().getLatestInformationOfType(InformationType.WeatherInformation);
+		List<WeatherInformation> weatherInfos = this.getInformationStore().getInformationOfType(WeatherInformation.class);
+		// Take the last piece of weather information
+		WeatherInformation weatherInfo = weatherInfos.get(weatherInfos.size()-1);
 		int timePassed = currentTick - weatherInfo.getTimeStamp();
 		if(timePassed<10){
 			List<GridCell<Rain>> rainInfo = weatherInfo.getRain();
@@ -489,6 +492,8 @@ public final class Agent {
   }
 
   public void messageReceived(Message message) {
+	// TODO: If message is of type WeatherInformation, then check if there is any older weather information in the information store
+	// and delete that first
     informationStore.archive(message.getInformationContent());
   }
 

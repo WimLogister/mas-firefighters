@@ -29,27 +29,6 @@ public class AgentInformationStore {
   public void clear() {
     informationStore.clear();
   }
-  
-  public void clearType(InformationType type){
-    List<InformationPiece> toRemove = new ArrayList<>();
-	for(InformationPiece p : informationStore){
-	  if(p.getInformationType().equals(type)) {
-	    toRemove.add(p);
-	  }
-	}
-	for(InformationPiece p : toRemove){
-	  informationStore.remove(p);
-	}
-  }
-  
-  public InformationPiece getLatestInformationOfType(InformationType type){
-	  if(informationStore.isEmpty()) return null;
-	  for(int n = informationStore.size()-1; n>=0; n--){
-		  InformationPiece p = informationStore.get(n);
-		  if(p.getInformationType().equals(type)) return p;
-	  }
-	  return null;
-  }
 
   /** Erases all information of the specified type */
   public <T extends InformationPiece> void clear(Class<T> informationClass) {

@@ -58,15 +58,13 @@ public class ComponentsUtilityFunction
 		this.weatherFunction = new WeatherUtilityFunction(grid);
 	}
 	
-	}
-	
   @Override
   public double calculateUtility(Plan plan, Agent agent) {
   	double weatherUtility;
-		if(SimulationParameters.useWeatherInformation) 
-			weatherUtility = weightWeather * weatherFunction.calculateUtility(action, agent);
-		else 
-			weatherUtility = 0;
+	//if(SimulationParameters.useWeatherInformation) 
+	//	weatherUtility = weightWeather * weatherFunction.calculateUtility(action, agent);
+	//else 
+	//	weatherUtility = 0;
     return fixedFunction.calculateUtility(plan, agent) + weightRisk * riskFunction.calculateUtility(plan, agent)
            + weightCooperating * cooperativeFunction.calculateUtility(plan, agent);
   }
