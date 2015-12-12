@@ -9,6 +9,7 @@ import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.util.ContextUtils;
+import repast.simphony.util.collections.IndexedIterable;
 
 /**
  * The wind is global across the forest
@@ -20,8 +21,12 @@ public class Wind {
 	private Grid<Object> grid;
 	// Velocity vector with speed and direction 
 	// These values are global across the forest
-	private Vector2 velocity; 
+	private static Vector2 velocity; 
 	private float changable; // Influence on how much the wind is changed every step
+	
+	public static Vector2 getWindVelocity(){
+		return velocity;
+	}
 	
 	public Wind(Grid<Object> grid, float windFactorSpeed, Directions direction, Float changable){
 		this.grid = grid;

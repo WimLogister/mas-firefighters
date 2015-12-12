@@ -11,13 +11,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.badlogic.gdx.math.Vector2;
+import com.jogamp.opengl.math.VectorUtil.Winding;
+
 import lombok.AllArgsConstructor;
+import repast.simphony.query.space.grid.GridCell;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import search.Path;
-
 import communication.information.FireLocationInformation;
-
+import communication.information.InformationType;
+import communication.information.WeatherInformation;
 import firefighters.agent.Agent;
 import firefighters.pathfinding.GridAction;
 import firefighters.pathfinding.GridState;
@@ -25,6 +29,7 @@ import firefighters.utility.PlanUtilityComparator;
 import firefighters.utility.UtilityFunction;
 import firefighters.utils.Directions;
 import firefighters.world.Fire;
+import communication.information.InformationType;
 
 @AllArgsConstructor
 public class Planner {
@@ -37,6 +42,14 @@ public class Planner {
     return Collections.max(possiblePlans, new PlanUtilityComparator(utilityFunction, agent));
   }
 
+  /** Returns an emergency plan for the agent */
+  public Plan deviseEmergencyPlan(Agent agent){
+	  Grid<?> grid = agent.getGrid();
+	  GridPoint agentPosition = grid.getLocation(agent);
+	  List<Plan> possiblePlans = deviseEmergencyPlans(agent,grid,agentPosition);
+	  return Collections.max(possiblePlans, new PlanUtilityComparator(utilityFunction, agent));
+  }
+  
   // TODO Check if the square the agent is on is on fire
   private List<Plan> discoverPossiblePlans(Agent agent) {
     Grid<?> grid = agent.getGrid();
@@ -46,12 +59,12 @@ public class Planner {
     List<FireLocationInformation> fireCells = agent.getKnownFireLocations();
 
     if (isAgentCellOnFire(grid, agentPosition)) {
-      return deviseEmergencyPlans(grid, agentPosition);
+      return deviseEmergencyPlans(agent, grid, agentPosition);
     }
 
     for (FireLocationInformation fireInformation : fireCells) {
       GridPoint firePoint = fireInformation.getPosition();
-      Path<GridState, GridAction> path = findShortestPath(grid, agentPosition, firePoint);
+      Path<GridState, GridAction> path = findShortestPath(agent, grid, agentPosition, firePoint);
       if (path != null && path.isValidPath()) {
         // System.out.println("ag " + agentPosition + " fire  " + firePoint);
         List<AbstractAction> actions = convertToPrimitiveActions(path, agent.getDirection());
@@ -62,18 +75,23 @@ public class Planner {
     }
     if (possiblePlans.size() == 0) {
       // Move randomly
-      Plan randomPlan = deviseRandomPlan(grid, agentPosition);
-      possiblePlans.add(randomPlan);
+      Plan randomPlan = deviseRandomPlan(agent, grid, agentPosition);
+      possiblePlans.add(randomPlan);	
     } else {
-      // Logger.println("Found plan");
+    	// Logger.println("Found plan");
+        List<AbstractAction> steps = new ArrayList<AbstractAction>();
+        steps.add(new CheckWeather());
+        Plan planWeather = new CheckWeatherPlan(steps);
+        possiblePlans.add(planWeather);
     }
+  
     return possiblePlans;
   }
 
-  /** Called the agent is on a burning cell */
-  private List<Plan> deviseEmergencyPlans(Grid<?> grid, GridPoint agentPosition) {
+  /** Called when the agent is on a burning cell */
+  private List<Plan> deviseEmergencyPlans(Agent agent, Grid<?> grid, GridPoint agentPosition) {
     List<Plan> possiblePlans = new ArrayList<>();
-    for (GridPoint point : getNeighboringPoints(grid, agentPosition)) {
+    for (GridPoint point : getNeighboringPoints(agent, grid, agentPosition)) {
       int xDiff = point.getX() - agentPosition.getX();
       int yDiff = point.getY() - agentPosition.getY();
       Directions facingFire = Directions.findDirection(xDiff, yDiff);
@@ -89,10 +107,10 @@ public class Planner {
     return getCellNeighborhood(grid, agentPosition, Fire.class, 0, true).size() > 0;
   }
 
-  private Plan deviseRandomPlan(Grid<?> grid, GridPoint agentPosition) {
+  private Plan deviseRandomPlan(Agent agent, Grid<?> grid, GridPoint agentPosition) {
     List<AbstractAction> actions = new ArrayList<>();
     MoveAndTurn move;
-    GridPoint randomPoint = getRandomNeighboringPoint(grid, agentPosition);
+    GridPoint randomPoint = getRandomNeighboringPoint(agent, grid, agentPosition);
     if (randomPoint == null)
       move = new MoveAndTurn(agentPosition, Directions.getRandomDirection());
     else

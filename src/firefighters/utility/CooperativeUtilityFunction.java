@@ -1,6 +1,5 @@
 package firefighters.utility;
 
-import static constants.SimulationConstants.AGENT_PERCEPTION_DISTANCE;
 import static firefighters.utils.GridFunctions.getCellNeighborhood;
 
 import java.util.List;
@@ -35,7 +34,7 @@ public class CooperativeUtilityFunction
 
   private static final int baseStayingTogetherUtility = 10;
 
-	public double calculateUtility(AbstractAction action) {
+	public double calculateUtility(AbstractAction action, Agent agent) {
 		double utility = 0;
 		if (action instanceof Extinguish) {
 			GridPoint gpFire = ((Extinguish) action).getFirePosition();
@@ -83,7 +82,7 @@ public class CooperativeUtilityFunction
                                                      .getInformationOfType(HelpRequestInformation.class);
     for (HelpRequestInformation helpRequest : helpRequests) {
       GridPoint endageredAgentLocation = helpRequest.getAgentLocation();
-      if (Metrics.hammingDistance(fireLocation, endageredAgentLocation) < AGENT_PERCEPTION_DISTANCE) {
+      if (Metrics.hammingDistance(fireLocation, endageredAgentLocation) < SimulationParameters.perceptionRange) {
         utility += helpingUtility;
       }
     }

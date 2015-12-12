@@ -8,18 +8,23 @@ import static firefighters.utils.GridFunctions.isOnFire;
 import java.util.ArrayList;
 import java.util.List;
 
+import cern.jet.random.Uniform;
+
+import com.badlogic.gdx.math.Vector2;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
+import repast.simphony.engine.environment.RunEnvironment;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.query.space.grid.GridCell;
 import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.ContextUtils;
-
+import sun.management.resources.agent;
 import communication.Message;
 import communication.MessageContent;
 import communication.MessageMediator;
@@ -29,17 +34,22 @@ import communication.information.AgentLocationInformation;
 import communication.information.FireLocationInformation;
 import communication.information.HelpRequestInformation;
 import communication.information.InformationPiece;
-
+import communication.information.InformationType;
+import communication.information.WeatherInformation;
+import constants.SimulationConstants;
 import constants.SimulationParameters;
 import firefighters.actions.AbstractAction;
 import firefighters.actions.ExtinguishFirePlan;
 import firefighters.actions.MoveAndTurn;
 import firefighters.actions.Plan;
 import firefighters.actions.Planner;
+import firefighters.pathfinding.GridState;
 import firefighters.utility.UtilityFunction;
 import firefighters.utils.Directions;
 import firefighters.world.Fire;
+import firefighters.world.Rain;
 import firefighters.world.TreeBuilder;
+import firefighters.world.Wind;
 
 /** The only distinction between agents is going to be their Behavior implementation, so this class is final */
 @Getter
@@ -49,15 +59,17 @@ public final class Agent {
 	
   /** Reference to the grid */
   @NonNull
-	final Grid<Object> grid;
+  final Grid<Object> grid;
 
-	final double movementSpeed;
+  final double movementSpeed;
 
-	@Getter
+  @Getter
   double money;
   /** The distance at which the agent can perceive the world around him, i.e. the status of the cells */
   final int perceptionRange;
 
+  double communicationProb;
+  
   /** The direction the agent is facing */
   Directions direction;
 
@@ -80,23 +92,27 @@ public final class Agent {
       
   /** The number of agents alive in the world */
   static AgentStatistics agentStatistics = new AgentStatistics();
-
-  // TODO Combine with the utility function
-  /** If true new fires will be broadcast to other agents */
-  private boolean shareFireInformation = SimulationParameters.cooperativeAgents;
+  
+  int tickWeatherLastChecked;
+  int currentTick;
+  
+  @Getter
+  private static GridPoint agentPosition;
 
   public Agent(Grid<Object> grid,
                double movementSpeed,
                double money,
                int perceptionRange,
-               UtilityFunction utilityFunction) {
+               UtilityFunction utilityFunction,
+               double communicationProb) {
     this.grid = grid;
     this.movementSpeed = movementSpeed;
     this.money = money;
     this.direction = Directions.getRandomDirection();
     this.perceptionRange = perceptionRange;
     this.utilityFunction = utilityFunction;
-
+    this.tickWeatherLastChecked = 0;
+    this.communicationProb = communicationProb;
     this.informationStore = new AgentInformationStore();
     this.planner = new Planner(utilityFunction);
 
@@ -110,23 +126,44 @@ public final class Agent {
 
   @ScheduledMethod(start = 1, interval = 1)
 	public void step() {
+	  currentTick = (int) RunEnvironment.getInstance().getCurrentSchedule().getTickCount();
+	  agentPosition = grid.getLocation(this); 
     if (lifePoints == 0 || checkDeath()) {
       kill();
       return;
     }
     processInformationAndCommunicate();
     // TODO Check if we should revise the plan
-    if (currentPlan == null || currentPlan.isFinished() || !isValid(currentPlan)) {
+    // Emergency plan for if the fire is likely to blow to the agent's current cell
+    if (this.danger(this.getAgentPosition())>1.5){
+    	currentPlan = planner.deviseEmergencyPlan(this);
+    }
+    else if (currentPlan == null || currentPlan.isFinished() || !isValid(currentPlan)) {
       currentPlan = planner.devisePlan(this);
     }
     executeCurrentAction();
-
-
+    // TODO: process in utility function
+    // Letting the agent checking the weather every 25 steps
+    //executeCurrentActionInclWeather(25);
   }
+  
+  // For now: let agent check weather every n steps
+  private void executeCurrentActionInclWeather(int n){
+	  if(currentTick % n == 0){
+		  //System.out.println(TickCounter.getTick());
+		  //System.out.println("Checking weather");
+		  this.checkWeather();
+		  currentPlan = null;
+	  } else {
+		  if (currentPlan != null && !currentPlan.isFinished()) {
+		      currentPlan.executeNextStep(this);
+		  }
+	  }
+  } 
   
   private void processInformationAndCommunicate() {
     List<GridPoint> newFires = updateFireInformation();
-    if(shareFireInformation) {
+    if(willShare()) {
       for(GridPoint newFirePoint : newFires) {
         FireLocationInformation fireLocation = new FireLocationInformation(newFirePoint);
         sendLocalMessage(fireLocation);
@@ -136,6 +173,11 @@ public final class Agent {
     if (isInDanger()) {
       sendHelpRequest(BOUNTY_PER_FIRE_EXTINGUISHED / 2);
     }
+    
+    // TODO: Process weather information by merging the rain information of different information pieces into one
+    //if(hasWeatherInfo()){
+    	
+   // }
   }
 
   private List<GridPoint> updateFireInformation() {
@@ -282,7 +324,7 @@ public final class Agent {
         toBeExtinguished.add(f);
         numFires++;
       }
-      assert numFires == 1 : "More than 1 fire cell founnd: " + numFires;
+      assert numFires == 1 : "More than 1 fire cell found: " + numFires;
     }
     for (Fire f : toBeExtinguished) {
       f.extinguish();
@@ -299,7 +341,7 @@ public final class Agent {
     return money += BOUNTY_PER_FIRE_EXTINGUISHED;
   }
 
-  /** Communicates the agent's position locally */
+  /** Communicates the agent's position locally */  
   private void communicateLocation() {
     GridPoint position = grid.getLocation(this);
     AgentLocationInformation location = new AgentLocationInformation(this, position.getX(), position.getY());
@@ -313,28 +355,154 @@ public final class Agent {
     HelpRequestInformation helpRequest = new HelpRequestInformation(this, position, bountyOffered);
     sendLocalMessage(helpRequest);
   }
+  
+  /** Communicates the information about the wind globally */
+  /*private void communicateWindInfo(){
+	  if(this.hasWeatherInfo()){
+		  WeatherInformation weather = (WeatherInformation) informationStore.getLatestInformationOfType(InformationType.WeatherInformation);
+		  Vector2 windInfo = weather.getWind();
+		  WeatherInformation toCommunicate = new WeatherInformation(windInfo, new ArrayList<GridCell<Rain>>(),currentTick);
+		  sendGlobalMessage(toCommunicate);
+	  }
+  }*/
 
   private void sendLocalMessage(InformationPiece information) {
-    Message message = new Message(this, MessageScope.LOCAL, new MessageContent(information));
-    MessageMediator.sendMessage(message);
+	if(money >= SimulationConstants.LOCAL_MESSAGE_COST){
+		Message message = new Message(this, MessageScope.LOCAL, new MessageContent(information));
+		MessageMediator.sendMessage(message);
+	}
+  }
+  
+  private void sendGlobalMessage(InformationPiece information) {
+	if(money >= SimulationConstants.GLOBAL_MESSAGE_COST){
+		Message message = new Message(this, MessageScope.GLOBAL, new MessageContent(information));
+		MessageMediator.sendMessage(message);
+	}
   }
 
   /** Returns a list of the locations of fire cells the agent knows of */
   public List<FireLocationInformation> getKnownFireLocations() {
     return informationStore.getInformationOfType(FireLocationInformation.class);
   }
+  
+  public WeatherInformation getWeatherInformation(){
+	  return (WeatherInformation) informationStore.getInformationOfType(WeatherInformation.class);
+  }
 
-	public void checkWeather() {
-		// TODO: Need to check rain and wind. First need to know how these are modeled.
+  /** 
+   * Check weather and store this information in agent's information store 
+   * Agent communicates this information directly with certain probability
+   */
+  public void checkWeather() {
+	// Clears any old weather information
+	informationStore.clear(WeatherInformation.class);
+    Vector2 wind = Wind.getWindVelocity();
+	// Check if there is rain in the agent's it surroundings
+	GridPoint agentPosition = grid.getLocation(this);
+	List<GridCell<Rain>> rain = getCellNeighborhood(grid, agentPosition, Rain.class, perceptionRange, true);
+	WeatherInformation currentWeather = new WeatherInformation(wind,rain,currentTick);
+	informationStore.archive(currentWeather);
+	this.tickWeatherLastChecked = currentTick;
+	if(willShare()){
+		sendGlobalMessage(currentWeather);
 	}
+  }
+  
+  public boolean willShare(){
+	  double test = SimulationConstants.RANDOM.nextDouble();
+	  if(test<communicationProb) return true;
+	  else return false;		  
+  }
+  
+  // Double between 1 and 4 for the amount of danger of being in the position newPoint considering
+  // chance that fire will spread to this point the next step.
+  // Also used for cost calculation in Astar algorithm.
+  public double danger(GridPoint toCheck){
+	double danger = 1;
+	if(this.hasWeatherInfo()){
+		int toCheckX = toCheck.getX();
+		int toCheckY = toCheck.getY();
+		List<WeatherInformation> weatherInfos = this.getInformationStore().getInformationOfType(WeatherInformation.class);
+		// Take the last piece of weather information
+		WeatherInformation weatherInfo = weatherInfos.get(weatherInfos.size()-1);
+		int timePassed = currentTick - weatherInfo.getTimeStamp();
+		if(timePassed<10){
+			List<GridCell<Rain>> rainInfo = weatherInfo.getRain();
+	
+			// Check if there is rain in the gridcell
+			boolean rainInNewPoint = false;
+			for(GridCell<Rain> rain : rainInfo){
+				if(rain.getPoint().getX() == toCheckX && rain.getPoint().getY() == toCheckY) rainInNewPoint = true;
+			}
+			//if(!getCellNeighborhood(grid,toCheck,Rain.class,0,true).isEmpty()) rainInNewPoint = true;
+	
+			// Loop through all the neighboring firecells
+			for (GridCell<Fire> fireCell : getCellNeighborhood(grid, toCheck, Fire.class, 1, false)) {
+				GridPoint pt = fireCell.getPoint();
+				int fireX = pt.getX();
+				int fireY = pt.getY();
+				Vector2 fireVelocity = null;
+				boolean rainInFireLoc = false;
+				for (Object obj : grid.getObjectsAt(fireX, fireY)){
+					if (obj instanceof Fire) fireVelocity = ((Fire) obj).getVelocity();
+					//else if (obj instanceof Rain) rainInFireLoc = true;
+				}	
+			
+				// If there is rain in the fire's location
+				for(GridCell<Rain> rain : rainInfo){
+					if(rain.getPoint().getX() == fireX && rain.getPoint().getY() == fireY) rainInFireLoc = true;
+				}
+		
+				Vector2 windVelocity = weatherInfo.getWind();
+				// Influence of wind on fire directions  
+				if(!fireVelocity.equals(null)){
+					fireVelocity.add(windVelocity).clamp(0, SimulationConstants.MAX_FIRE_SPEED);
+					if(rainInFireLoc) {
+						float newSpeed = fireVelocity.len() - SimulationConstants.MAX_FIRE_SPEED * 0.4f;
+						fireVelocity.setLength(newSpeed);
+						fireVelocity.clamp(0, SimulationConstants.MAX_FIRE_SPEED);
+					}
+				}
+				else {
+					throw new IllegalArgumentException("This is not supposed to happen! In GridSuccessorFunction.java");
+				}
+				// Determine if the updated fire direction is towards newPoint
+				Directions dir = Directions.fromAngleToDir(fireVelocity.angle());
+				boolean headingTowardsNewPoint = false;
+				if(fireX + dir.xDiff == toCheck.getX() && fireY + dir.yDiff == toCheck.getY()) headingTowardsNewPoint = true;
+				
+				if(headingTowardsNewPoint){
+					// Has to do with the way the rain is influencing the speed of the fire in Fire.java
+					if(!rainInFireLoc && rainInNewPoint){
+						float newSpeed = fireVelocity.len() - SimulationConstants.MAX_FIRE_SPEED * 0.2f;
+						fireVelocity.setLength(newSpeed);
+						fireVelocity.clamp(0, SimulationConstants.MAX_FIRE_SPEED);
+					}
+					// Value between 0 and 1
+					double spreadChange = fireVelocity.len()*(1/SimulationConstants.MAX_FIRE_SPEED);
+					danger = danger + spreadChange;
+				}
+			}
+		}
+	}
+	if(danger<1||danger>4) 
+		throw new IllegalArgumentException("Calculated cost is out of range!");
+	//if(danger>1) System.out.println(danger);
+	return danger;
+  }
 
   public void messageReceived(Message message) {
+	// TODO: If message is of type WeatherInformation, then check if there is any older weather information in the information store
+	// and delete that first
     informationStore.archive(message.getInformationContent());
   }
 
   public void decrementLifePoints() {
     lifePoints--;
   }
-	
-
+  
+  public boolean hasWeatherInfo(){
+	  if(this.getInformationStore().getInformationOfType(WeatherInformation.class).isEmpty()) return false;
+	  else return true;
+  }
 }

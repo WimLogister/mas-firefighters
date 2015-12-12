@@ -45,8 +45,6 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		Parameters params = RunEnvironment.getInstance().getParameters();
 		SimulationParameters.setParameters(params);
 
-		final Uniform urng = RandomHelper.getUniform();
-
 		GridFactory gridFactory = GridFactoryFinder.createGridFactory(null);
 		Grid<Object> grid = gridFactory.createGrid("grid",
                                                context,
@@ -73,27 +71,31 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		Wind wind = new Wind(grid, SimulationParameters.windSpeed, SimulationParameters.windDirection, SimulationParameters.windInstability); 
 		context.add(wind);
 		
-		// Adding performance into the context so that we can visuale the performance in a chart
+		// Adding performance to the context
 		context.add(performance);
 		
 		// Add raincontext to the forest 
 		RainContext rc = new RainContext(grid); 
 		context.add(rc);
 		
-		/*
-		 * Randomly place agents in grid
-		 */
-		for (int i = 0; i < SimulationParameters.agentCount; i++) {
-			double money = 0;
-		UtilityFunction utilityFunction = new ComponentsUtilityFunction(1,1,grid);
-			//UtilityFunction utilityFunction = new ExpectedBountiesUtilityFunction();
-			//UtilityFunction utilityFunction = new CheckWeatherUtilityFunction();
-		      
-		Agent agent = new Agent(grid, MAX_FIRE_AGENT_SPEED, money, SimulationParameters.perceptionRange, utilityFunction);
+		// Randomly place agents of set 1 in grid
+		int agentSet1 = (int) (SimulationParameters.proportionSet1 * SimulationParameters.agentCount);
+		for (int i = 0; i < agentSet1; i++) {
+			UtilityFunction utilityFunction = new ComponentsUtilityFunction(SimulationParameters.riskTakingWeightSet1,SimulationParameters.cooperativeWeightSet1,grid);
+			Agent agent = new Agent(grid, MAX_FIRE_AGENT_SPEED, SimulationParameters.money, SimulationParameters.perceptionRange, utilityFunction, SimulationParameters.cooperativeWeightSet1);
 			context.add(agent);
 			ra.add(grid, agent);
 	    }
-			
+		
+		// Randomly place agents of set 2 in grid
+		int agentSet2 = SimulationParameters.agentCount - agentSet1;
+		for (int i = 0; i < agentSet2; i++) {
+			UtilityFunction utilityFunction = new ComponentsUtilityFunction(SimulationParameters.riskTakingWeightSet2,SimulationParameters.cooperativeWeightSet2,grid);
+			Agent agent = new Agent(grid, MAX_FIRE_AGENT_SPEED, SimulationParameters.money, SimulationParameters.perceptionRange, utilityFunction, SimulationParameters.cooperativeWeightSet2);
+			context.add(agent);
+			ra.add(grid, agent);
+		}
+					
 		/* 
 		 * Randomly place fires in grid
 		 * Each of the wildfires can have a different initial speed and direction
@@ -133,7 +135,8 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		Fire fire4 = new Fire(grid,fire_vel,1,SimulationParameters.lifePointsFire,FIRE_PROB);
 		context.add(fire4);
 		grid.moveTo(fire4, loc4);*/
-
+		
+		performance.init();
 		return context;
 	}	
 }

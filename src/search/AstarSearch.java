@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.Set;
 
+import firefighters.agent.Agent;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -41,11 +42,15 @@ public class AstarSearch<State extends SearchState,
 
 	@Getter
 	private int nodesExpanded;
+	
+	@Getter
+	private Agent agent;
 
-  public AstarSearch(SuccessorFunction<State, Action> successorFunction,
+  public AstarSearch(Agent agent, SuccessorFunction<State, Action> successorFunction,
                      HeuristicFunction<State> heuristicFunction,
                      GoalTest<State> goalTest,
                      double costCutoffThreshold) {
+	this.agent = agent;
     this.successorFunction = successorFunction;
     this.heuristicFunction = heuristicFunction;
     this.goalTest = goalTest;
