@@ -1,15 +1,13 @@
 package firefighters.world;
 
+import static constants.SimulationConstants.MAX_WIND_SPEED;
+import repast.simphony.engine.schedule.ScheduledMethod;
+import repast.simphony.space.grid.Grid;
+
 import com.badlogic.gdx.math.Vector2;
 
 import constants.SimulationConstants;
-import cern.jet.random.Uniform;
 import firefighters.utils.Directions;
-import repast.simphony.engine.schedule.ScheduledMethod;
-import repast.simphony.random.RandomHelper;
-import repast.simphony.space.grid.Grid;
-import repast.simphony.util.ContextUtils;
-import repast.simphony.util.collections.IndexedIterable;
 
 /**
  * The wind is global across the forest
@@ -21,7 +19,7 @@ public class Wind {
 	private Grid<Object> grid;
 	// Velocity vector with speed and direction 
 	// These values are global across the forest
-	private static Vector2 velocity; 
+  private static Vector2 velocity;
 	private float changable; // Influence on how much the wind is changed every step
 	
 	public static Vector2 getWindVelocity(){
@@ -49,6 +47,7 @@ public class Wind {
 		float varianceA = velocity.angle() * changable;
 		float noiseAngle = (float) (r.nextGaussian() * Math.sqrt(varianceA) + mean); 
 		velocity.add(noiseSpeed, noiseAngle);
+    velocity.clamp(0, MAX_WIND_SPEED);
 	}
 	
 	public Vector2 getVelocity(){
