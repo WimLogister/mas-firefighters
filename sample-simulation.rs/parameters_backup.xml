@@ -60,6 +60,12 @@
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
 		/>
+				<parameter name="cooperative_weight_set_2" displayName="Cooperative Weight Set 2" type="double" 
+						defaultValue="0.5" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+									
+		/>
 				<parameter name="fire_count" displayName="Fire Count" type="int" 
 						defaultValue="1" 
 						isReadOnly="false" 

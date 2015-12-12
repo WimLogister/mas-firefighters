@@ -8,8 +8,6 @@ public class SimulationConstants {
   
   public static final float MAX_FIRE_AGENT_SPEED = 2 * MAX_FIRE_SPEED;
   
-  public static final float MAX_WIND_SPEED = 2;
- 
   /** Chance with which fire can appear out of nowhere */
   public static final double FIRE_PROB = 0.01;
 

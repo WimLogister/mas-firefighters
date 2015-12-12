@@ -8,10 +8,6 @@ import static firefighters.utils.GridFunctions.isOnFire;
 import java.util.ArrayList;
 import java.util.List;
 
-import cern.jet.random.Uniform;
-
-import com.badlogic.gdx.math.Vector2;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -24,7 +20,8 @@ import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.ContextUtils;
-import sun.management.resources.agent;
+
+import com.badlogic.gdx.math.Vector2;
 import communication.Message;
 import communication.MessageContent;
 import communication.MessageMediator;
@@ -34,16 +31,14 @@ import communication.information.AgentLocationInformation;
 import communication.information.FireLocationInformation;
 import communication.information.HelpRequestInformation;
 import communication.information.InformationPiece;
-import communication.information.InformationType;
 import communication.information.WeatherInformation;
+
 import constants.SimulationConstants;
-import constants.SimulationParameters;
 import firefighters.actions.AbstractAction;
 import firefighters.actions.ExtinguishFirePlan;
 import firefighters.actions.MoveAndTurn;
 import firefighters.actions.Plan;
 import firefighters.actions.Planner;
-import firefighters.pathfinding.GridState;
 import firefighters.utility.UtilityFunction;
 import firefighters.utils.Directions;
 import firefighters.world.Fire;
@@ -389,28 +384,29 @@ public final class Agent {
 	  return (WeatherInformation) informationStore.getInformationOfType(WeatherInformation.class);
   }
 
-  /** 
-   * Check weather and store this information in agent's information store 
-   * Agent communicates this information directly with certain probability
+  /**
+   * Check weather and store this information in agent's information store Agent communicates this information directly
+   * with certain probability
    */
   public void checkWeather() {
-	// Clears any old weather information
-	informationStore.clear(WeatherInformation.class);
+    // Clears any old weather information
+    informationStore.clear(WeatherInformation.class);
     Vector2 wind = Wind.getWindVelocity();
-	// Check if there is rain in the agent's it surroundings
-	GridPoint agentPosition = grid.getLocation(this);
-	List<GridCell<Rain>> rain = getCellNeighborhood(grid, agentPosition, Rain.class, perceptionRange, true);
-	WeatherInformation currentWeather = new WeatherInformation(wind,rain,currentTick);
-	informationStore.archive(currentWeather);
-	this.tickWeatherLastChecked = currentTick;
-	if(willShare()){
-		sendGlobalMessage(currentWeather);
-	}
+    // Check if there is rain in the agent's it surroundings
+    GridPoint agentPosition = grid.getLocation(this);
+    List<GridCell<Rain>> rain = getCellNeighborhood(grid, agentPosition, Rain.class, perceptionRange, true);
+    WeatherInformation currentWeather = new WeatherInformation(wind, rain, currentTick);
+    informationStore.archive(currentWeather);
+    this.tickWeatherLastChecked = currentTick;
+    if (willShare()) {
+      sendGlobalMessage(currentWeather);
+    }
   }
-  
+
   public boolean willShare(){
 	  double test = SimulationConstants.RANDOM.nextDouble();
-	  if(test<communicationProb) return true;
+    if (test < communicationProb)
+      return true;
 	  else return false;		  
   }
   
@@ -492,8 +488,11 @@ public final class Agent {
   }
 
   public void messageReceived(Message message) {
-	// TODO: If message is of type WeatherInformation, then check if there is any older weather information in the information store
-	// and delete that first
+    // If message is of type WeatherInformation, then check if there is any older weather information in the information
+    // store and delete that first, to keep the most up to date version
+    if (message.getInformationContent() instanceof WeatherInformation) {
+      informationStore.clear(WeatherInformation.class);
+    }
     informationStore.archive(message.getInformationContent());
   }
 
