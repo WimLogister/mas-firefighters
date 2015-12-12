@@ -14,6 +14,7 @@ import repast.simphony.space.grid.GridPoint;
 import search.AstarSearch;
 import search.ImmutableTriple;
 import search.Path;
+import firefighters.agent.Agent;
 import firefighters.pathfinding.GridAction;
 import firefighters.pathfinding.GridHammingDistanceHeuristic;
 import firefighters.pathfinding.GridPointGoalTest;
@@ -119,8 +120,8 @@ public class GridFunctions {
   }
 
   /** Returns the shortest path from the source to the target point */
-  public static Path<GridState, GridAction> findShortestPath(Grid<?> grid, GridPoint source, GridPoint target) {
-    AstarSearch<GridState, GridAction, GridSuccessorFunction, GridHammingDistanceHeuristic, GridPointGoalTest> aStar = createAstarPathFinder(grid,
+  public static Path<GridState, GridAction> findShortestPath(Agent agent, Grid<?> grid, GridPoint source, GridPoint target) {
+    AstarSearch<GridState, GridAction, GridSuccessorFunction, GridHammingDistanceHeuristic, GridPointGoalTest> aStar = createAstarPathFinder(agent, grid,
                                                                                                                                        target);
     Path<GridState, GridAction> shortestPath = aStar.findPath(new GridState(source));
     return shortestPath;
@@ -128,15 +129,16 @@ public class GridFunctions {
 
   /** Returns an instance of AstarSearch to search for a path to the specified target point */
   public static AstarSearch<GridState, GridAction, GridSuccessorFunction, GridHammingDistanceHeuristic, GridPointGoalTest>
-      createAstarPathFinder(Grid<?> grid, GridPoint target) {
-    return new AstarSearch<>(new GridSuccessorFunction(grid, target),
+      createAstarPathFinder(Agent agent, Grid<?> grid, GridPoint target) {
+    return new AstarSearch<>(agent,
+    						 new GridSuccessorFunction(agent,grid, target),
                              new GridHammingDistanceHeuristic(target),
                              new GridPointGoalTest(target),
                              MAX_SEARCH_DISTANCE);
   }
 
-  public static List<GridPoint> getNeighboringPoints(Grid<?> grid, GridPoint point) {
-    GridSuccessorFunction successorFunction = new GridSuccessorFunction(grid, null);
+  public static List<GridPoint> getNeighboringPoints(Agent agent, Grid<?> grid, GridPoint point) {
+    GridSuccessorFunction successorFunction = new GridSuccessorFunction(agent, grid, null);
     List<ImmutableTriple<GridState, GridAction, Double>> successors = successorFunction.apply(new GridState(point));
     List<GridPoint> neighboringPoints = new ArrayList<>();
     for (ImmutableTriple<GridState, GridAction, Double> successor : successors) {
@@ -150,8 +152,8 @@ public class GridFunctions {
    * Returns a random point at a distance one from the given point, or null if it is not legal to move to any
    * neighboring square
    */
-  public static GridPoint getRandomNeighboringPoint(Grid<?> grid, GridPoint point) {
-    List<GridPoint> neighboringPoints = getNeighboringPoints(grid, point);
+  public static GridPoint getRandomNeighboringPoint(Agent agent, Grid<?> grid, GridPoint point) {
+    List<GridPoint> neighboringPoints = getNeighboringPoints(agent, grid, point);
     if (neighboringPoints.isEmpty())
       return null;
     int rand = RANDOM.nextInt(neighboringPoints.size());

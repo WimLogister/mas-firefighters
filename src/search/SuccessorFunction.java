@@ -1,5 +1,7 @@
 package search;
 
+import firefighters.agent.Agent;
+
 /**
  * Abstraction of a successor function for search algorithms. used to obtain all the possible successors states of a
  * given state, along with then action leading to them and the cost of the action

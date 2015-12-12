@@ -41,12 +41,30 @@ public class SimulationParameters {
   /** Average grid size of the rain */
   public static int averageRainSize;
   
-  /** Whether agents will share information about the fire */
-  public static boolean cooperativeAgents = true;
-  
-  /** Wether or not agents will use weather information, useful for experiment */
+  /** Whether or not agents will use weather information, useful for experiment */
   public static boolean useWeatherInformation;
-
+  
+  /** Value between 0 and 1, the proportion of agents in set 1 (with corresponding weights) */ 
+  public static double proportionSet1;
+  
+  /** Value between 0 and 1, how risk taking the agents are (1 maximum risk taking)*/
+  public static double riskTakingWeightSet1;
+  
+  /** Value between 0 and 1, how cooperative the agents are (1 maximum cooperative)*/
+  public static double cooperativeWeightSet1;
+  
+  /** The proportion of agents in set 2 (with corresponding weights) */ 
+  public static double proportionSet2;
+  
+  /** Value between 0 and 1, how risk taking the agents are (1 maximum risk taking)*/
+  public static double riskTakingWeightSet2;
+  
+  /** Value between 0 and 1, how cooperative the agents are (1 maximum cooperative)*/
+  public static double cooperativeWeightSet2;
+  
+  /** The amount of money the agents are initialised with */
+  public static double money;
+  
   /** Sets the simulation's parameters */
   public static void setParameters(Parameters params) {
     gridSize = (Integer) params.getValue("grid_size");
@@ -67,6 +85,20 @@ public class SimulationParameters {
     checkBound("rain_prob",rainProb);
     averageRainSize = (Integer) params.getValue("average_rain_size");
     useWeatherInformation = (boolean) params.getValue("use_weather_information");
+    proportionSet1 = ((Double) params.getValue("proportion_set_1"));
+    checkBound("proportion_set_1",proportionSet1);
+    riskTakingWeightSet1 = ((Double) params.getValue("risk_taking_weight_set_1"));
+    checkBound("risk_taking_weight_set_1",riskTakingWeightSet1);
+    cooperativeWeightSet1 = ((Double) params.getValue("cooperative_weight_set_1"));
+    checkBound("cooperative_weight_set_1",cooperativeWeightSet1);
+    proportionSet2 = ((Double) params.getValue("proportion_set_2"));
+    checkBound("proportion_set_2",proportionSet2);
+    riskTakingWeightSet2 = ((Double) params.getValue("risk_taking_weight_set_2"));
+    checkBound("risk_taking_weight_set_2",riskTakingWeightSet2);
+    cooperativeWeightSet2 = ((Double) params.getValue("cooperative_weight_set_2"));
+    checkBound("cooperative_weight_set_2",cooperativeWeightSet2);
+    
+    money = ((Double) params.getValue("money"));
     if(averageRainSize<0|averageRainSize>gridSize)
     	throw new IllegalArgumentException("Value of average rain size out of range!");
   }

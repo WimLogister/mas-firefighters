@@ -18,10 +18,13 @@ public class WeatherInformation extends InformationPiece {
 	/** Rain objects within the perception range of the agent */
 	@Getter
 	private List<GridCell<Rain>> rain;
+	/** Tick weather checked */
+	private int timeStamp;
 
-	public WeatherInformation(Vector2 wind, List<GridCell<Rain>> rain) {
+	public WeatherInformation(Vector2 wind, List<GridCell<Rain>> rain, int timeStamp) {
 		super(InformationType.WeatherInformation);
 		this.wind = wind;
 		this.rain = rain;
+		this.timeStamp = timeStamp;
 	}
 }

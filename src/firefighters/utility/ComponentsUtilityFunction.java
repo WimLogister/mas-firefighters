@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NonNull;
 import repast.simphony.query.space.grid.GridCell;
 import repast.simphony.space.grid.Grid;
@@ -31,8 +32,10 @@ public class ComponentsUtilityFunction extends DiscountedUtilityFunction{
 	// Weight for different components of the utility function,
 	// the higher the weight the more the particular agent is tended to act ...
 	// ... with risk
+	@Getter
 	private double weightRisk;
 	// ... cooperating
+	@Getter
 	private double weightCooperating;
 	// ... lying
 	//private double weightLying;
@@ -59,9 +62,13 @@ public class ComponentsUtilityFunction extends DiscountedUtilityFunction{
 	
 	@Override
 	public double calculateUtility(AbstractAction action, Agent agent) {
+		double weatherUtility;
+		if(SimulationParameters.useWeatherInformation) 
+			weatherUtility = weightWeather * weatherFunction.calculateUtility(action, agent);
+		else 
+			weatherUtility = 0;
 		double utility = expectedBounties.calculateUtility(action, agent) 
 				// TODO: finetune check weather utility function
-				//+ weightWeather * weatherFunction.calculateUtility(action, agent)
 				+ weightRisk * riskFunction.calculateUtility(action, agent) 
 				+ weightCooperating * cooperativeFunction.calculateUtility(action, agent);
 		//if(action instanceof CheckWeather){

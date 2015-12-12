@@ -1,5 +1,5 @@
 <repast.simphony.data2.engine.DataSetDescriptor>
-  <name>Performance</name>
+  <name>Performance 2</name>
   <type>AGGREGATE</type>
   <inclTick>true</inclTick>
   <inclBatchRun>false</inclBatchRun>
@@ -11,7 +11,7 @@
     <pType>LAST</pType>
     <duration>-1.0</duration>
     <frequency>REPEAT</frequency>
-    <hashCode>-1047344939</hashCode>
+    <hashCode>-2061725862</hashCode>
   </scheduleParams>
   <atEnd>false</atEnd>
   <methodDataSources class="linked-hash-map">
@@ -22,6 +22,24 @@
         <className>performance.OverallPerformance</className>
         <methodName>getPerformance</methodName>
         <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>Bounty Sum</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>Bounty Sum</id>
+        <className>firefighters.agent.Agent</className>
+        <methodName>getMoney</methodName>
+        <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>Bounty Mean</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>Bounty Mean</id>
+        <className>firefighters.agent.Agent</className>
+        <methodName>getMoney</methodName>
+        <aggType>MEAN</aggType>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>
   </methodDataSources>

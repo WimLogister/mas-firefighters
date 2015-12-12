@@ -5,6 +5,7 @@ import static firefighters.utils.GridFunctions.getCellNeighborhood;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
+import repast.simphony.engine.environment.RunEnvironment;
 import repast.simphony.query.space.grid.GridCell;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
@@ -13,7 +14,6 @@ import firefighters.actions.AbstractAction;
 import firefighters.actions.CheckWeather;
 import firefighters.actions.Extinguish;
 import firefighters.agent.Agent;
-import firefighters.utils.TickCounter;
 import firefighters.world.Fire;
 
 @AllArgsConstructor
@@ -27,7 +27,8 @@ public class WeatherUtilityFunction extends DiscountedUtilityFunction{
 		
 		if (action instanceof CheckWeather) {
 			// Bonus for checking the weather if an agent haven't done this for a while
-			int timeNotChecked = TickCounter.getTick() - agent.getTickWeatherLastChecked();
+			int currentTick = (int) RunEnvironment.getInstance().getCurrentSchedule().getTickCount(); 
+			int timeNotChecked = currentTick - agent.getTickWeatherLastChecked();
 			double bonusNotChecked = 0;
 			if(timeNotChecked > 0 && timeNotChecked <= 5) bonusNotChecked = 50;
 			else if(timeNotChecked > 5 && timeNotChecked <= 10) bonusNotChecked = 100;
