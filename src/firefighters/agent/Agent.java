@@ -202,16 +202,14 @@ public final class Agent {
   }
 
   private List<GridCell<Fire>> findFiresInNeighborhood() {
-    GridPoint position = grid.getLocation(this);
     // Update fire information
-    List<GridCell<Fire>> fireCells = getCellNeighborhood(grid, position, Fire.class, perceptionRange, true);
+    List<GridCell<Fire>> fireCells = getCellNeighborhood(grid, agentPosition, Fire.class, perceptionRange, true);
     return fireCells;
   }
 
   private List<GridCell<Agent>> findAgentsInNeighborhood() {
-    GridPoint position = grid.getLocation(this);
     // Update fire information
-    List<GridCell<Agent>> agentCells = getCellNeighborhood(grid, position, Agent.class, perceptionRange, true);
+    List<GridCell<Agent>> agentCells = getCellNeighborhood(grid, agentPosition, Agent.class, perceptionRange, true);
     return agentCells;
   }
 
@@ -255,8 +253,7 @@ public final class Agent {
 	 */
 	public boolean checkDeath() {
 		// Set up necessary operators
-		GridPoint cpt = grid.getLocation(this);
-    List<GridCell<Fire>> gridCells = getCellNeighborhood(grid, cpt, Fire.class, 1, false);
+    List<GridCell<Fire>> gridCells = getCellNeighborhood(grid, agentPosition, Fire.class, 1, false);
 
 		// Need at least four fires in neighborhood in order to be surrounded
 		if (gridCells.size() < 4) return false;
@@ -268,8 +265,10 @@ public final class Agent {
 		for (GridCell<Fire> cell : gridCells) {
 			for (Fire fire : cell.items()) {
 				GridPoint firept = grid.getLocation(fire);
-				if (firept.getX() == cpt.getX()) enclosedHorizontal++;
-				if (firept.getY() == cpt.getY()) enclosedVertical++;
+        if (firept.getX() == agentPosition.getX())
+          enclosedHorizontal++;
+        if (firept.getY() == agentPosition.getY())
+          enclosedVertical++;
 			}
 		}
 		return (enclosedVertical >= 2 && enclosedHorizontal >= 2);
@@ -292,7 +291,6 @@ public final class Agent {
 	 */
 	public void move(GridPoint newPt) {
 		if (RandomHelper.nextDouble() < movementSpeed) {
-      GridPoint pt = grid.getLocation(this);
 			/*
 			 * Move the agent according to its current direction. How the direction
 			 * influences its movement in the grid is modeled by the Directions Enum,
@@ -338,8 +336,7 @@ public final class Agent {
 
   /** Communicates the agent's position locally */  
   private void communicateLocation() {
-    GridPoint position = grid.getLocation(this);
-    AgentLocationInformation location = new AgentLocationInformation(this, position.getX(), position.getY());
+    AgentLocationInformation location = new AgentLocationInformation(this, agentPosition.getX(), agentPosition.getY());
     sendLocalMessage(location);
   }
 
