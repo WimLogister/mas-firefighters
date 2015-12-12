@@ -41,7 +41,6 @@ public class OverallPerformance {
 	@ScheduledMethod(start = 1, interval = 1, priority =0)
 	public void step(){
     this.setPerformance(calculate());
-    // System.out.println(RunEnvironment.getInstance().getCurrentSchedule().getTickCount() + " " + performance);
 	}
 	
 	public void increaseHumanLosses(){

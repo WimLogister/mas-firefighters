@@ -23,7 +23,7 @@ import firefighters.world.Fire;
 
 @AllArgsConstructor
 public class CooperativeUtilityFunction
-    implements UtilityFunction {
+    extends DiscountedUtilityFunction {
 	
 	private Grid<Object> grid;
 	
@@ -33,9 +33,10 @@ public class CooperativeUtilityFunction
    */
   private static final int helpingUtility = 50;
 
+  private static final int baseStayingTogetherUtility = 10;
+
 	public double calculateUtility(AbstractAction action) {
 		double utility = 0;
-		
 		if (action instanceof Extinguish) {
 			GridPoint gpFire = ((Extinguish) action).getFirePosition();
 			// Calculate ratio fire:agent in region defined by the perception range of the agent
@@ -48,9 +49,12 @@ public class CooperativeUtilityFunction
 			// Working as a team: ideally on every fire one agent, so ratio 1 is ideal
 			// With a bigger ratio (so more fires than agents) also some bounty, but not for more than 2
 			// times as many fires as agents
-			if(ratio > 0.75 && ratio <= 1) utility = utility + 200;
-			else if(ratio > 1 && ratio <= 1.5) utility = utility + 100;
-			else if(ratio > 1.5 && ratio <= 2) utility = utility + 50;
+      if (ratio > 0.75 && ratio <= 1)
+        utility += baseStayingTogetherUtility * 4;
+      else if (ratio > 1 && ratio <= 1.5)
+        utility += baseStayingTogetherUtility * 2;
+      else if (ratio > 1.5 && ratio <= 2)
+        utility += baseStayingTogetherUtility;
 		}
 		
 		// Selfish versus cooperative agents, bounty received for helping other agents
@@ -65,18 +69,22 @@ public class CooperativeUtilityFunction
 
   @Override
   public double calculateUtility(Plan plan, Agent agent) {
-    double utility = 0;
+    double utility = super.calculateUtility(plan, agent);
     if (plan instanceof ExtinguishFirePlan) {
+      utility += calculateHelpingUtility(plan, agent, utility);
+    }
+    return utility;
+  }
 
-      ExtinguishFirePlan extinguishFirePlan = (ExtinguishFirePlan) plan;
-      GridPoint fireLocation = extinguishFirePlan.getFireLocation();
-      List<HelpRequestInformation> helpRequests = agent.getInformationStore()
-                                                       .getInformationOfType(HelpRequestInformation.class);
-      for (HelpRequestInformation helpRequest : helpRequests) {
-        GridPoint endageredAgentLocation = helpRequest.getAgentLocation();
-        if (Metrics.hammingDistance(fireLocation, endageredAgentLocation) < AGENT_PERCEPTION_DISTANCE) {
-          utility += helpingUtility;
-        }
+  private double calculateHelpingUtility(Plan plan, Agent agent, double utility) {
+    ExtinguishFirePlan extinguishFirePlan = (ExtinguishFirePlan) plan;
+    GridPoint fireLocation = extinguishFirePlan.getFireLocation();
+    List<HelpRequestInformation> helpRequests = agent.getInformationStore()
+                                                     .getInformationOfType(HelpRequestInformation.class);
+    for (HelpRequestInformation helpRequest : helpRequests) {
+      GridPoint endageredAgentLocation = helpRequest.getAgentLocation();
+      if (Metrics.hammingDistance(fireLocation, endageredAgentLocation) < AGENT_PERCEPTION_DISTANCE) {
+        utility += helpingUtility;
       }
     }
     return utility;
