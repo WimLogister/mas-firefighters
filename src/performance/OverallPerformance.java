@@ -1,14 +1,11 @@
 package performance;
 
+import lombok.Getter;
+import lombok.Setter;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import constants.SimulationConstants;
 import constants.SimulationParameters;
 import firefighters.world.Wind;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import repast.simphony.engine.schedule.ScheduledMethod;
-import constants.SimulationParameters;
 
 /**
  * How well the agents perform in terms of conditions of the world, weather, fire-category,
@@ -88,10 +85,11 @@ public class OverallPerformance {
 	
 	/** What fraction of the maximum wind speed is the current wind speed */
 	public float getWindFraction(){
-		return SimulationConstants.MAX_WIND_SPEED / Wind.getWindVelocity().len();
+    return Wind.getWindVelocity().len() / SimulationConstants.MAX_WIND_SPEED;
 	}
 	
 	public double calculate(){
+    double previousPerf = performance;
 		double forestLostPer = ((double) forestLosses / (double)(SimulationParameters.gridSize * SimulationParameters.gridSize)) * 100;
 		double humanLostPer = ((double) humanLosses / (double) SimulationParameters.agentCount) * 100;		
 		double firesExtinguishedPer = ((double) firesExtinguished / (double)(fireCount + SimulationParameters.fireCount)) * 100;
@@ -105,7 +103,6 @@ public class OverallPerformance {
 		if(performance>10000) performance = 10000;
 		
 		//System.out.println(performance);
-		this.performance = performance;
 		return performance;
 	}
 }
