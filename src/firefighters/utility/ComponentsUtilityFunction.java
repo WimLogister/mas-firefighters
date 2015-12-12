@@ -35,37 +35,24 @@ public class ComponentsUtilityFunction
 	// ... cooperating
 	@Getter
 	private double weightCooperating;
-	// ... lying
-	//private double weightLying;
-	// If weather information is not used, this weight is set to 0, else to 1
-	private double weightWeather;
 	private Grid<Object> grid;
 	
 	private ExpectedBountiesUtilityFunction fixedFunction;
 	private RiskTakingUtilityFunction riskFunction;
 	private CooperativeUtilityFunction cooperativeFunction;
-	private WeatherUtilityFunction weatherFunction;
 	
 	public ComponentsUtilityFunction(double weightRisk, double weightCooperating, Grid grid){
 		this.weightRisk = weightRisk;
 		this.weightCooperating = weightCooperating;
 		this.grid = grid;
-		if(SimulationParameters.useWeatherInformation) this.weightWeather = 1;
-		else this.weightWeather = 0;
 		this.fixedFunction = new ExpectedBountiesUtilityFunction();
 		this.riskFunction = new RiskTakingUtilityFunction(grid);
 		this.cooperativeFunction = new CooperativeUtilityFunction(grid);
-		this.weatherFunction = new WeatherUtilityFunction(grid);
 	}
 	
   @Override
   public double calculateUtility(Plan plan, Agent agent) {
-  	double weatherUtility;
-	//if(SimulationParameters.useWeatherInformation) 
-	//	weatherUtility = weightWeather * weatherFunction.calculateUtility(action, agent);
-	//else 
-	//	weatherUtility = 0;
-    return fixedFunction.calculateUtility(plan, agent) + weightRisk * riskFunction.calculateUtility(plan, agent)
+  	  return fixedFunction.calculateUtility(plan, agent) + weightRisk * riskFunction.calculateUtility(plan, agent)
            + weightCooperating * cooperativeFunction.calculateUtility(plan, agent);
   }
 }

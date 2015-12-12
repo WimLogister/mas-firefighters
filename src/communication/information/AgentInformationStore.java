@@ -40,6 +40,11 @@ public class AgentInformationStore {
     }
     informationStore = retainedInformation;
   }
+  
+  /** Removes a specific element of the information store */
+  public void remove(InformationPiece piece){
+	  informationStore.remove(piece);
+  }
 
   /**
    * Get information of a specific type. Example usage: <br>

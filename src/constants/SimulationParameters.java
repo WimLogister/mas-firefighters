@@ -53,9 +53,6 @@ public class SimulationParameters {
   /** Value between 0 and 1, how cooperative the agents are (1 maximum cooperative)*/
   public static double cooperativeWeightSet1;
   
-  /** The proportion of agents in set 2 (with corresponding weights) */ 
-  public static double proportionSet2;
-  
   /** Value between 0 and 1, how risk taking the agents are (1 maximum risk taking)*/
   public static double riskTakingWeightSet2;
   
@@ -91,8 +88,6 @@ public class SimulationParameters {
     checkBound("risk_taking_weight_set_1",riskTakingWeightSet1);
     cooperativeWeightSet1 = ((Double) params.getValue("cooperative_weight_set_1"));
     checkBound("cooperative_weight_set_1",cooperativeWeightSet1);
-    proportionSet2 = ((Double) params.getValue("proportion_set_2"));
-    checkBound("proportion_set_2",proportionSet2);
     riskTakingWeightSet2 = ((Double) params.getValue("risk_taking_weight_set_2"));
     checkBound("risk_taking_weight_set_2",riskTakingWeightSet2);
     cooperativeWeightSet2 = ((Double) params.getValue("cooperative_weight_set_2"));
