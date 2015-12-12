@@ -9,15 +9,6 @@ public class SimulationConstants {
   public static final float MAX_FIRE_AGENT_SPEED = 2 * MAX_FIRE_SPEED;
   
   public static final float MAX_WIND_SPEED = 2;
- 
-  /** Chance with which fire can appear out of nowhere */
-  public static final double FIRE_PROB = 0.01;
-
-  /** Chance with which rain can appear */
-  public static final double RAIN_PROB = 0.2;
-  
-  /** Change with which wind is changing direction */
-  public static final double WIND_CHANGE_PROB = 0.1;
   
   /** The life points of each agent, fire deals 1 damage per step */
   public static final int AGENT_LIFE_POINTS = 3;

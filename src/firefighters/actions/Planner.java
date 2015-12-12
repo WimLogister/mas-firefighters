@@ -77,14 +77,7 @@ public class Planner {
       // Move randomly
       Plan randomPlan = deviseRandomPlan(agent, grid, agentPosition);
       possiblePlans.add(randomPlan);	
-    } else {
-    	// Logger.println("Found plan");
-        List<AbstractAction> steps = new ArrayList<AbstractAction>();
-        steps.add(new CheckWeather());
-        Plan planWeather = new CheckWeatherPlan(steps);
-        possiblePlans.add(planWeather);
-    }
-  
+    } 
     return possiblePlans;
   }
 

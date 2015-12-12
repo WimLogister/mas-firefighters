@@ -39,6 +39,7 @@ import communication.information.WeatherInformation;
 import constants.SimulationConstants;
 import constants.SimulationParameters;
 import firefighters.actions.AbstractAction;
+import firefighters.actions.CheckWeather;
 import firefighters.actions.ExtinguishFirePlan;
 import firefighters.actions.MoveAndTurn;
 import firefighters.actions.Plan;
@@ -97,7 +98,7 @@ public final class Agent {
   int currentTick;
   
   @Getter
-  private static GridPoint agentPosition;
+  private GridPoint agentPosition;
 
   public Agent(Grid<Object> grid,
                double movementSpeed,
@@ -111,7 +112,7 @@ public final class Agent {
     this.direction = Directions.getRandomDirection();
     this.perceptionRange = perceptionRange;
     this.utilityFunction = utilityFunction;
-    this.tickWeatherLastChecked = 0;
+    this.tickWeatherLastChecked = -SimulationConstants.RANDOM.nextInt(26);
     this.communicationProb = communicationProb;
     this.informationStore = new AgentInformationStore();
     this.planner = new Planner(utilityFunction);
@@ -133,33 +134,35 @@ public final class Agent {
       return;
     }
     processInformationAndCommunicate();
-    // TODO Check if we should revise the plan
-    // Emergency plan for if the fire is likely to blow to the agent's current cell
+    // Emergency plan for if the fire is likely to spread to the agent's current cell
     if (this.danger(this.getAgentPosition())>1.5){
     	currentPlan = planner.deviseEmergencyPlan(this);
     }
     else if (currentPlan == null || currentPlan.isFinished() || !isValid(currentPlan)) {
-      currentPlan = planner.devisePlan(this);
+      if(SimulationConstants.RANDOM.nextDouble()<probabilityOfWeatherChecking()){
+    	  List<AbstractAction> steps = new ArrayList<AbstractAction>();
+          steps.add(new CheckWeather());
+          currentPlan = new Plan(steps);
+      } else{
+    	  currentPlan = planner.devisePlan(this);
+      }
     }
     executeCurrentAction();
-    // TODO: process in utility function
-    // Letting the agent checking the weather every 25 steps
-    //executeCurrentActionInclWeather(25);
   }
   
-  // For now: let agent check weather every n steps
-  private void executeCurrentActionInclWeather(int n){
-	  if(currentTick % n == 0){
-		  //System.out.println(TickCounter.getTick());
-		  //System.out.println("Checking weather");
-		  this.checkWeather();
-		  currentPlan = null;
+  private double probabilityOfWeatherChecking(){
+	  int timeNotChecked = currentTick - tickWeatherLastChecked;
+	  if(SimulationParameters.useWeatherInformation){
+		  if(timeNotChecked<=1) return 0;
+		  if(timeNotChecked>1 && timeNotChecked<=5) return 0.05;
+		  if(timeNotChecked>5 && timeNotChecked<=10) return 0.1;
+		  if(timeNotChecked>10 && timeNotChecked<=15) return 0.2;
+		  if(timeNotChecked>15 && timeNotChecked<=20) return 0.3;
+		  else return 0.5;
 	  } else {
-		  if (currentPlan != null && !currentPlan.isFinished()) {
-		      currentPlan.executeNextStep(this);
-		  }
+		  return 0;
 	  }
-  } 
+  }
   
   private void processInformationAndCommunicate() {
     List<GridPoint> newFires = updateFireInformation();
@@ -173,11 +176,6 @@ public final class Agent {
     if (isInDanger()) {
       sendHelpRequest(BOUNTY_PER_FIRE_EXTINGUISHED / 2);
     }
-    
-    // TODO: Process weather information by merging the rain information of different information pieces into one
-    //if(hasWeatherInfo()){
-    	
-   // }
   }
 
   private List<GridPoint> updateFireInformation() {
@@ -261,7 +259,7 @@ public final class Agent {
 	public boolean checkDeath() {
 		// Set up necessary operators
 		GridPoint cpt = grid.getLocation(this);
-    List<GridCell<Fire>> gridCells = getCellNeighborhood(grid, cpt, Fire.class, 1, false);
+		List<GridCell<Fire>> gridCells = getCellNeighborhood(grid, cpt, Fire.class, 1, false);
 
 		// Need at least four fires in neighborhood in order to be surrounded
 		if (gridCells.size() < 4) return false;
@@ -286,8 +284,8 @@ public final class Agent {
 	public void kill() {
 		TreeBuilder.performance.increaseHumanLosses();
 		ContextUtils.getContext(this).remove(this);
-    MessageMediator.deregisterAgent(this);
-    agentStatistics.removeAgent();
+		MessageMediator.deregisterAgent(this);
+		agentStatistics.removeAgent();
 	}
 	
 	/**
@@ -300,10 +298,10 @@ public final class Agent {
       GridPoint pt = grid.getLocation(this);
 			/*
 			 * Move the agent according to its current direction. How the direction
-			 * influences its movement in the grid is modeled by the Directions Enum,
+			 * influences its movement in the grid is modelled by the Directions Enum,
 			 * which is used here.
 			 */
-      // TODO Check if it's legal to move to newPt
+      		// TODO Check if it's legal to move to newPt
 			grid.moveTo(this, newPt.getX(), newPt.getY());
 		}
 	}
@@ -350,21 +348,10 @@ public final class Agent {
 
   /** Sends a help request message */
   private void sendHelpRequest(int bountyOffered) {
-    // System.out.println("Requesting help ");
     GridPoint position = grid.getLocation(this);
     HelpRequestInformation helpRequest = new HelpRequestInformation(this, position, bountyOffered);
     sendLocalMessage(helpRequest);
   }
-  
-  /** Communicates the information about the wind globally */
-  /*private void communicateWindInfo(){
-	  if(this.hasWeatherInfo()){
-		  WeatherInformation weather = (WeatherInformation) informationStore.getLatestInformationOfType(InformationType.WeatherInformation);
-		  Vector2 windInfo = weather.getWind();
-		  WeatherInformation toCommunicate = new WeatherInformation(windInfo, new ArrayList<GridCell<Rain>>(),currentTick);
-		  sendGlobalMessage(toCommunicate);
-	  }
-  }*/
 
   private void sendLocalMessage(InformationPiece information) {
 	if(money >= SimulationConstants.LOCAL_MESSAGE_COST){
@@ -404,7 +391,9 @@ public final class Agent {
 	informationStore.archive(currentWeather);
 	this.tickWeatherLastChecked = currentTick;
 	if(willShare()){
-		sendGlobalMessage(currentWeather);
+		// Agent only communicates the wind information
+		WeatherInformation toCommunicate = new WeatherInformation(wind, new ArrayList<GridCell<Rain>>(),currentTick);
+		sendGlobalMessage(toCommunicate);
 	}
   }
   
@@ -434,8 +423,7 @@ public final class Agent {
 			for(GridCell<Rain> rain : rainInfo){
 				if(rain.getPoint().getX() == toCheckX && rain.getPoint().getY() == toCheckY) rainInNewPoint = true;
 			}
-			//if(!getCellNeighborhood(grid,toCheck,Rain.class,0,true).isEmpty()) rainInNewPoint = true;
-	
+
 			// Loop through all the neighboring firecells
 			for (GridCell<Fire> fireCell : getCellNeighborhood(grid, toCheck, Fire.class, 1, false)) {
 				GridPoint pt = fireCell.getPoint();
@@ -487,14 +475,29 @@ public final class Agent {
 	}
 	if(danger<1||danger>4) 
 		throw new IllegalArgumentException("Calculated cost is out of range!");
-	//if(danger>1) System.out.println(danger);
 	return danger;
   }
 
   public void messageReceived(Message message) {
-	// TODO: If message is of type WeatherInformation, then check if there is any older weather information in the information store
-	// and delete that first
-    informationStore.archive(message.getInformationContent());
+	// If message is of type WeatherInformation, check if there is any older weather information in the information store
+	// and delete that before archiving the new WeatherInformation
+	if(message.getInformationContent().getInformationType().equals(InformationType.WeatherInformation)){
+	  WeatherInformation messageW = (WeatherInformation) message.getInformationContent();
+	  int newestStamp = messageW.getTimeStamp();
+	  List<WeatherInformation> weatherInfos = informationStore.getInformationOfType(WeatherInformation.class);
+	  List<WeatherInformation> toRemove = new ArrayList<WeatherInformation>();
+	  for(WeatherInformation weatherInfo : weatherInfos){
+	    // If there is weather information found that is older, remove that one
+		if(weatherInfo.getTimeStamp() < newestStamp) {
+			toRemove.add(weatherInfo);
+		}
+      }
+	  for(WeatherInformation weatherInfo : toRemove){
+		informationStore.remove(weatherInfo);
+	  }
+	  informationStore.archive(message.getInformationContent());
+	}
+	else informationStore.archive(message.getInformationContent());
   }
 
   public void decrementLifePoints() {
