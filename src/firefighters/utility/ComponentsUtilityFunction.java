@@ -1,22 +1,8 @@
 package firefighters.utility;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import lombok.AllArgsConstructor;
-import lombok.NonNull;
-import repast.simphony.query.space.grid.GridCell;
 import repast.simphony.space.grid.Grid;
-import repast.simphony.space.grid.GridPoint;
-import constants.SimulationConstants;
-import constants.SimulationParameters;
-import firefighters.actions.AbstractAction;
-import firefighters.actions.Extinguish;
 import firefighters.actions.Plan;
 import firefighters.agent.Agent;
-import firefighters.utils.Directions;
-import firefighters.world.Fire;
-import static firefighters.utils.GridFunctions.getCellNeighborhood;
 
 /**
  * Utility is determined by setting different weights to the different components of the utility function:
@@ -29,7 +15,8 @@ import static firefighters.utils.GridFunctions.getCellNeighborhood;
  * Bonus for really extinguishing it? 
  */
 
-public class ComponentsUtilityFunction extends DiscountedUtilityFunction{
+public class ComponentsUtilityFunction
+    implements UtilityFunction {
 	
 	// Weight for different components of the utility function,
 	// the higher the weight the more the particular agent is tended to act ...
@@ -54,8 +41,9 @@ public class ComponentsUtilityFunction extends DiscountedUtilityFunction{
 		this.cooperativeFunction = new CooperativeUtilityFunction(grid);
 	}
 	
-	@Override
-	public double calculateUtility(AbstractAction action) {
-		return fixedFunction.calculateUtility(action) + weightRisk * riskFunction.calculateUtility(action) + weightCooperating * cooperativeFunction.calculateUtility(action);
-	}
+  @Override
+  public double calculateUtility(Plan plan, Agent agent) {
+    return fixedFunction.calculateUtility(plan, agent) + weightRisk * riskFunction.calculateUtility(plan, agent)
+           + weightCooperating * cooperativeFunction.calculateUtility(plan, agent);
+  }
 }

@@ -1,5 +1,6 @@
 package firefighters.utility;
 
+import static constants.SimulationConstants.AGENT_PERCEPTION_DISTANCE;
 import static firefighters.utils.GridFunctions.getCellNeighborhood;
 
 import java.util.List;
@@ -8,18 +9,30 @@ import lombok.AllArgsConstructor;
 import repast.simphony.query.space.grid.GridCell;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
+
+import communication.information.HelpRequestInformation;
+
 import constants.SimulationParameters;
 import firefighters.actions.AbstractAction;
 import firefighters.actions.Extinguish;
+import firefighters.actions.ExtinguishFirePlan;
+import firefighters.actions.Plan;
 import firefighters.agent.Agent;
+import firefighters.utils.Metrics;
 import firefighters.world.Fire;
 
 @AllArgsConstructor
-public class CooperativeUtilityFunction extends DiscountedUtilityFunction {
+public class CooperativeUtilityFunction
+    implements UtilityFunction {
 	
 	private Grid<Object> grid;
 	
-	@Override
+  /**
+   * The utility of helping an agent who has requested help. It's a constant but agents will have a different weight for
+   * the CooperativeUtilityFunction
+   */
+  private static final int helpingUtility = 50;
+
 	public double calculateUtility(AbstractAction action) {
 		double utility = 0;
 		
@@ -49,5 +62,24 @@ public class CooperativeUtilityFunction extends DiscountedUtilityFunction {
 		
 		return utility;
 	}
+
+  @Override
+  public double calculateUtility(Plan plan, Agent agent) {
+    double utility = 0;
+    if (plan instanceof ExtinguishFirePlan) {
+
+      ExtinguishFirePlan extinguishFirePlan = (ExtinguishFirePlan) plan;
+      GridPoint fireLocation = extinguishFirePlan.getFireLocation();
+      List<HelpRequestInformation> helpRequests = agent.getInformationStore()
+                                                       .getInformationOfType(HelpRequestInformation.class);
+      for (HelpRequestInformation helpRequest : helpRequests) {
+        GridPoint endageredAgentLocation = helpRequest.getAgentLocation();
+        if (Metrics.hammingDistance(fireLocation, endageredAgentLocation) < AGENT_PERCEPTION_DISTANCE) {
+          utility += helpingUtility;
+        }
+      }
+    }
+    return utility;
+  }
 
 }
