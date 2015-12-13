@@ -1,12 +1,11 @@
 package firefighters.world;
 
-import static constants.SimulationConstants.MAX_WIND_SPEED;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.space.grid.Grid;
 
 import com.badlogic.gdx.math.Vector2;
 
-import constants.SimulationConstants;
+import constants.SimulationParameters;
 import firefighters.utils.Directions;
 
 /**
@@ -29,7 +28,7 @@ public class Wind {
 	public Wind(Grid<Object> grid, float windFactorSpeed, Directions direction, Float changable){
 		this.grid = grid;
 		Vector2 windVelocity = new Vector2();
-		windVelocity.x = windFactorSpeed * SimulationConstants.MAX_WIND_SPEED;
+    windVelocity.x = windFactorSpeed * SimulationParameters.maxWindSpeed;
 		windVelocity.setAngle(Directions.fromDirToAngle(direction));
 		this.velocity = windVelocity;
 		this.changable = changable;
@@ -47,7 +46,7 @@ public class Wind {
 		float varianceA = velocity.angle() * changable;
 		float noiseAngle = (float) (r.nextGaussian() * Math.sqrt(varianceA) + mean); 
 		velocity.add(noiseSpeed, noiseAngle);
-    velocity.clamp(0, MAX_WIND_SPEED);
+    velocity.clamp(0, SimulationParameters.maxWindSpeed);
 	}
 	
 	public Vector2 getVelocity(){

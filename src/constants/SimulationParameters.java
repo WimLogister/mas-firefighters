@@ -62,6 +62,9 @@ public class SimulationParameters {
   /** The amount of money the agents are initialised with */
   public static double money;
   
+  /** The maximum speed of the wind */
+  public static float maxWindSpeed;
+
   /** Sets the simulation's parameters */
   public static void setParameters(Parameters params) {
     gridSize = (Integer) params.getValue("grid_size");
@@ -72,6 +75,8 @@ public class SimulationParameters {
     checkBound("fire_prob",fireProb);
     agentCount = (Integer) params.getValue("agent_count"); 
     perceptionRange = (Integer) params.getValue("perception_range"); 
+    maxWindSpeed = ((Float) params.getValue("maxWindSpeed"));
+    checkBound("maxWindSpeed", maxWindSpeed);
     String windD = ((String) params.getValue("wind_direction"));
     windDirection = Directions.fromStringToDir(windD);
     windSpeed = ((Float) params.getValue("wind_speed"));

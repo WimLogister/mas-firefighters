@@ -8,10 +8,6 @@ import static firefighters.utils.GridFunctions.isOnFire;
 import java.util.ArrayList;
 import java.util.List;
 
-import cern.jet.random.Uniform;
-
-import com.badlogic.gdx.math.Vector2;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -24,7 +20,8 @@ import repast.simphony.random.RandomHelper;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.ContextUtils;
-import sun.management.resources.agent;
+
+import com.badlogic.gdx.math.Vector2;
 import communication.Message;
 import communication.MessageContent;
 import communication.MessageMediator;
@@ -34,8 +31,8 @@ import communication.information.AgentLocationInformation;
 import communication.information.FireLocationInformation;
 import communication.information.HelpRequestInformation;
 import communication.information.InformationPiece;
-import communication.information.InformationType;
 import communication.information.WeatherInformation;
+
 import constants.SimulationConstants;
 import constants.SimulationParameters;
 import firefighters.actions.AbstractAction;
@@ -44,7 +41,6 @@ import firefighters.actions.ExtinguishFirePlan;
 import firefighters.actions.MoveAndTurn;
 import firefighters.actions.Plan;
 import firefighters.actions.Planner;
-import firefighters.pathfinding.GridState;
 import firefighters.utility.UtilityFunction;
 import firefighters.utils.Directions;
 import firefighters.world.Fire;
@@ -205,16 +201,14 @@ public final class Agent {
   }
 
   private List<GridCell<Fire>> findFiresInNeighborhood() {
-    GridPoint position = grid.getLocation(this);
     // Update fire information
-    List<GridCell<Fire>> fireCells = getCellNeighborhood(grid, position, Fire.class, perceptionRange, true);
+    List<GridCell<Fire>> fireCells = getCellNeighborhood(grid, agentPosition, Fire.class, perceptionRange, true);
     return fireCells;
   }
 
   private List<GridCell<Agent>> findAgentsInNeighborhood() {
-    GridPoint position = grid.getLocation(this);
     // Update fire information
-    List<GridCell<Agent>> agentCells = getCellNeighborhood(grid, position, Agent.class, perceptionRange, true);
+    List<GridCell<Agent>> agentCells = getCellNeighborhood(grid, agentPosition, Agent.class, perceptionRange, true);
     return agentCells;
   }
 
@@ -258,8 +252,7 @@ public final class Agent {
 	 */
 	public boolean checkDeath() {
 		// Set up necessary operators
-		GridPoint cpt = grid.getLocation(this);
-		List<GridCell<Fire>> gridCells = getCellNeighborhood(grid, cpt, Fire.class, 1, false);
+    List<GridCell<Fire>> gridCells = getCellNeighborhood(grid, agentPosition, Fire.class, 1, false);
 
 		// Need at least four fires in neighborhood in order to be surrounded
 		if (gridCells.size() < 4) return false;
@@ -271,8 +264,10 @@ public final class Agent {
 		for (GridCell<Fire> cell : gridCells) {
 			for (Fire fire : cell.items()) {
 				GridPoint firept = grid.getLocation(fire);
-				if (firept.getX() == cpt.getX()) enclosedHorizontal++;
-				if (firept.getY() == cpt.getY()) enclosedVertical++;
+        if (firept.getX() == agentPosition.getX())
+          enclosedHorizontal++;
+        if (firept.getY() == agentPosition.getY())
+          enclosedVertical++;
 			}
 		}
 		return (enclosedVertical >= 2 && enclosedHorizontal >= 2);
@@ -295,7 +290,6 @@ public final class Agent {
 	 */
 	public void move(GridPoint newPt) {
 		if (RandomHelper.nextDouble() < movementSpeed) {
-      GridPoint pt = grid.getLocation(this);
 			/*
 			 * Move the agent according to its current direction. How the direction
 			 * influences its movement in the grid is modelled by the Directions Enum,
@@ -341,8 +335,7 @@ public final class Agent {
 
   /** Communicates the agent's position locally */  
   private void communicateLocation() {
-    GridPoint position = grid.getLocation(this);
-    AgentLocationInformation location = new AgentLocationInformation(this, position.getX(), position.getY());
+    AgentLocationInformation location = new AgentLocationInformation(this, agentPosition.getX(), agentPosition.getY());
     sendLocalMessage(location);
   }
 
@@ -351,6 +344,16 @@ public final class Agent {
     GridPoint position = grid.getLocation(this);
     HelpRequestInformation helpRequest = new HelpRequestInformation(this, position, bountyOffered);
     sendLocalMessage(helpRequest);
+  }
+  
+  /** Communicates the information about the wind globally */
+  private void communicateWindInfo() {
+    if (this.hasWeatherInfo()) {
+      WeatherInformation weather = (WeatherInformation) informationStore.getInformationOfType(WeatherInformation.class);
+      Vector2 windInfo = weather.getWind();
+      WeatherInformation toCommunicate = new WeatherInformation(windInfo, new ArrayList<GridCell<Rain>>(), currentTick);
+      sendGlobalMessage(toCommunicate);
+    }
   }
 
   private void sendLocalMessage(InformationPiece information) {
@@ -376,30 +379,29 @@ public final class Agent {
 	  return (WeatherInformation) informationStore.getInformationOfType(WeatherInformation.class);
   }
 
-  /** 
-   * Check weather and store this information in agent's information store 
-   * Agent communicates this information directly with certain probability
+  /**
+   * Check weather and store this information in agent's information store Agent communicates this information directly
+   * with certain probability
    */
   public void checkWeather() {
-	// Clears any old weather information
-	informationStore.clear(WeatherInformation.class);
+    // Clears any old weather information
+    informationStore.clear(WeatherInformation.class);
     Vector2 wind = Wind.getWindVelocity();
-	// Check if there is rain in the agent's it surroundings
-	GridPoint agentPosition = grid.getLocation(this);
-	List<GridCell<Rain>> rain = getCellNeighborhood(grid, agentPosition, Rain.class, perceptionRange, true);
-	WeatherInformation currentWeather = new WeatherInformation(wind,rain,currentTick);
-	informationStore.archive(currentWeather);
-	this.tickWeatherLastChecked = currentTick;
-	if(willShare()){
-		// Agent only communicates the wind information
-		WeatherInformation toCommunicate = new WeatherInformation(wind, new ArrayList<GridCell<Rain>>(),currentTick);
-		sendGlobalMessage(toCommunicate);
-	}
+    // Check if there is rain in the agent's it surroundings
+    GridPoint agentPosition = grid.getLocation(this);
+    List<GridCell<Rain>> rain = getCellNeighborhood(grid, agentPosition, Rain.class, perceptionRange, true);
+    WeatherInformation currentWeather = new WeatherInformation(wind, rain, currentTick);
+    informationStore.archive(currentWeather);
+    this.tickWeatherLastChecked = currentTick;
+    if (willShare()) {
+      sendGlobalMessage(currentWeather);
+    }
   }
-  
+
   public boolean willShare(){
 	  double test = SimulationConstants.RANDOM.nextDouble();
-	  if(test<communicationProb) return true;
+    if (test < communicationProb)
+      return true;
 	  else return false;		  
   }
   
@@ -463,7 +465,7 @@ public final class Agent {
 					// Has to do with the way the rain is influencing the speed of the fire in Fire.java
 					if(!rainInFireLoc && rainInNewPoint){
 						float newSpeed = fireVelocity.len() - SimulationConstants.MAX_FIRE_SPEED * 0.2f;
-						fireVelocity.setLength(newSpeed);
+              fireVelocity.setLength(newSpeed);
 						fireVelocity.clamp(0, SimulationConstants.MAX_FIRE_SPEED);
 					}
 					// Value between 0 and 1
@@ -479,25 +481,12 @@ public final class Agent {
   }
 
   public void messageReceived(Message message) {
-	// If message is of type WeatherInformation, check if there is any older weather information in the information store
-	// and delete that before archiving the new WeatherInformation
-	if(message.getInformationContent().getInformationType().equals(InformationType.WeatherInformation)){
-	  WeatherInformation messageW = (WeatherInformation) message.getInformationContent();
-	  int newestStamp = messageW.getTimeStamp();
-	  List<WeatherInformation> weatherInfos = informationStore.getInformationOfType(WeatherInformation.class);
-	  List<WeatherInformation> toRemove = new ArrayList<WeatherInformation>();
-	  for(WeatherInformation weatherInfo : weatherInfos){
-	    // If there is weather information found that is older, remove that one
-		if(weatherInfo.getTimeStamp() < newestStamp) {
-			toRemove.add(weatherInfo);
-		}
-      }
-	  for(WeatherInformation weatherInfo : toRemove){
-		informationStore.remove(weatherInfo);
-	  }
-	  informationStore.archive(message.getInformationContent());
-	}
-	else informationStore.archive(message.getInformationContent());
+    // If message is of type WeatherInformation, then check if there is any older weather information in the information
+    // store and delete that first, to keep the most up to date version
+    if (message.getInformationContent() instanceof WeatherInformation) {
+      informationStore.clear(WeatherInformation.class);
+    }
+    informationStore.archive(message.getInformationContent());
   }
 
   public void decrementLifePoints() {
