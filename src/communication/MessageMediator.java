@@ -80,6 +80,4 @@ public class MessageMediator {
     }
     sendMessageTo(message, receivers);
   }
-
-  // TODO Support sending a message to a specific set of agents
 }

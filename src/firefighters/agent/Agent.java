@@ -190,7 +190,6 @@ public final class Agent {
       }
     }
 
-    // TODO Temporary before storing the time steps information was received
     informationStore.clear(FireLocationInformation.class);
     for (GridCell<Fire> fireCell : fireCells) {
       GridPoint firePoint = fireCell.getPoint();
@@ -214,7 +213,6 @@ public final class Agent {
 
   /** Returns whether the agent is in danger and should request for assistance */
   private boolean isInDanger() {
-    // TODO Determine some threshold
     int fireCount = findFiresInNeighborhood().size();
     int agentCount = findAgentsInNeighborhood().size();
     double ratio = 1.0 * fireCount / agentCount;
@@ -295,7 +293,6 @@ public final class Agent {
 			 * influences its movement in the grid is modelled by the Directions Enum,
 			 * which is used here.
 			 */
-      		// TODO Check if it's legal to move to newPt
 			grid.moveTo(this, newPt.getX(), newPt.getY());
 		}
 	}
@@ -322,7 +319,6 @@ public final class Agent {
       f.extinguish();
       if (f.getLifePoints() == 0) {
         // Fire is extinguished, receive bounty
-        // TODO If 2 agents hose a fire in the same step they probably should receive half each
         receiveBounty();
       }
     }
@@ -394,7 +390,9 @@ public final class Agent {
     informationStore.archive(currentWeather);
     this.tickWeatherLastChecked = currentTick;
     if (willShare()) {
-      sendGlobalMessage(currentWeather);
+		// Agent only communicates the wind information
+		WeatherInformation toCommunicate = new WeatherInformation(wind, new ArrayList<GridCell<Rain>>(),currentTick);
+		sendGlobalMessage(toCommunicate);
     }
   }
 

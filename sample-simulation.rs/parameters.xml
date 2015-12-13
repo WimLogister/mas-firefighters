@@ -19,7 +19,7 @@
 									
 		/>
 				<parameter name="grid_size" displayName="Grid Size" type="int" 
-						defaultValue="50" 
+						defaultValue="35" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
@@ -37,7 +37,7 @@
 									
 		/>
 				<parameter name="perception_range" displayName="Perception Range" type="int" 
-						defaultValue="20" 
+						defaultValue="10" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
@@ -112,12 +112,6 @@
 						defaultValue="0.5" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$FloatConverter"
-									
-		/>
-				<parameter name="proportion_set_2" displayName="Proportion Agents Set 2" type="double" 
-						defaultValue="0.5" 
-						isReadOnly="false" 
-						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
 		/>
 				<parameter name="agent_count" displayName="Agent Count" type="int" 

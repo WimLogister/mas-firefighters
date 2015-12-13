@@ -56,13 +56,6 @@ public class CooperativeUtilityFunction
         utility += baseStayingTogetherUtility;
 		}
 		
-		// Selfish versus cooperative agents, bounty received for helping other agents
-		// When are you helping other agents?
-		// When you receive a 'help' message and you decide to act on it
-				
-		// When you communicate 'useful' messages
-		// What are useful messages?
-		
 		return utility;
 	}
 

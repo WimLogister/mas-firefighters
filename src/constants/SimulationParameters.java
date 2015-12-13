@@ -6,24 +6,24 @@ import firefighters.utils.Directions;
 public class SimulationParameters {
 
   /** The dimensions of the grid, width and height are equal */
-  public static int gridSize = 50;
+  public static int gridSize;
 
   /** How many steps it takes before the tree-grid has burned down completely */
   public static int lifePointsTree;
 
-  /** How many steps it takes before the fire can be extinguished */
+  /** How many steps it takes before the fire will be extinguished */
   public static int lifePointsFire;
 
-  /** How many fires we initialize with */
+  /** How many fires we initialise with */
   public static int fireCount;
   
-  /** Chance with which fire can appear with every tick */
+  /** Chance with which a new fire can randomly appear with every tick */
   public static double fireProb;
 
-  /** How many agents we start with */
+  /** How many agents we initialise with */
   public static int agentCount;
   
-  /** How far the agents can look */
+  /** How far (number of gridcells) the agents can see their environment */
   public static int perceptionRange;
   
   /** Initial direction of the wind */
@@ -32,7 +32,7 @@ public class SimulationParameters {
   /** Fraction of the maximum wind speed, value between 0 and 1*/
   public static float windSpeed;
   
-  /** Value between 0 and 1, how much wind velocity vector can change every time step*/
+  /** Value between 0 and 1, how much the wind can change every time step*/
   public static float windInstability;
   
   /** Probability with which rain can appear, value between 0 and 1*/
@@ -41,10 +41,10 @@ public class SimulationParameters {
   /** Average grid size of the rain */
   public static int averageRainSize;
   
-  /** Whether or not agents will use weather information, useful for experiment */
+  /** Whether or not agents will use weather information */
   public static boolean useWeatherInformation;
   
-  /** Value between 0 and 1, the proportion of agents in set 1 (with corresponding weights) */ 
+  /** Value between 0 and 1, the proportion of total agents being in set 1 (with corresponding weights) */ 
   public static double proportionSet1;
   
   /** Value between 0 and 1, how risk taking the agents are (1 maximum risk taking)*/

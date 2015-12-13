@@ -11,7 +11,6 @@ import firefighters.utils.Directions;
 /**
  * The wind is global across the forest
  * The wind its direction changes gradually over time
- * TODO: visualisation of the wind in the grid
  */
 public class Wind {
 	
@@ -46,7 +45,7 @@ public class Wind {
 		float varianceA = velocity.angle() * changable;
 		float noiseAngle = (float) (r.nextGaussian() * Math.sqrt(varianceA) + mean); 
 		velocity.add(noiseSpeed, noiseAngle);
-    velocity.clamp(0, SimulationParameters.maxWindSpeed);
+		velocity.clamp(0, SimulationParameters.maxWindSpeed);
 	}
 	
 	public Vector2 getVelocity(){

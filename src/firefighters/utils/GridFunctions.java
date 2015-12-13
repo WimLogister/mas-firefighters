@@ -60,7 +60,6 @@ public class GridFunctions {
    * @return
    */
   public static boolean isInFrontOfAgent(GridPoint agentPos, Directions direction, GridPoint objPos) {
-    // TODO Test
     return agentPos.getX() + direction.xDiff == objPos.getX() || agentPos.getY() + direction.yDiff == objPos.getY();
   }
 

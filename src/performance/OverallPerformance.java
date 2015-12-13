@@ -9,11 +9,6 @@ import firefighters.world.Wind;
 /**
  * How well the agents perform in terms of conditions of the world, weather, fire-category,
  * human and forest losses and achievements such as the number of fires extinguished
- * TODO: Seperate evaluation function which covers:
- * Cumulative bounty collected
- * Mean of individual bounty
- * Resources spent on communication
- * Resources spent on task allocation
  */
 public class OverallPerformance {
 	
@@ -95,12 +90,10 @@ public class OverallPerformance {
 		double windPer = getWindFraction() * 100;
 		
 		// Value between 0 and 10.000
-		//System.out.println("ratioPoints " + ratioPoints + " ratioFireAgent " + ratioFireAgent + " forestLostPer " + forestLostPer + " humanlostper " + humanLostPer + " firesexper " + firesExtinguishedPer + " rain per " + rainPer + " windPer " + windPer);
 		performance = (this.ratioPoints + this.ratioFireAgent) * (windPer + (100-rainPer) + 3 * firesExtinguishedPer + 5 * (100-humanLostPer) - 2 * forestLostPer);
 		if(performance<0) performance = 0;
 		if(performance>10000) performance = 10000;
 		
-		//System.out.println(performance);
 		return performance;
 	}
 }

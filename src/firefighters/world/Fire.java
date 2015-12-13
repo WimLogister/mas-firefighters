@@ -23,11 +23,6 @@ import firefighters.agent.Agent;
 import firefighters.utils.Directions;
 import firefighters.utils.GridFunctions;
 
-/*
- * TODO:
- * Appear(): FIX: now fires might randomly appear at already burned grids
- * Check modeling speed
- */
 public class Fire {
 	
 	Random rand = new Random();
@@ -68,7 +63,6 @@ public class Fire {
 		appear();
 		removeFire();
 	}
-	
 
 	/**
 	 *  If there is a firefighter hosing the fire, the fire decreases in its lifepoints and speed
@@ -299,15 +293,19 @@ public class Fire {
 	 * They appear with the direction of the wind
 	 */
 	public void appear(){
-		if (urng.nextDouble() < fireProb) {
-			RandomGridAdder<Object> ra = new RandomGridAdder<Object>();
-			Vector2 fire_vel = new Vector2();
-			fire_vel.x = rand.nextFloat() * (SimulationConstants.MAX_FIRE_SPEED - 0) + 0;
-			fire_vel.setAngle(rand.nextFloat() * (360 - 0) + 0);
-			Fire fire = new Fire(grid,fire_vel,1,1,fireProb);
-			TreeBuilder.performance.increaseFireCount();
-			ContextUtils.getContext(this).add(fire);
-			ra.add(grid, fire);
+		if (urng.nextDouble() < fireProb) {			
+			int randX = SimulationConstants.RANDOM.nextInt(SimulationParameters.gridSize);
+			int randY = SimulationConstants.RANDOM.nextInt(SimulationParameters.gridSize);
+			int[] loc = {randX,randY};
+			if(canSpread(loc)) {		
+				Vector2 fire_vel = new Vector2();
+				fire_vel.x = rand.nextFloat() * (SimulationConstants.MAX_FIRE_SPEED - 0) + 0;
+				fire_vel.setAngle(rand.nextFloat() * (360 - 0) + 0);
+				Fire fire = new Fire(grid,fire_vel,1,1,fireProb);
+				TreeBuilder.performance.increaseFireCount();
+				ContextUtils.getContext(this).add(fire);
+				grid.moveTo(fire, loc);
+			}
 		}
 	}
 	

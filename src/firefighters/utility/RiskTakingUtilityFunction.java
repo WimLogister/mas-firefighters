@@ -35,7 +35,6 @@ public class RiskTakingUtilityFunction extends DiscountedUtilityFunction {
 			utility = ratio * 100;
 		}	
 		
-		// Bonus for extinguishing big fires?
 		return utility;
 	}
 

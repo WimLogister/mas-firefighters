@@ -50,7 +50,6 @@ public class Planner {
 	  return Collections.max(possiblePlans, new PlanUtilityComparator(utilityFunction, agent));
   }
   
-  // TODO Check if the square the agent is on is on fire
   private List<Plan> discoverPossiblePlans(Agent agent) {
     Grid<?> grid = agent.getGrid();
     GridPoint agentPosition = grid.getLocation(agent);
@@ -66,7 +65,6 @@ public class Planner {
       GridPoint firePoint = fireInformation.getPosition();
       Path<GridState, GridAction> path = findShortestPath(agent, grid, agentPosition, firePoint);
       if (path != null && path.isValidPath()) {
-        // System.out.println("ag " + agentPosition + " fire  " + firePoint);
         List<AbstractAction> actions = convertToPrimitiveActions(path, agent.getDirection());
         actions.add(new Extinguish(firePoint));
         Plan plan = new ExtinguishFirePlan(actions, firePoint);
