@@ -60,7 +60,6 @@ public class GridCellNeighborhood2d<T>
 
   private boolean isCorrectType(int x, int y) {
     for (Object o : grid.getObjectsAt(x, y)) {
-      // TODO This will break with inheritance
       if (o.getClass() == clazz) {
         return true;
       }

@@ -39,7 +39,8 @@ public class Planner {
   /** Returns a plan for the agent */
   public Plan devisePlan(Agent agent) {
     List<Plan> possiblePlans = discoverPossiblePlans(agent);
-    return Collections.max(possiblePlans, new PlanUtilityComparator(utilityFunction, agent));
+    if(possiblePlans.size() == 0) return new Plan(new ArrayList<AbstractAction>());
+    else return Collections.max(possiblePlans, new PlanUtilityComparator(utilityFunction, agent));
   }
 
   /** Returns an emergency plan for the agent */
@@ -119,7 +120,6 @@ public class Planner {
     List<GridAction> gridActions = path.getRoute();
     if (gridActions.size() == 0) {
       System.out.println("Planner.convertToPrimitiveActions: Warning: this shouldn't happen");
-      // System.out.println(agentPosition + " " + firePosition);
     } else if (gridActions.size() == 1) {
       if (!isInFrontOfAgent(agentPosition, agentDirection, firePosition)) {
         Directions desiredDirection = findDirection(agentPosition, firePosition);
