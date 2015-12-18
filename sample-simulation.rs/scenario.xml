@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Scenario>
-<repast.simphony.action.data_set context="sample-simulation" file="repast.simphony.action.data_set_0.xml" />
+<repast.simphony.dataLoader.engine.ClassNameDataLoaderAction context="sample-simulation" file="repast.simphony.dataLoader.engine.ClassNameDataLoaderAction_0.xml" />
 <repast.simphony.action.data_set context="sample-simulation" file="repast.simphony.action.data_set_1.xml" />
 <repast.simphony.action.data_set context="sample-simulation" file="repast.simphony.action.data_set_2.xml" />
-<repast.simphony.action.file_sink context="sample-simulation" file="repast.simphony.action.file_sink_3.xml" />
-<repast.simphony.action.file_sink context="sample-simulation" file="repast.simphony.action.file_sink_4.xml" />
-<repast.simphony.dataLoader.engine.ClassNameDataLoaderAction context="sample-simulation" file="repast.simphony.dataLoader.engine.ClassNameDataLoaderAction_5.xml" />
-<repast.simphony.action.time_series_chart context="sample-simulation" file="repast.simphony.action.time_series_chart_6.xml" />
-<repast.simphony.action.time_series_chart context="sample-simulation" file="repast.simphony.action.time_series_chart_7.xml" />
+<repast.simphony.action.data_set context="sample-simulation" file="repast.simphony.action.data_set_3.xml" />
+<repast.simphony.action.data_set context="sample-simulation" file="repast.simphony.action.data_set_4.xml" />
+<repast.simphony.action.file_sink context="sample-simulation" file="repast.simphony.action.file_sink_5.xml" />
+<repast.simphony.action.file_sink context="sample-simulation" file="repast.simphony.action.file_sink_6.xml" />
+<repast.simphony.action.file_sink context="sample-simulation" file="repast.simphony.action.file_sink_7.xml" />
 <repast.simphony.action.time_series_chart context="sample-simulation" file="repast.simphony.action.time_series_chart_8.xml" />
-<repast.simphony.action.display context="sample-simulation" file="repast.simphony.action.display_9.xml" />
-<repast.simphony.action.display context="sample-simulation" file="repast.simphony.action.display_10.xml" />
+<repast.simphony.action.time_series_chart context="sample-simulation" file="repast.simphony.action.time_series_chart_9.xml" />
+<repast.simphony.action.time_series_chart context="sample-simulation" file="repast.simphony.action.time_series_chart_10.xml" />
+<repast.simphony.action.display context="sample-simulation" file="repast.simphony.action.display_11.xml" />
+<repast.simphony.action.display context="sample-simulation" file="repast.simphony.action.display_12.xml" />
 </Scenario>
