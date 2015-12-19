@@ -1,13 +1,12 @@
 <repast.simphony.data2.engine.FileSinkDescriptor>
-  <name>Overall Performance</name>
-  <dataSet>Performance 2</dataSet>
+  <name>Avg performance</name>
+  <dataSet>AvgPerformance</dataSet>
   <delimiter>,</delimiter>
   <format>TABULAR</format>
   <sourceIds class="linked-hash-set">
     <string>tick</string>
-    <string>Bounty Sum</string>
-    <string>Bounty Mean</string>
+    <string>AvgPerformance</string>
   </sourceIds>
-  <fileName>output/perf/OverallPerformance.txt</fileName>
-  <addTimeStamp>true</addTimeStamp>
+  <fileName>output/AvgPerformance.txt</fileName>
+  <addTimeStamp>false</addTimeStamp>
 </repast.simphony.data2.engine.FileSinkDescriptor>

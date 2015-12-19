@@ -1,9 +1,9 @@
 <repast.simphony.chart2.engine.TimeSeriesChartDescriptor>
-  <name>Agent Count</name>
-  <dataSet>Agent count</dataSet>
+  <name>Bounties Chart</name>
+  <dataSet>Performance 2</dataSet>
   <xAxisLabel>Tick Count</xAxisLabel>
-  <yAxisLabel>Number of agents</yAxisLabel>
-  <chartTitle>Agent Count</chartTitle>
+  <yAxisLabel>Bounty</yAxisLabel>
+  <chartTitle>Bounties Collected</chartTitle>
   <type>TIME_SERIES</type>
   <background>
     <red>192</red>
@@ -21,21 +21,9 @@
   <showLegend>true</showLegend>
   <seriesIds>
     <entry>
-      <string>Firefighter Count</string>
+      <string>Bounty Mean</string>
       <SeriesData>
-        <label>Firefighter Count</label>
-        <color>
-          <red>0</red>
-          <green>0</green>
-          <blue>255</blue>
-          <alpha>255</alpha>
-        </color>
-      </SeriesData>
-    </entry>
-    <entry>
-      <string>Tree Count</string>
-      <SeriesData>
-        <label>Tree Count</label>
+        <label>Bounty Mean</label>
         <color>
           <red>0</red>
           <green>255</green>
@@ -45,9 +33,9 @@
       </SeriesData>
     </entry>
     <entry>
-      <string>Fire Count</string>
+      <string>Bounty Sum</string>
       <SeriesData>
-        <label>Fire Count</label>
+        <label>Bounty Sum</label>
         <color>
           <red>255</red>
           <green>0</green>

@@ -25,6 +25,7 @@ import com.badlogic.gdx.math.Vector2;
 import constants.SimulationConstants;
 import constants.SimulationParameters;
 import firefighters.agent.Agent;
+import firefighters.agent.AgentStatistics;
 import firefighters.utility.ComponentsUtilityFunction;
 import firefighters.utility.UtilityFunction;
 
@@ -76,11 +77,14 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		RainContext rc = new RainContext(grid); 
 		context.add(rc);
 		
+		AgentStatistics agentStatistics = new AgentStatistics();
+		context.add(agentStatistics);
+		
 		// Randomly place agents of set 1 in grid
 		int agentSet1 = (int) (SimulationParameters.proportionSet1 * SimulationParameters.agentCount);
 		for (int i = 0; i < agentSet1; i++) {
 			UtilityFunction utilityFunction = new ComponentsUtilityFunction(SimulationParameters.riskTakingWeightSet1,SimulationParameters.cooperativeWeightSet1,grid);
-			Agent agent = new Agent(grid, MAX_FIRE_AGENT_SPEED, SimulationParameters.money, SimulationParameters.perceptionRange, utilityFunction, SimulationParameters.cooperativeWeightSet1);
+			Agent agent = new Agent(grid, MAX_FIRE_AGENT_SPEED, SimulationParameters.money, SimulationParameters.perceptionRange, utilityFunction, SimulationParameters.cooperativeWeightSet1,agentStatistics);
 			context.add(agent);
 			ra.add(grid, agent);
 	    }
@@ -89,7 +93,7 @@ public class TreeBuilder implements ContextBuilder<Object> {
 		int agentSet2 = SimulationParameters.agentCount - agentSet1;
 		for (int i = 0; i < agentSet2; i++) {
 			UtilityFunction utilityFunction = new ComponentsUtilityFunction(SimulationParameters.riskTakingWeightSet2,SimulationParameters.cooperativeWeightSet2,grid);
-			Agent agent = new Agent(grid, MAX_FIRE_AGENT_SPEED, SimulationParameters.money, SimulationParameters.perceptionRange, utilityFunction, SimulationParameters.cooperativeWeightSet2);
+			Agent agent = new Agent(grid, MAX_FIRE_AGENT_SPEED, SimulationParameters.money, SimulationParameters.perceptionRange, utilityFunction, SimulationParameters.cooperativeWeightSet2,agentStatistics);
 			context.add(agent);
 			ra.add(grid, agent);
 		}

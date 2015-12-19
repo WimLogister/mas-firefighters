@@ -1,9 +1,9 @@
 <repast.simphony.chart2.engine.TimeSeriesChartDescriptor>
-  <name>Performance Chart</name>
-  <dataSet>Performance</dataSet>
+  <name>Bounties Chart New</name>
+  <dataSet>Bounties</dataSet>
   <xAxisLabel>Tick Count</xAxisLabel>
-  <yAxisLabel>Performance Measure</yAxisLabel>
-  <chartTitle>Performance</chartTitle>
+  <yAxisLabel>Bounty</yAxisLabel>
+  <chartTitle>Bounties Collected New</chartTitle>
   <type>TIME_SERIES</type>
   <background>
     <red>192</red>
@@ -21,13 +21,25 @@
   <showLegend>true</showLegend>
   <seriesIds>
     <entry>
-      <string>Performance</string>
+      <string>Bounties Mean</string>
       <SeriesData>
-        <label>Performance</label>
+        <label>Bounties Mean</label>
         <color>
           <red>0</red>
           <green>0</green>
           <blue>255</blue>
+          <alpha>255</alpha>
+        </color>
+      </SeriesData>
+    </entry>
+    <entry>
+      <string>Bounties Sum</string>
+      <SeriesData>
+        <label>Bounties Sum</label>
+        <color>
+          <red>255</red>
+          <green>0</green>
+          <blue>0</blue>
           <alpha>255</alpha>
         </color>
       </SeriesData>

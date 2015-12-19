@@ -86,12 +86,10 @@ public final class Agent {
 
   /** Ratio of fires to agents in the region to request help */
   double firesToAgentsDangerThreshold = 5;
-      
-  /** The number of agents alive in the world */
-  static AgentStatistics agentStatistics = new AgentStatistics();
   
   int tickWeatherLastChecked;
   int currentTick;
+  AgentStatistics agentStatistics;
   
   @Getter
   private GridPoint agentPosition;
@@ -101,7 +99,8 @@ public final class Agent {
                double money,
                int perceptionRange,
                UtilityFunction utilityFunction,
-               double communicationProb) {
+               double communicationProb,
+               AgentStatistics agentStatistics) {
     this.grid = grid;
     this.movementSpeed = movementSpeed;
     this.money = money;
@@ -114,6 +113,7 @@ public final class Agent {
     this.planner = new Planner(utilityFunction);
 
     MessageMediator.registerAgent(this);
+    this.agentStatistics = agentStatistics;
     agentStatistics.addAgent();
   }
 
