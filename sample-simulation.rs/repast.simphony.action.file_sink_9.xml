@@ -1,0 +1,12 @@
+<repast.simphony.data2.engine.FileSinkDescriptor>
+  <name>FF count</name>
+  <dataSet>Firefighter count</dataSet>
+  <delimiter>,</delimiter>
+  <format>TABULAR</format>
+  <sourceIds class="linked-hash-set">
+    <string>tick</string>
+    <string>Firefighter count</string>
+  </sourceIds>
+  <fileName>output/FirefighterCount.csv</fileName>
+  <addTimeStamp>false</addTimeStamp>
+</repast.simphony.data2.engine.FileSinkDescriptor>
