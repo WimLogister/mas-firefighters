@@ -2,8 +2,11 @@ package performance;
 
 import lombok.Getter;
 import lombok.Setter;
+import repast.simphony.engine.environment.RunEnvironment;
 import repast.simphony.engine.schedule.ScheduledMethod;
+import repast.simphony.util.ContextUtils;
 import constants.SimulationParameters;
+import firefighters.world.Fire;
 import firefighters.world.Wind;
 
 /**
@@ -46,11 +49,19 @@ public class OverallPerformance {
 		this.ratioFireAgent = ((double) SimulationParameters.fireCount / (double) SimulationParameters.agentCount) / 0.04;
 		if(ratioFireAgent<0.5) ratioFireAgent = 0.5;
 		if(ratioFireAgent>5) ratioPoints = 5;
+
 	}
 	
 	@ScheduledMethod(start = 1, interval = 1, priority =0)
 	public void step(){
     this.setPerformance(calculate());
+    int currFires = 0;
+    for (Object o : ContextUtils.getContext(this).getAgentLayer(Fire.class)) {
+      currFires++;
+    }
+    if (currFires == 0) {
+      RunEnvironment.getInstance().endRun();
+    }
 	}
 	
 	public void increaseHumanLosses(){
