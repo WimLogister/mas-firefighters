@@ -1,0 +1,14 @@
+<repast.simphony.data2.engine.FileSinkDescriptor>
+  <name>Agent Count</name>
+  <dataSet>Agent count</dataSet>
+  <delimiter>,</delimiter>
+  <format>TABULAR</format>
+  <sourceIds class="linked-hash-set">
+    <string>tick</string>
+    <string>Firefighter Count</string>
+    <string>Fire Count</string>
+    <string>Tree Count</string>
+  </sourceIds>
+  <fileName>output/AgentCount.txt</fileName>
+  <addTimeStamp>true</addTimeStamp>
+</repast.simphony.data2.engine.FileSinkDescriptor>

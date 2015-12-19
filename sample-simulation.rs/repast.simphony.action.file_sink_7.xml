@@ -1,0 +1,12 @@
+<repast.simphony.data2.engine.FileSinkDescriptor>
+  <name>Avg performance</name>
+  <dataSet>AvgPerformance</dataSet>
+  <delimiter>,</delimiter>
+  <format>TABULAR</format>
+  <sourceIds class="linked-hash-set">
+    <string>tick</string>
+    <string>AvgPerformance</string>
+  </sourceIds>
+  <fileName>output/AvgPerformance.txt</fileName>
+  <addTimeStamp>false</addTimeStamp>
+</repast.simphony.data2.engine.FileSinkDescriptor>

@@ -1,0 +1,31 @@
+<repast.simphony.data2.engine.DataSetDescriptor>
+  <name>AvgPerformance</name>
+  <type>AGGREGATE</type>
+  <inclTick>true</inclTick>
+  <inclBatchRun>false</inclBatchRun>
+  <inclRandomSeed>false</inclRandomSeed>
+  <scheduleParams>
+    <start>500.0</start>
+    <interval>0.0</interval>
+    <priority>-Infinity</priority>
+    <pType>LAST</pType>
+    <duration>-1.0</duration>
+    <frequency>ONE_TIME</frequency>
+    <hashCode>-1635169489</hashCode>
+  </scheduleParams>
+  <atEnd>true</atEnd>
+  <methodDataSources class="linked-hash-map">
+    <entry>
+      <string>AvgPerformance</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>AvgPerformance</id>
+        <className>performance.OverallPerformance</className>
+        <methodName>calculate</methodName>
+        <aggType>MEAN</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+  </methodDataSources>
+  <countSources class="linked-hash-map"/>
+  <customNADataSources class="linked-hash-map"/>
+  <customAggDataSources class="linked-hash-map"/>
+</repast.simphony.data2.engine.DataSetDescriptor>
