@@ -30,6 +30,9 @@ public class OverallPerformance {
 	private double ratioPoints;
 	private double ratioFireAgent;
 	
+  private double performanceSum;
+  private int numTicks = 0;
+
 	public OverallPerformance(){
 		initCounts();
 	}
@@ -40,6 +43,8 @@ public class OverallPerformance {
 		this.firesExtinguished = 0;
 		this.performance = 0;
     this.fireCount = 0;
+    this.performanceSum = 0;
+    this.numTicks = 0;
   }
 	
 	public void init(){
@@ -61,6 +66,10 @@ public class OverallPerformance {
 	@ScheduledMethod(start = 1, interval = 1, priority =0)
 	public void step(){
     this.setPerformance(calculate());
+
+    performanceSum += performance;
+    numTicks++;
+
     int currFires = 0;
     for (Object o : ContextUtils.getContext(this).getAgentLayer(Fire.class)) {
       currFires++;
@@ -70,6 +79,10 @@ public class OverallPerformance {
     }
 	}
 	
+  public double getMeanPerformance() {
+    return performanceSum / numTicks;
+  }
+
 	public void increaseHumanLosses(){
 		humanLosses++;
 	}
