@@ -31,13 +31,19 @@ public class OverallPerformance {
 	private double ratioFireAgent;
 	
 	public OverallPerformance(){
-		this.humanLosses = 0;
+		initCounts();
+	}
+
+  private void initCounts() {
+    this.humanLosses = 0;
 		this.forestLosses = 0;
 		this.firesExtinguished = 0;
 		this.performance = 0;
-	}
+    this.fireCount = 0;
+  }
 	
 	public void init(){
+    initCounts();
 		// Difficulty is determined by the ratio of lifePointsTree : lifePointsFire
 		// If the fire is stronger than the trees, the fire is harder to extinguish
 		this.ratioPoints = (double) SimulationParameters.lifePointsFire / (double) SimulationParameters.lifePointsTree; 

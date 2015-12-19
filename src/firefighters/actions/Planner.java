@@ -11,17 +11,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.badlogic.gdx.math.Vector2;
-import com.jogamp.opengl.math.VectorUtil.Winding;
-
 import lombok.AllArgsConstructor;
-import repast.simphony.query.space.grid.GridCell;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import search.Path;
+
 import communication.information.FireLocationInformation;
-import communication.information.InformationType;
-import communication.information.WeatherInformation;
+
 import firefighters.agent.Agent;
 import firefighters.pathfinding.GridAction;
 import firefighters.pathfinding.GridState;
@@ -29,7 +25,6 @@ import firefighters.utility.PlanUtilityComparator;
 import firefighters.utility.UtilityFunction;
 import firefighters.utils.Directions;
 import firefighters.world.Fire;
-import communication.information.InformationType;
 
 @AllArgsConstructor
 public class Planner {
@@ -48,6 +43,9 @@ public class Planner {
 	  Grid<?> grid = agent.getGrid();
 	  GridPoint agentPosition = grid.getLocation(agent);
 	  List<Plan> possiblePlans = deviseEmergencyPlans(agent,grid,agentPosition);
+    if (possiblePlans.isEmpty()) {
+      return new Plan(new ArrayList<>());
+    }
 	  return Collections.max(possiblePlans, new PlanUtilityComparator(utilityFunction, agent));
   }
   
